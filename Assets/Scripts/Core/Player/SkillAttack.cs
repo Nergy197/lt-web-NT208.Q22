@@ -10,11 +10,13 @@ public abstract class PlayerAttack : AttackBase
 
     public override void Use(Status attacker, Status target)
     {
-        PlayerStatus player = attacker as PlayerStatus;
-        EnemyStatus enemy = target as EnemyStatus;
+        // Type checking
+        if (!(attacker is PlayerStatus player))
+            return;
+        if (!(target is EnemyStatus enemy))
+            return;
 
-        // chỉ player mới dùng được
-        if (player == null || enemy == null)
+        if (!player.IsAlive || !enemy.IsAlive)
             return;
 
         // check AP

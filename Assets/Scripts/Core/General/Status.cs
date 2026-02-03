@@ -52,8 +52,14 @@ public abstract class Status
         HealFull(); 
     }
 
-    public void TakeDamage(int rawDamage)
+    public void TakeDamage(Status attacker, int rawDamage)
     {
+        if (attacker == null || !attacker.IsAlive)
+            return;
+
+        if (!IsAlive)
+            return;
+
         int finalDmg = Mathf.Max(1, rawDamage - Def);
         currentHP -= finalDmg;
         if (currentHP < 0) currentHP = 0;

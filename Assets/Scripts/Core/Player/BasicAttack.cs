@@ -4,13 +4,16 @@ public class BasicAttack : AttackBase
 
     public override void Use(Status attacker, Status target)
     {
-        PlayerStatus player = attacker as PlayerStatus;
-        EnemyStatus enemy = target as EnemyStatus;
-
-        if (player == null || enemy == null)
+        // Type checking
+        if (!(attacker is PlayerStatus player))
+            return;
+        if (!(target is EnemyStatus enemy))
             return;
 
-        enemy.TakeDamage(player.Atk);
+        if (!player.IsAlive || !enemy.IsAlive)
+            return;
+
+        enemy.TakeDamage(player, player.Atk);
 
         // đánh thường → +1 AP
         player.GainAP(1);

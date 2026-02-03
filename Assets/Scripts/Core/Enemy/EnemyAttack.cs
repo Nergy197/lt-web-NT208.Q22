@@ -4,12 +4,14 @@ public class EnemyAttack : AttackBase
 
     public override void Use(Status attacker, Status target)
     {
-        EnemyStatus enemy = attacker as EnemyStatus;
-        PlayerStatus player = target as PlayerStatus;
-
-        if (enemy == null || player == null)
+        if (!(attacker is EnemyStatus enemy))
+            return;
+        if (!(target is PlayerStatus player))
             return;
 
-        player.TakeDamage(enemy.Atk);
+        if (!enemy.IsAlive || !player.IsAlive)
+            return;
+
+        player.TakeDamage(enemy, enemy.Atk);
     }
 }
