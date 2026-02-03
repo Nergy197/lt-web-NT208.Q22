@@ -1,34 +1,51 @@
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 [System.Serializable]
 public class EnemyStatus : Status
 {
-    // ===== EXP REWARD =====
-    // EXP cơ bản ở level 1
     [SerializeField] private int baseExpReward = 20;
 
-    // ===== CONSTRUCTOR =====
+    [SerializeField] private bool isAggressive = true; 
+
     public EnemyStatus(string name, int baseHP, int baseAtk, int baseDef, int baseSpd)
         : base(name, baseHP, baseAtk, baseDef, baseSpd)
     {
     }
 
-    // ===== SYNC LEVEL THEO MAP =====
     public void SyncToLevel(int targetLevel)
     {
-        // dùng logic chuẩn của Status (set level + full HP)
         SetLevel(targetLevel);
-
         Debug.Log($"Enemy [{entityName}] synced to Map Level {level}");
     }
 
-    // ===== EXP REWARD =====
     public int GetExpReward()
     {
-        // EXP scale theo level map
-        // Lv1: 20
-        // Lv5: ~40
-        // Lv10: ~60
         return Mathf.RoundToInt(baseExpReward * (1f + level * 0.2f));
+    }
+
+    // ===== CHỌN MỤC TIÊU =====
+    // Hàm này nhận vào danh sách tất cả Hero (Status) đang có trong trận
+    public Status PickTarget(List<Status> heroParty)
+    {
+        // 1. Lọc ra những Hero còn sống (HP > 0)
+        var aliveHeroes = heroParty.Where(h => h.currentHP > 0).ToList();
+
+        // Nếu không còn ai sống -> trả về null (Thắng trận)
+        if (aliveHeroes.Count == 0) return null;
+
+        // 2. Logic chọn mục tiêu
+        if (isAggressive)
+        {
+            // AGGRESSIVE: Sắp xếp theo HP tăng dần -> Lấy người đầu tiên (Thấp máu nhất)
+            return aliveHeroes.OrderBy(h => h.currentHP).First();
+        }
+        else
+        {
+            // NORMAL: Chọn ngẫu nhiên (nếu muốn quái khác đánh lung tung)
+            int randomIndex = Random.Range(0, aliveHeroes.Count);
+            return aliveHeroes[randomIndex];
+        }
     }
 }

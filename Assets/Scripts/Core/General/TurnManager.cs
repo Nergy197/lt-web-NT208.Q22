@@ -18,15 +18,25 @@ public class TurnManager
 
     public Status GetNext(Status current, List<Status> turnOrder)
     {
-        if (turnOrder == null || turnOrder.Count == 0)
-            return null;
+        if (turnOrder == null || turnOrder.Count == 0) return null;
 
-        int index = turnOrder.IndexOf(current);
+        int startIndex = turnOrder.IndexOf(current);
+        // Nếu không tìm thấy current (ví dụ mới bắt đầu), bắt đầu từ -1 để loop check từ 0
+        if (startIndex < 0) startIndex = -1;
 
-        if (index < 0)
-            return turnOrder[0];
+        int count = turnOrder.Count;
+        // Loop để tìm người còn sống tiếp theo
+        for (int i = 1; i <= count; i++)
+        {
+            int nextIndex = (startIndex + i) % count;
+            Status candidate = turnOrder[nextIndex];
 
-        int nextIndex = (index + 1) % turnOrder.Count;
-        return turnOrder[nextIndex];
+            // Chỉ trả về nếu còn sống
+            if (candidate.IsAlive) 
+                return candidate;
+        }
+
+        // Nếu tất cả đều chết (trừ người hiện tại?), return null hoặc xử lý Endgame
+        return null;
     }
 }
