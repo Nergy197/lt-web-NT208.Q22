@@ -16,10 +16,22 @@ public class BattleManager : MonoBehaviour
     private Character currentCharacter;
 
     // INIT BATTLE
-    public void InitBattle(Party player, Party enemy)
+    // SỬA HÀM INIT: Nhận thêm mapLevel (Dummy Level)
+    public void InitBattle(Party player, Party enemy, int mapDifficultyLevel)
     {
         playerParty = player;
         enemyParty = enemy;
+
+        // === LOGIC MỚI: QUÁI SCALE THEO LEVEL CỦA M AP===
+        foreach (var member in enemyParty.Members)
+        {
+            if (member is Enemy enemyUnit)
+            {
+                // Thay vì lấy player.level, ta dùng mapDifficultyLevel
+                enemyUnit.SyncToLevel(mapDifficultyLevel);
+            }
+        }
+        // =================================================
 
         turnOrder = turnManager.BuildTurnOrder(playerParty, enemyParty);
         currentCharacter = turnOrder.Count > 0 ? turnOrder[0] : null;
@@ -27,6 +39,9 @@ public class BattleManager : MonoBehaviour
         State = BattleState.Start;
         AdvanceState();
     }
+    
+    // ... (Phần CheckEndBattle và ProcessWinRewards giữ nguyên, 
+    // vì EXP nhận được đã được tính dựa trên Level của quái trong hàm SyncToLevel rồi)
 
     // TURN FLOW
     private void AdvanceState()
