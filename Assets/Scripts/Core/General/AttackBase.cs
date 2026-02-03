@@ -1,11 +1,37 @@
+using System.Collections;
+using UnityEngine;
+
 public abstract class AttackBase
 {
-    public string Name;
+    public string Name { get; protected set; }
+    public AttackPhase Phase { get; private set; }
 
-    protected AttackBase(string name)
+    protected Status attacker;
+    protected Status target;
+
+    public void StartAttack(Status attacker, Status target)
     {
-        Name = name;
+        this.attacker = attacker;
+        this.target = target;
+        BattleRunner.Instance.StartCoroutine(Run());
     }
 
-    public abstract void Use(Status attacker, Status target);
+    private IEnumerator Run()
+    {
+        Phase = AttackPhase.Prepare;
+        yield return Prepare();
+
+        Phase = AttackPhase.Execute;
+        yield return Execute();
+
+        Phase = AttackPhase.Recovery;
+        yield return Recovery();
+
+        Phase = AttackPhase.Finished;
+        BattleEvents.RaiseAttackFinished();
+    }
+
+    protected virtual IEnumerator Prepare() { yield break; }
+    protected abstract IEnumerator Execute();
+    protected virtual IEnumerator Recovery() { yield break; }
 }

@@ -17,4 +17,13 @@ public class EnemyStatus : Status
         return Mathf.RoundToInt(baseExpReward * (1f + level * 0.2f));
     }
 
+    public EnemyAttack GetAttack()
+    {
+        if (attacks == null || attacks.Count == 0)
+            return null;
+
+        // Core đơn giản: random
+        return attacks[Random.Range(0, attacks.Count)];
+    }
+
 }

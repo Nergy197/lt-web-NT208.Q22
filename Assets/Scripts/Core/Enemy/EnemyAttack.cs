@@ -1,17 +1,44 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
 public class EnemyAttack : AttackBase
 {
-    public EnemyAttack() : base("Enemy Attack") { }
+    private List<EnemyAttackHit> hits;
+    private EnemyStatus enemy;
+    private PlayerStatus player;
 
-    public override void Use(Status attacker, Status target)
+    public EnemyAttack(string name, List<EnemyAttackHit> hits)
     {
-        if (!(attacker is EnemyStatus enemy))
-            return;
-        if (!(target is PlayerStatus player))
-            return;
+        Name = name;
+        this.hits = hits;
+    }
 
-        if (!enemy.IsAlive || !player.IsAlive)
-            return;
+    protected override IEnumerator Prepare()
+    {
+        enemy = attacker as EnemyStatus;
+        player = target as PlayerStatus;
+        yield return null;
+    }
 
-        player.TakeDamage(enemy, enemy.Atk);
+    protected override IEnumerator Execute()
+    {
+        foreach (var hit in hits)
+        {
+            if (hit.canBeParried)
+                player.EnableParry();
+
+            yield return new WaitForSeconds(hit.windUpTime);
+
+            if (hit.canBeParried && player.ConsumeParry())
+                enemy.TakeDamage(player.Atk / 2);
+            else
+                player.TakeDamage(enemy.Atk * hit.damageMultiplier);
+        }
+    }
+
+    protected override IEnumerator Recovery()
+    {
+        yield return new WaitForSeconds(0.2f);
     }
 }
