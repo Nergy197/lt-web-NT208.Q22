@@ -9,8 +9,8 @@ public enum PartyType
 
 public class Party
 {
-    private List<Character> members = new List<Character>();
-    public IReadOnlyList<Character> Members => members;
+    private List<Status> members = new List<Status>();
+    public IReadOnlyList<Status> Members => members;
 
     private int maxMembers;
 
@@ -19,20 +19,20 @@ public class Party
         maxMembers = (type == PartyType.Player) ? 2 : 3;
     }
 
-    public bool AddMember(Character character)
+    public bool AddMember(Status status)
     {
         if (members.Count >= maxMembers)
             return false;
 
-        if (members.Contains(character))
+        if (members.Contains(status))
             return false;
 
-        members.Add(character);
+        members.Add(status);
         return true;
     }
 
     public bool IsDefeated()
     {
-        return members.All(c => !c.IsAlive);
+        return members.All(m => !m.IsAlive);
     }
 }

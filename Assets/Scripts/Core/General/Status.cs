@@ -7,16 +7,16 @@ public abstract class Status
     public int level = 1;
 
     // --- 1. BASE STATS ---
-    [SerializeField] protected int baseHP;
-    [SerializeField] protected int baseAtk;
-    [SerializeField] protected int baseDef;
-    [SerializeField] protected int baseSpd;
+    protected int baseHP;
+    protected int baseAtk;
+    protected int baseDef;
+    protected int baseSpd;
 
     // --- 2. GROWTH STATS ---
-    [SerializeField] protected int hpGrowth;
-    [SerializeField] protected int atkGrowth;
-    [SerializeField] protected int defGrowth;
-    [SerializeField] protected int spdGrowth;
+    protected int hpGrowth;
+    protected int atkGrowth;
+    protected int defGrowth;
+    protected int spdGrowth;
 
     // --- 3. REAL-TIME CALCULATION ---
     public int MaxHP => baseHP + (hpGrowth * (level - 1));

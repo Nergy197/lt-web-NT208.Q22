@@ -3,29 +3,32 @@ using UnityEngine;
 [System.Serializable]
 public class EnemyStatus : Status
 {
-    // Phần thưởng EXP cơ bản (sẽ nhân với level)
-    private int baseExpReward = 20;
+    // ===== EXP REWARD =====
+    // EXP cơ bản ở level 1
+    [SerializeField] private int baseExpReward = 20;
 
-    // Base stats của Enemy
+    // ===== CONSTRUCTOR =====
     public EnemyStatus(string name, int baseHP, int baseAtk, int baseDef, int baseSpd)
-        // SỬA LỖI: Chỉ truyền 5 tham số khớp với constructor của Status
-        : base(name, baseHP, baseAtk, baseDef, baseSpd) 
+        : base(name, baseHP, baseAtk, baseDef, baseSpd)
     {
     }
 
-    // === HÀM ĐỒNG BỘ LEVEL ===
+    // ===== SYNC LEVEL THEO MAP =====
     public void SyncToLevel(int targetLevel)
     {
-        // Gọi hàm của lớp cha để set level và hồi máu
-        base.SetLevel(targetLevel);
-        
-        UnityEngine.Debug.Log($"Enemy {entityName} initialized at Map Level {level}.");
+        // dùng logic chuẩn của Status (set level + full HP)
+        SetLevel(targetLevel);
+
+        Debug.Log($"Enemy [{entityName}] synced to Map Level {level}");
     }
-    
-    // === TÍNH TOÁN EXP THƯỞNG ===
+
+    // ===== EXP REWARD =====
     public int GetExpReward()
     {
-        // Level map càng cao, exp càng nhiều
-        return (int)(baseExpReward * (1 + (level * 0.2f)));
+        // EXP scale theo level map
+        // Lv1: 20
+        // Lv5: ~40
+        // Lv10: ~60
+        return Mathf.RoundToInt(baseExpReward * (1f + level * 0.2f));
     }
 }

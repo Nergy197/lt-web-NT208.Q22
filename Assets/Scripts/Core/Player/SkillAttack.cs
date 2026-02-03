@@ -8,35 +8,29 @@ public abstract class PlayerAttack : AttackBase
         this.apCost = apCost;
     }
 
-    public override void Use(Character attacker, Character target)
+    public override void Use(Status attacker, Status target)
     {
-        // chỉ player mới được dùng
-        if (attacker.Side != CharacterSide.Player)
+        PlayerStatus player = attacker as PlayerStatus;
+        EnemyStatus enemy = target as EnemyStatus;
+
+        // chỉ player mới dùng được
+        if (player == null || enemy == null)
             return;
 
-        if (!attacker.CanUseAP(apCost))
+        // check AP
+        if (!player.CanUseAP(apCost))
             return;
 
-        attacker.UseAP(apCost);
+        player.UseAP(apCost);
 
-        // PLAYER CÓ THỂ PARRY =====
-        if (target.TryParry(attacker))
-        {
-            OnParried(attacker, target);
-            return;
-        }
+        // ===== PARRY (PLAYER CHỈ PARRY KHI BỊ ĐÁNH, KHÔNG PHẢI Ở ĐÂY) =====
+        // PlayerAttack KHÔNG xử lý parry của enemy
 
-        Execute(attacker, target);
-        AfterExecute(attacker);
+        Execute(player, enemy);
+        AfterExecute(player);
     }
 
-    protected abstract void Execute(Character attacker, Character target);
+    protected abstract void Execute(PlayerStatus player, EnemyStatus enemy);
 
-    protected virtual void AfterExecute(Character attacker) { }
-
-    protected virtual void OnParried(Character attacker, Character defender)
-    {
-        // counter cơ bản
-        attacker.TakeDamage(defender.atk / 2);
-    }
+    protected virtual void AfterExecute(PlayerStatus player) { }
 }

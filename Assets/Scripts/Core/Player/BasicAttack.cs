@@ -1,14 +1,18 @@
-public class BasicAttack : PlayerAttack
+public class BasicAttack : AttackBase
 {
-    public BasicAttack() : base("Attack", 0) { }
+    public BasicAttack() : base("Basic Attack") { }
 
-    protected override void Execute(Character attacker, Character target)
+    public override void Use(Status attacker, Status target)
     {
-        target.TakeDamage(attacker.atk);
-    }
+        PlayerStatus player = attacker as PlayerStatus;
+        EnemyStatus enemy = target as EnemyStatus;
 
-    protected override void AfterExecute(Character attacker)
-    {
-        attacker.GainAP(1); // đánh thường để tích AP
+        if (player == null || enemy == null)
+            return;
+
+        enemy.TakeDamage(player.Atk);
+
+        // đánh thường → +1 AP
+        player.GainAP(1);
     }
 }

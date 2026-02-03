@@ -3,29 +3,28 @@ using UnityEngine;
 [System.Serializable]
 public class PlayerStatus : Status
 {
-    [Header("Progression")]
+    // ===== PROGRESSION =====
     public int currentExp = 0;
-
-    // Lv1 cần 100, Lv2 cần 200...
     public int MaxExpRequired => 100 * level;
 
-    public PlayerStatus(string name) 
-        // Base Stats cố định cho Player
+    // ===== ACTION POINT =====
+    public int currentAP = 0;
+    public int maxAP = 5;
+
+    public PlayerStatus(string name)
         : base(name, hp: 100, atk: 15, def: 5, spd: 10)
     {
-        this.level = 1;
-        this.currentExp = 0;
+        level = 1;
+        currentExp = 0;
+        currentAP = 0;
     }
 
+    // ===== EXP =====
     public void GainExp(int amount)
     {
         currentExp += amount;
-        Debug.Log($"Player gained {amount} EXP. Total: {currentExp}/{MaxExpRequired}");
-
         while (currentExp >= MaxExpRequired)
-        {
             LevelUp();
-        }
     }
 
     private void LevelUp()
@@ -33,19 +32,22 @@ public class PlayerStatus : Status
         currentExp -= MaxExpRequired;
         level++;
         HealFull();
-        Debug.Log($"<color=yellow>LEVEL UP!</color> Player Lv.{level}. MaxHP: {MaxHP}");
     }
 
-    public float GetExpRatio()
+    // ===== AP =====
+    public void GainAP(int amount)
     {
-        if (MaxExpRequired == 0) return 0;
-        return (float)currentExp / MaxExpRequired;
+        currentAP = Mathf.Min(currentAP + amount, maxAP);
     }
 
-    public void LoadData(int savedLevel, int savedExp)
+    public bool CanUseAP(int cost)
     {
-        // Sử dụng hàm SetLevel của cha để đảm bảo đồng bộ máu
-        base.SetLevel(savedLevel);
-        this.currentExp = savedExp;
+        return currentAP >= cost;
+    }
+
+    public void UseAP(int cost)
+    {
+        currentAP -= cost;
+        if (currentAP < 0) currentAP = 0;
     }
 }

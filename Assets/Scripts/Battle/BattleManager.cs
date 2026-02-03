@@ -4,93 +4,89 @@ using System.Linq;
 
 public class BattleManager : MonoBehaviour
 {
-    // STATE 
+    // ===== STATE =====
     public BattleState State { get; private set; }
 
-    // CORE DATA 
+    // ===== CORE DATA =====
     private Party playerParty;
     private Party enemyParty;
 
     private TurnManager turnManager = new TurnManager();
-    private List<Character> turnOrder = new List<Character>();
-    private Character currentCharacter;
+    private List<Status> turnOrder = new List<Status>();
+    private Status currentUnit;
 
-    // INIT BATTLE
-    // SỬA HÀM INIT: Nhận thêm mapLevel (Dummy Level)
+    // ===== INIT BATTLE =====
+    // mapDifficultyLevel = level của map / dungeon
     public void InitBattle(Party player, Party enemy, int mapDifficultyLevel)
     {
         playerParty = player;
         enemyParty = enemy;
 
-        // === LOGIC MỚI: QUÁI SCALE THEO LEVEL CỦA M AP===
+        // ===== SCALE ENEMY THEO MAP LEVEL =====
         foreach (var member in enemyParty.Members)
         {
-            if (member is Enemy enemyUnit)
+            if (member is EnemyStatus enemyStatus)
             {
-                // Thay vì lấy player.level, ta dùng mapDifficultyLevel
-                enemyUnit.SyncToLevel(mapDifficultyLevel);
+                enemyStatus.SetLevel(mapDifficultyLevel);
             }
         }
-        // =================================================
 
+        // ===== BUILD TURN ORDER =====
         turnOrder = turnManager.BuildTurnOrder(playerParty, enemyParty);
-        currentCharacter = turnOrder.Count > 0 ? turnOrder[0] : null;
+        currentUnit = turnOrder.Count > 0 ? turnOrder[0] : null;
 
         State = BattleState.Start;
         AdvanceState();
     }
-    
-    // ... (Phần CheckEndBattle và ProcessWinRewards giữ nguyên, 
-    // vì EXP nhận được đã được tính dựa trên Level của quái trong hàm SyncToLevel rồi)
 
-    // TURN FLOW
+    // ===== TURN FLOW =====
     private void AdvanceState()
     {
         if (CheckEndBattle())
             return;
 
-        if (currentCharacter == null)
+        if (currentUnit == null)
             return;
 
-        if (playerParty.Members.Contains(currentCharacter))
+        if (playerParty.Members.Contains(currentUnit))
             State = BattleState.PlayerTurn;
         else
             State = BattleState.EnemyTurn;
     }
 
-    public Character GetCurrentCharacter()
+    public Status GetCurrentUnit()
     {
-        return currentCharacter;
+        return currentUnit;
     }
 
-    // EXECUTE ACTION (HỆ MỚI)
-    public bool ExecuteAttack(AttackBase attack, Character target)
+    // ===== EXECUTE ACTION =====
+    public bool ExecuteAttack(AttackBase attack, Status target)
     {
         if (State != BattleState.PlayerTurn && State != BattleState.EnemyTurn)
             return false;
 
-        if (currentCharacter == null || !currentCharacter.IsAlive)
+        if (currentUnit == null || !currentUnit.IsAlive)
             return false;
 
         if (attack == null || target == null)
             return false;
 
-        attack.Use(currentCharacter, target);
+        attack.Use(currentUnit, target);
 
         EndTurn();
         return true;
     }
 
-    // END TURN
+    // ===== END TURN =====
     private void EndTurn()
     {
         turnOrder = turnManager.BuildTurnOrder(playerParty, enemyParty);
-        currentCharacter = turnManager.GetNext(currentCharacter, turnOrder);
+        currentUnit = turnManager.GetNext(currentUnit, turnOrder);
 
         AdvanceState();
     }
 
-    // WIN / LOSE
+    // ===== WIN / LOSE =====
     private bool CheckEndBattle()
     {
         if (enemyParty.IsDefeated())

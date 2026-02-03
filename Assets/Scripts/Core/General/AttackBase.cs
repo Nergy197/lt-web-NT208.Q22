@@ -7,5 +7,5 @@ public abstract class AttackBase
         Name = name;
     }
 
-    public abstract void Use(Character attacker, Character target);
+    public abstract void Use(Status attacker, Status target);
 }

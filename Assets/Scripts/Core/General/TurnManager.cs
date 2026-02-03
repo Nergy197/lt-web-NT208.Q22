@@ -3,22 +3,20 @@ using System.Linq;
 
 public class TurnManager
 {
-    //Trả về danh sách lượt hiện tại (đã sort, đã loại người chết)
-    public List<Character> BuildTurnOrder(Party playerParty, Party enemyParty)
+    public List<Status> BuildTurnOrder(Party playerParty, Party enemyParty)
     {
-        List<Character> result = new List<Character>();
+        List<Status> result = new List<Status>();
 
         result.AddRange(playerParty.Members);
         result.AddRange(enemyParty.Members);
 
         return result
-            .Where(c => c.IsAlive)
-            .OrderByDescending(c => c.spd)
+            .Where(s => s.IsAlive)
+            .OrderByDescending(s => s.Spd)
             .ToList();
     }
 
-    //Lấy nhân vật đi sau current
-    public Character GetNext(Character current, List<Character> turnOrder)
+    public Status GetNext(Status current, List<Status> turnOrder)
     {
         if (turnOrder == null || turnOrder.Count == 0)
             return null;

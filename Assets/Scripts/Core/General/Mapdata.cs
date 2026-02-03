@@ -10,5 +10,5 @@ public class MapData : ScriptableObject
     public int recommendedLevel = 5; 
     
     // Bạn có thể thêm: list quái xuất hiện ở map này, nhạc nền, background...
-    public List<EnemyStatus> enemyPool; 
+    //public List<EnemyStatus> enemyPool; 
 }

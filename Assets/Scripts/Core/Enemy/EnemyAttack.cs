@@ -1,19 +1,15 @@
 public class EnemyAttack : AttackBase
 {
-    public EnemyAttack(string name = "Enemy Attack")
-        : base(name) { }
+    public EnemyAttack() : base("Enemy Attack") { }
 
-    public override void Use(EnemyStatus attacker, PlayerStatus target)
+    public override void Use(Status attacker, Status target)
     {
-        // enemy đánh rất đơn giản
-        if (attacker.Side != CharacterSide.Enemy)
+        EnemyStatus enemy = attacker as EnemyStatus;
+        PlayerStatus player = target as PlayerStatus;
+
+        if (enemy == null || player == null)
             return;
 
-        target.TakeDamage(attacker.atk);
-    }
-
-    public override void Use(Character attacker, Character target)
-    {
-        throw new System.NotImplementedException();
+        player.TakeDamage(enemy.Atk);
     }
 }
