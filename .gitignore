@@ -1,56 +1,104 @@
-# --- Unity Standard Ignored Folders ---
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/[Ll]ogs/
-/[Uu]ser[Ss]ettings/
+###############################################################################
+# UNITY
+###############################################################################
 
-# --- MemoryCaptures & Replays ---
-/[Mm]emoryCaptures/
-/[Rr]ecordings/
+# --- Unity generated folders ---
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
 
-# --- Asset Meta Files (CỰC KỲ QUAN TRỌNG: Không ignore file .meta trong Assets) ---
-# Chỉ ignore meta của các file không nằm trong Assets
+# Crash reports
+sysinfo.txt
+
+# --- Asset meta files ---
+# ⚠️ CỰC KỲ QUAN TRỌNG:
+# KHÔNG ignore .meta trong Assets
+# Chỉ ignore meta của file ngoài Assets
 /*.pidb.meta
 /*.pdb.meta
 /*.mdb.meta
+/*.opendb.meta
 
-# --- IDE / Code Editor (Visual Studio, VS Code, Rider) ---
-/*.csproj
-/*.unityproj
-/*.sln
-/*.suo
-/*.tmp
-/*.user
-/*.userprefs
-/*.pidb
-/*.booproj
-/*.svd
-/*.pdb
-/*.opendb
-/*.VC.db
+###############################################################################
+# IDE / EDITORS
+###############################################################################
 
-# VS Code specific
+# Visual Studio / VS Code / Rider
 .vscode/
-
-# JetBrains Rider specific
 .idea/
 
-# --- Operating System Junk ---
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# VS Code local history
+.history/
+
+###############################################################################
+# UNITY PACKAGE CACHE (RẤT QUAN TRỌNG – TRÁNH FILE >100MB)
+###############################################################################
+
+# Unity Package Cache (Burst, IL2CPP, etc.)
+Library/PackageCache/
+
+###############################################################################
+# OS / SYSTEM JUNK
+###############################################################################
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+
+# Windows
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# --- WebGL Specific ---
-# Thường thì folder Build sẽ chứa output của WebGL, ta không nên commit nó
-# trừ khi bạn muốn deploy trực tiếp lên GitHub Pages từ branch main.
-# Nếu bạn build vào folder tên khác, hãy thêm tên đó vào đây.
-/Build/
-/Builds/
-/WebGL_Build/
+###############################################################################
+# WEBGL / EXPORT BUILDS
+###############################################################################
+
+# Output builds (WebGL, PC, etc.)
+Build/
+Builds/
+WebGL_Build/
+WebGL/
+
+###############################################################################
+# OPTIONAL – LOG / CACHE KHÁC
+###############################################################################
+
+# Rider / Resharper
+*.DotSettings.user
+
+# Unity test results
+TestResults/
+
+###############################################################################
+# SAFETY: CHỐNG LỠ COMMIT FILE TO
+###############################################################################
+
+# IL2CPP generated
+Il2CppBuildCache/
+
+# Crash dumps
+*.dmp
