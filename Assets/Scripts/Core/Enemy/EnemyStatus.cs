@@ -5,6 +5,7 @@ using System.Linq;
 [System.Serializable]
 public class EnemyStatus : Status
 {
+    [SerializeField] private List<EnemyAttack> attacks = new List<EnemyAttack>();
     [SerializeField] private int baseExpReward = 20;
 
     [SerializeField] private bool isAggressive = true; 

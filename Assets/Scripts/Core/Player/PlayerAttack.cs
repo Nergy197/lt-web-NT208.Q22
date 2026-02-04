@@ -2,8 +2,20 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+public class PlayerAttackHit
+{
+    public float windUpTime;
+    public float damageMultiplier;
+}
+
 public class PlayerAttack : AttackBase
 {
+    public override void Use(Status attacker, Status target)
+    {
+        this.attacker = attacker;
+        this.target = target;
+        StartAttack(attacker, target); // Use public method from AttackBase
+    }
     public int apCost;
 
     private List<PlayerAttackHit> hits;
@@ -42,7 +54,7 @@ public class PlayerAttack : AttackBase
             if (!player.IsAlive || !enemy.IsAlive)
                 yield break;
 
-            enemy.TakeDamage(player.Atk * hit.damageMultiplier);
+            enemy.TakeDamage(player, Mathf.RoundToInt(player.Atk * hit.damageMultiplier));
         }
     }
 

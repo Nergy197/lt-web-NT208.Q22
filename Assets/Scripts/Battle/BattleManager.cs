@@ -16,6 +16,13 @@ public class BattleManager : MonoBehaviour
     private Queue<Status> turnOrder = new Queue<Status>();
     private Status currentUnit;
 
+    // [THÊM MỚI] Biến để theo dõi người chơi đang nhắm vào ai
+    private int targetIndex = 0; 
+    private bool isActionSelected = false;
+    private AttackBase currentSelectedAttack = null;
+    
+    // [SỬA LẠI] Thêm [SerializeField] để hiện ra ngoài Inspector
+    [SerializeField] private InputConfig keymap;
     // ===== PARRY SYSTEM (MODEL 3 - Real-time window) =====
     private bool isParryWindowOpen = false;
     private float parryWindowDuration = 2.5f; // 2.5 seconds
@@ -67,18 +74,124 @@ public class BattleManager : MonoBehaviour
     }
 
     // ===== PARRY SYSTEM (MODEL 3) =====
+    // ===== UPDATE LOOP =====
     private void Update()
     {
-        // Check if parry window expired
+        // Safety check
+        if (keymap == null) return;
+
+        // 1. ƯU TIÊN CAO NHẤT: PARRY (Có thể bấm bất cứ lúc nào nếu cửa sổ đang mở)
         if (isParryWindowOpen)
         {
-            float elapsedTime = Time.time - parryWindowStartTime;
-            if (elapsedTime >= parryWindowDuration)
+            // Kiểm tra hết giờ
+            if (Time.time - parryWindowStartTime >= parryWindowDuration)
             {
-                // Window expired - player didn't parry
                 OnParryWindowExpired();
+                return;
+            }
+
+            // Kiểm tra nút bấm Parry
+            if (Input.GetKeyDown(keymap.parryKey))
+            {
+                PlayerAttemptParry();
+                return; // Đã parry xong thì không làm việc khác
             }
         }
+
+        // 2. LƯỢT CỦA NGƯỜI CHƠI (Chỉ điều khiển khi đến lượt và không phải đang đỡ đòn)
+        if (State == BattleState.PlayerTurn && !isParryWindowOpen)
+        {
+            HandlePlayerInput();
+        }
+    }
+
+    private void HandlePlayerInput()
+    {
+        // --- A. ĐIỀU HƯỚNG MỤC TIÊU ---
+        if (Input.GetKeyDown(keymap.nextTargetKey))
+        {
+            ChangeTarget(1); // Qua phải
+        }
+        else if (Input.GetKeyDown(keymap.prevTargetKey))
+        {
+            ChangeTarget(-1); // Qua trái
+        }
+
+        // --- B. CHỌN HÀNH ĐỘNG ---
+        if (Input.GetKeyDown(keymap.basicAttackKey))
+        {
+            Debug.Log("Đã chọn: Đánh thường (Tốn 2 AP)");
+            // Giả lập tạo đòn đánh (Cần khớp constructor class PlayerAttack của bạn)
+            // currentSelectedAttack = new PlayerAttack("Basic", 2, new List<PlayerAttackHit>()); 
+            isActionSelected = true;
+        }
+        else if (Input.GetKeyDown(keymap.skill1Key))
+        {
+            Debug.Log("Đã chọn: Skill 1 (Tốn 5 AP)");
+            // currentSelectedAttack = new PlayerAttack("Skill Fire", 5, ...);
+            isActionSelected = true;
+        }
+
+        // --- C. XÁC NHẬN ---
+        if (Input.GetKeyDown(keymap.confirmKey))
+        {
+            if (isActionSelected)
+            {
+                // Lấy mục tiêu hiện tại
+                var target = GetCurrentTargetEnemy();
+                if (target != null)
+                {
+                    Debug.Log($"Tấn công {target.entityName}!");
+                    // Thực thi đòn đánh (Bỏ comment khi bạn đã cài logic Attack xong)
+                    // ExecuteAttack(currentSelectedAttack, target);
+                    
+                    // Reset trạng thái
+                    isActionSelected = false; 
+                }
+            }
+            else
+            {
+                Debug.Log("Chưa chọn hành động nào! Hãy bấm E hoặc Q trước.");
+            }
+        }
+        
+        // --- D. HỦY BỎ ---
+        if (Input.GetKeyDown(keymap.cancelKey))
+        {
+            isActionSelected = false;
+            currentSelectedAttack = null;
+            Debug.Log("Đã hủy chọn.");
+        }
+    }
+
+    // ===== CÁC HÀM HỖ TRỢ LOGIC MỚI =====
+
+    // Hàm đổi mục tiêu xoay vòng
+    private void ChangeTarget(int direction)
+    {
+        // Lấy danh sách kẻ địch còn sống
+        var liveEnemies = enemyParty.Members.Where(e => e.IsAlive).ToList();
+        if (liveEnemies.Count == 0) return;
+
+        targetIndex += direction;
+
+        // Xử lý xoay vòng (Loop)
+        if (targetIndex >= liveEnemies.Count) targetIndex = 0;
+        if (targetIndex < 0) targetIndex = liveEnemies.Count - 1;
+
+        Debug.Log($"Đang nhắm vào: {liveEnemies[targetIndex].entityName}");
+    }
+
+    // Hàm lấy kẻ địch đang được nhắm
+    private EnemyStatus GetCurrentTargetEnemy()
+    {
+        var liveEnemies = enemyParty.Members.Where(e => e.IsAlive).ToList();
+        if (liveEnemies.Count == 0) return null;
+
+        // Bảo vệ lỗi index
+        if (targetIndex >= liveEnemies.Count) targetIndex = 0;
+
+        return liveEnemies[targetIndex] as EnemyStatus;
     }
 
     public void OnEnemyAttackAnnounced(EnemyStatus attacker, PlayerStatus defender)

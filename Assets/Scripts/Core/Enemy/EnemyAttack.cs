@@ -2,8 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class EnemyAttackHit
+{
+    public bool canBeParried;
+    public float windUpTime;
+    public float damageMultiplier;
+}
 public class EnemyAttack : AttackBase
 {
+    public override void Use(Status attacker, Status target)
+    {
+        this.attacker = attacker;
+        this.target = target;
+        StartAttack(attacker, target); // Use public method from AttackBase
+    }
     private List<EnemyAttackHit> hits;
     private EnemyStatus enemy;
     private PlayerStatus player;
@@ -31,9 +43,9 @@ public class EnemyAttack : AttackBase
             yield return new WaitForSeconds(hit.windUpTime);
 
             if (hit.canBeParried && player.ConsumeParry())
-                enemy.TakeDamage(player.Atk / 2);
+                enemy.TakeDamage(player, player.Atk / 2);
             else
-                player.TakeDamage(enemy.Atk * hit.damageMultiplier);
+                player.TakeDamage(enemy, Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier));
         }
     }
 

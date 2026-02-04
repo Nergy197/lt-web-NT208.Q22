@@ -34,4 +34,7 @@ public abstract class AttackBase
     protected virtual IEnumerator Prepare() { yield break; }
     protected abstract IEnumerator Execute();
     protected virtual IEnumerator Recovery() { yield break; }
+
+    // Add abstract Use method for polymorphic attack execution
+    public abstract void Use(Status attacker, Status target);
 }
