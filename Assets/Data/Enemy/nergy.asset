@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 177d1af869d55ee43a9784d24786a902, type: 3}
-  m_Name: PlayerData
+  m_Name: nergy
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
-  entityName: New Player
-  baseHP: 30
-  baseAtk: 8
-  baseDef: 2
-  baseSpd: 3
-  attacks: []
+  entityName: nergy
+  baseHP: 999
+  baseAtk: 999
+  baseDef: 999
+  baseSpd: 999
+  maxAP: 999
