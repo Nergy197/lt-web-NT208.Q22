@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class PlayerStatus : Status
 {
     // --- AP SYSTEM ---
-    public int MaxAP => 100; // Fixed max AP for simplicity
+    public int MaxAP { get; private set; }
     public int currentAP;
     public bool CanUseAP(int cost) => currentAP >= cost;
     public void UseAP(int cost) => currentAP -= cost;
@@ -47,9 +47,10 @@ public class PlayerStatus : Status
     }
 
     // --- CONSTRUCTOR ---
-    public PlayerStatus(string name, int baseHP, int baseAtk, int baseDef, int baseSpd)
+    public PlayerStatus(string name, int baseHP, int baseAtk, int baseDef, int baseSpd, int maxAP = 100)
         : base(name, baseHP, baseAtk, baseDef, baseSpd)
     {
+        MaxAP = maxAP;
         currentAP = MaxAP;
     }
 }

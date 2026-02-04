@@ -27,4 +27,10 @@ public class EnemyStatus : Status
         return attacks[Random.Range(0, attacks.Count)];
     }
 
+    // Allow runtime assignment of attack instances created from Editor data
+    public void SetAttackInstances(System.Collections.Generic.List<EnemyAttack> instances)
+    {
+        this.attacks = instances ?? new System.Collections.Generic.List<EnemyAttack>();
+    }
+
 }

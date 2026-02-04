@@ -6,6 +6,9 @@ public class PlayerAttackHit
 {
     public float windUpTime;
     public float damageMultiplier;
+    public int repeat = 1;
+    public float delayBetweenHits = 0f;
+    public List<float> timingOffsets = new List<float>();
 }
 
 public class PlayerAttack : AttackBase
@@ -48,13 +51,31 @@ public class PlayerAttack : AttackBase
     {
         foreach (var hit in hits)
         {
-            if (hit.windUpTime > 0)
+            // Wind-up once before the sequence of repeats
+            if (hit.windUpTime > 0f)
                 yield return new WaitForSeconds(hit.windUpTime);
 
             if (!player.IsAlive || !enemy.IsAlive)
                 yield break;
 
-            enemy.TakeDamage(player, Mathf.RoundToInt(player.Atk * hit.damageMultiplier));
+            for (int i = 0; i < Mathf.Max(1, hit.repeat); i++)
+            {
+                if (!player.IsAlive || !enemy.IsAlive)
+                    yield break;
+
+                enemy.TakeDamage(player, Mathf.RoundToInt(player.Atk * hit.damageMultiplier));
+
+                // Determine delay before next repeat: use timingOffsets[i] if available, else use delayBetweenHits
+                if (i < hit.repeat - 1)
+                {
+                    float delay = hit.delayBetweenHits; // default
+                    if (hit.timingOffsets != null && i < hit.timingOffsets.Count)
+                        delay = hit.timingOffsets[i];
+                    
+                    if (delay > 0f)
+                        yield return new WaitForSeconds(delay);
+                }
+            }
         }
     }
 

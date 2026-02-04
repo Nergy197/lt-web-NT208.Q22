@@ -7,6 +7,9 @@ public class EnemyAttackHit
     public bool canBeParried;
     public float windUpTime;
     public float damageMultiplier;
+    public int repeat = 1;
+    public float delayBetweenHits = 0f;
+    public List<float> timingOffsets = new List<float>();
 }
 public class EnemyAttack : AttackBase
 {
@@ -37,15 +40,45 @@ public class EnemyAttack : AttackBase
     {
         foreach (var hit in hits)
         {
+            // Enable parry for the wind-up phase if applicable
             if (hit.canBeParried)
                 player.EnableParry();
 
-            yield return new WaitForSeconds(hit.windUpTime);
+            if (hit.windUpTime > 0f)
+                yield return new WaitForSeconds(hit.windUpTime);
 
-            if (hit.canBeParried && player.ConsumeParry())
-                enemy.TakeDamage(player, player.Atk / 2);
-            else
-                player.TakeDamage(enemy, Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier));
+            if (!player.IsAlive || !enemy.IsAlive)
+                yield break;
+
+            // Handle repeats: parry only considered for the first strike in the sequence
+            bool first = true;
+            for (int i = 0; i < Mathf.Max(1, hit.repeat); i++)
+            {
+                if (!player.IsAlive || !enemy.IsAlive)
+                    yield break;
+
+                if (hit.canBeParried && first && player.ConsumeParry())
+                {
+                    enemy.TakeDamage(player, player.Atk / 2);
+                }
+                else
+                {
+                    player.TakeDamage(enemy, Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier));
+                }
+
+                first = false;
+
+                // Determine delay before next repeat: use timingOffsets[i] if available, else use delayBetweenHits
+                if (i < hit.repeat - 1)
+                {
+                    float delay = hit.delayBetweenHits; // default
+                    if (hit.timingOffsets != null && i < hit.timingOffsets.Count)
+                        delay = hit.timingOffsets[i];
+                    
+                    if (delay > 0f)
+                        yield return new WaitForSeconds(delay);
+                }
+            }
         }
     }
 
