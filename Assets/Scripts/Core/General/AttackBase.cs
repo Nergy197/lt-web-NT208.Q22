@@ -13,6 +13,13 @@ public abstract class AttackBase
     {
         this.attacker = attacker;
         this.target = target;
+        
+        if (BattleRunner.Instance == null)
+        {
+            Debug.LogError("❌ BattleRunner.Instance không tồn tại! Hãy thêm BattleRunner vào scene.");
+            return;
+        }
+        
         BattleRunner.Instance.StartCoroutine(Run());
     }
 
