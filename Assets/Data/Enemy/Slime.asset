@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3bf434e84c27ce44a89a55ef58b8975, type: 3}
   m_Name: Slime
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  entityName: New Enemy
+  entityName: Kobol
   baseHP: 20
   baseAtk: 6
   baseDef: 1

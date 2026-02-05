@@ -25,11 +25,11 @@ public class BattleManager : MonoBehaviour
         foreach (var e in enemyParty.Members.OfType<EnemyStatus>())
             e.SetLevel(mapLevel);
 
-        turnOrder = new Queue<Status>(
-            playerParty.Members.Concat(enemyParty.Members)
-        );
+        // build turn order (simple: theo thứ tự add)
+        turnOrder.Clear();
+        foreach (var s in playerParty.Members.Concat(enemyParty.Members))
+            turnOrder.Enqueue(s);
 
-        currentUnit = turnOrder.Peek();
         State = BattleState.Start;
 
         Debug.Log("=== BATTLE START ===");
