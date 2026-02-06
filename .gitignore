@@ -1,104 +1,73 @@
-###############################################################################
-# UNITY
-###############################################################################
-
-# --- Unity generated folders ---
+####################################
+# UNITY GENERATED
+####################################
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
-[Uu]ser[Ss]ettings/
+[Uu]serSettings/
 [Mm]emoryCaptures/
-[Rr]ecordings/
 
-# Crash reports
-sysinfo.txt
-
-# --- Asset meta files ---
-# ⚠️ CỰC KỲ QUAN TRỌNG:
-# KHÔNG ignore .meta trong Assets
-# Chỉ ignore meta của file ngoài Assets
-/*.pidb.meta
-/*.pdb.meta
-/*.mdb.meta
-/*.opendb.meta
-
-###############################################################################
-# IDE / EDITORS
-###############################################################################
-
-# Visual Studio / VS Code / Rider
-.vscode/
-.idea/
-
+####################################
+# UNITY CACHE / ARTIFACTS
+####################################
 *.csproj
 *.unityproj
 *.sln
 *.suo
-*.tmp
 *.user
 *.userprefs
 *.pidb
 *.booproj
-*.svd
-*.pdb
-*.opendb
-*.VC.db
 
-# VS Code local history
-.history/
-
-###############################################################################
-# UNITY PACKAGE CACHE (RẤT QUAN TRỌNG – TRÁNH FILE >100MB)
-###############################################################################
-
-# Unity Package Cache (Burst, IL2CPP, etc.)
-Library/PackageCache/
-
-###############################################################################
-# OS / SYSTEM JUNK
-###############################################################################
-
-# macOS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-
-# Windows
-ehthumbs.db
-Thumbs.db
-desktop.ini
-
-###############################################################################
-# WEBGL / EXPORT BUILDS
-###############################################################################
-
-# Output builds (WebGL, PC, etc.)
-Build/
-Builds/
-WebGL_Build/
-WebGL/
-
-###############################################################################
-# OPTIONAL – LOG / CACHE KHÁC
-###############################################################################
-
-# Rider / Resharper
+####################################
+# VISUAL STUDIO / RIDER
+####################################
+.vs/
+.idea/
+.vscode/
+*.DotSettings
 *.DotSettings.user
 
-# Unity test results
-TestResults/
+####################################
+# OS JUNK
+####################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
 
-###############################################################################
-# SAFETY: CHỐNG LỠ COMMIT FILE TO
-###############################################################################
+####################################
+# INPUT SYSTEM (GENERATED)
+####################################
+# Auto-generated C# from InputActions
+*InputActions.cs
 
-# IL2CPP generated
-Il2CppBuildCache/
+# Optional: ignore InputAction backups
+*.inputactions.backup
 
-# Crash dumps
-*.dmp
+####################################
+# UNITY ADDRESSABLE / CACHE
+####################################
+[Aa]ssets/AddressableAssetsData/*/Build
+[Aa]ssets/AddressableAssetsData/*/PlayerBuildData
+
+####################################
+# AUDIO / VIDEO CACHE
+####################################
+*.wav.meta
+*.mp3.meta
+*.mp4.meta
+
+####################################
+# CRASH / PROFILING
+####################################
+sysinfo.txt
+*.stacktrace
+
+####################################
+# OPTIONAL – LOCAL CONFIG
+####################################
+*.env
