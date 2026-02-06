@@ -4,7 +4,7 @@ using System.Collections.Generic;
 [System.Serializable]
 public class PlayerStatus : Status
 {
-    // --- AP SYSTEM ---
+    // AP SYSTEM
     public int MaxAP { get; private set; }
     public int currentAP;
     public bool CanUseAP(int cost) => currentAP >= cost;
@@ -12,7 +12,7 @@ public class PlayerStatus : Status
     public void RestoreAP(int amount) => currentAP = Mathf.Min(MaxAP, currentAP + amount);
     public void RestoreFullAP() => currentAP = MaxAP;
 
-    // --- PARRY SYSTEM ---
+    // PARRY SYSTEM
     private bool canParry = false;
     public void EnableParry() => canParry = true;
     public bool ConsumeParry()
@@ -25,7 +25,7 @@ public class PlayerStatus : Status
         return false;
     }
 
-    // --- EXP SYSTEM ---
+    // EXP SYSTEM
     public int currentExp = 0;
     public int expToNextLevel => level * 100; // Simple formula
     public void GainExp(int amount)
@@ -46,7 +46,7 @@ public class PlayerStatus : Status
         Debug.Log($"{entityName} leveled up to {level}!");
     }
 
-    // --- CONSTRUCTOR ---
+    // CONSTRUCTOR
     public PlayerStatus(string name, int baseHP, int baseAtk, int baseDef, int baseSpd, int maxAP = 100)
         : base(name, baseHP, baseAtk, baseDef, baseSpd)
     {

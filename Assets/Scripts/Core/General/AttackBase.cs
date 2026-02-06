@@ -16,7 +16,7 @@ public abstract class AttackBase
         
         if (BattleRunner.Instance == null)
         {
-            Debug.LogError("❌ BattleRunner.Instance không tồn tại! Hãy thêm BattleRunner vào scene.");
+            Debug.LogError("[ERROR] BattleRunner.Instance is null! Please add BattleRunner to scene.");
             return;
         }
         

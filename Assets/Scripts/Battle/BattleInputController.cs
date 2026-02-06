@@ -11,18 +11,18 @@ public class BattleInputController : MonoBehaviour
         battle = GetComponent<BattleManager>();
         if (battle == null)
         {
-            Debug.LogError("❌ BattleInputController: Missing BattleManager");
+            Debug.LogError("[ERROR] BattleInputController: Missing BattleManager");
             enabled = false;
             return;
         }
 
-        // 🔥 INIT INPUT Ở ĐÂY (KHÔNG PHẢI AWAKE)
+        // INIT INPUT HERE (NOT IN AWAKE)
         input = new CombatInputActions();
 
-        // 🔥 ENABLE ĐÚNG ACTION MAP
+        // ENABLE CORRECT ACTION MAP
         input.Battle.Enable();
 
-        // ===== REGISTER CALLBACKS =====
+        // REGISTER CALLBACKS
         input.Battle.BasicAttack.performed += OnBasicAttack;
         //input.Battle.OpenSkillMenu.performed += OnOpenSkillMenu;
         //input.Battle.OpenItemMenu.performed += OnOpenItemMenu;
@@ -32,7 +32,7 @@ public class BattleInputController : MonoBehaviour
         input.Battle.PrevTarget.performed += OnPrevTarget;
         //input.Battle.Parry.performed += OnParry;
 
-        Debug.Log("✅ BattleInputController ENABLED");
+        Debug.Log("[OK] BattleInputController ENABLED");
     }
 
     private void OnDisable()
@@ -52,26 +52,26 @@ public class BattleInputController : MonoBehaviour
         input.Dispose();
         input = null;
 
-        Debug.Log("🛑 BattleInputController DISABLED");
+        Debug.Log("[STOP] BattleInputController DISABLED");
     }
 
-    // ===== INPUT CALLBACKS =====
+    // INPUT CALLBACKS
 
     private void OnBasicAttack(InputAction.CallbackContext ctx)
     {
-        Debug.Log("🎮 Input: BasicAttack");
+        Debug.Log("Input: BasicAttack");
         battle.SelectBasicAttack();
     }
 
     private void OnNextTarget(InputAction.CallbackContext ctx)
     {
-        Debug.Log("🎯 Input: NextTarget");
+        Debug.Log("Input: NextTarget");
         battle.ChangeTargetInput(1);
     }
 
     private void OnPrevTarget(InputAction.CallbackContext ctx)
     {
-        Debug.Log("🎯 Input: PrevTarget");
+        Debug.Log("Input: PrevTarget");
         battle.ChangeTargetInput(-1);
     }
 

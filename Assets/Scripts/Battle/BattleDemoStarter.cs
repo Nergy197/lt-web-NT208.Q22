@@ -9,20 +9,20 @@ public class BattleDemoStarter : MonoBehaviour
     {
         battle = GetComponent<BattleManager>();
         if (battle == null)
-            Debug.LogError("❌ BattleManager missing on Battle System");
+            Debug.LogError("[ERROR] BattleManager missing on Battle System");
     }
 
     private void Start()
     {
-        // ===== CREATE PARTIES =====
+        // CREATE PARTIES
         Party playerParty = new Party(PartyType.Player);
         Party enemyParty  = new Party(PartyType.Enemy);
 
-        // ===== FIND PLAYERS =====
+        // FIND PLAYERS
         var players = FindObjectsOfType<PlayerDataManager>();
         if (players.Length == 0)
         {
-            Debug.LogError("❌ Không tìm thấy PlayerDataManager");
+            Debug.LogError("[ERROR] PlayerDataManager not found");
             return;
         }
 
@@ -34,11 +34,11 @@ public class BattleDemoStarter : MonoBehaviour
             playerParty.AddMember(data.CreateStatus());
         }
 
-        // ===== FIND ENEMIES =====
+        // FIND ENEMIES
         var enemies = FindObjectsOfType<EnemyDataManager>();
         if (enemies.Length == 0)
         {
-            Debug.LogError("❌ Không tìm thấy EnemyDataManager");
+            Debug.LogError("[ERROR] EnemyDataManager not found");
             return;
         }
 
@@ -50,7 +50,7 @@ public class BattleDemoStarter : MonoBehaviour
             enemyParty.AddMember(data.CreateStatus());
         }
 
-        // ===== INIT BATTLE =====
+        // INIT BATTLE
         Debug.Log($"Init Battle: {playerParty} vs {enemyParty}");
         battle.InitBattle(playerParty, enemyParty, 1);
     }

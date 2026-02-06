@@ -6,29 +6,29 @@ public abstract class Status
     public string entityName;
     public int level = 1;
 
-    // --- 1. BASE STATS ---
+    // BASE STATS
     protected int baseHP;
     protected int baseAtk;
     protected int baseDef;
     protected int baseSpd;
 
-    // --- 2. GROWTH STATS ---
+    // GROWTH STATS
     protected int hpGrowth;
     protected int atkGrowth;
     protected int defGrowth;
     protected int spdGrowth;
 
-    // --- 3. REAL-TIME CALCULATION ---
+    // REAL-TIME CALCULATION
     public int MaxHP => baseHP + (hpGrowth * (level - 1));
     public int Atk   => baseAtk + (atkGrowth * (level - 1));
     public int Def   => baseDef + (defGrowth * (level - 1));
     public int Spd   => baseSpd + (spdGrowth * (level - 1));
 
-    // --- 4. DYNAMIC STATE ---
+    // DYNAMIC STATE
     public int currentHP;
     public bool IsAlive => currentHP > 0;
 
-    // --- CONSTRUCTOR ---
+    // CONSTRUCTOR
     public Status(string name, int hp, int atk, int def, int spd)
     {
         entityName = name;
