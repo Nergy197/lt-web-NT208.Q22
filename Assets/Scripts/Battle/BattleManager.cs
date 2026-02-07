@@ -5,24 +5,22 @@ using System.Linq;
 
 public class BattleManager : MonoBehaviour
 {
-    private int turnCount = 0;
+    // ================= STATE =================
     public BattleState State { get; private set; }
+    private int turnCount = 0;
 
     private Party playerParty;
     private Party enemyParty;
 
-    // ===== SPEED BASED TURN =====
-    private List<Status> turnVector = new List<Status>();
+    // ================= TIMELINE =================
+    private readonly List<Status> timeline = new();
     private const float BASE_DELAY = 100f;
 
-    // ===== CURRENT TURN =====
+    // ================= TURN =================
     private Status currentUnit;
+    private bool waitingForPlayerAction;
+    private bool isRunning;
 
-    // ===== FLOW CONTROL =====
-    private bool isRunning = false;
-    private bool waitingForPlayerAction = false;
-
-    // ===== INPUT GATE =====
     public bool CanAcceptInput =>
         State == BattleState.PlayerTurn && waitingForPlayerAction;
 
@@ -35,9 +33,9 @@ public class BattleManager : MonoBehaviour
         foreach (var e in enemyParty.Members.OfType<EnemyStatus>())
             e.SetLevel(mapLevel);
 
-        BuildTurnVector();
+        BuildTimeline();
 
-        foreach (var u in playerParty.Members.Concat(enemyParty.Members))
+        foreach (var u in timeline)
         {
             u.ResetForBattle(BASE_DELAY);
             u.LastTargetSlot = 0;
@@ -45,7 +43,6 @@ public class BattleManager : MonoBehaviour
 
         State = BattleState.Start;
         turnCount = 0;
-        currentUnit = null;
 
         Debug.Log("=== BATTLE START ===");
 
@@ -53,30 +50,31 @@ public class BattleManager : MonoBehaviour
             StartCoroutine(BattleLoop());
     }
 
-    private void BuildTurnVector()
+    // ================= TIMELINE =================
+    private void BuildTimeline()
     {
-        turnVector.Clear();
-        turnVector.AddRange(playerParty.Members);
-        turnVector.AddRange(enemyParty.Members);
+        timeline.Clear();
+        timeline.AddRange(playerParty.Members);
+        timeline.AddRange(enemyParty.Members);
     }
 
-    // ================= SPEED CORE =================
+    private void RemoveDeadFromTimeline()
+    {
+        timeline.RemoveAll(u => !u.IsAlive);
+    }
+
     private Status GetNextUnit()
     {
-        turnVector.Sort((a, b) => a.NextTurnTime.CompareTo(b.NextTurnTime));
+        RemoveDeadFromTimeline();
+        if (timeline.Count == 0)
+            return null;
 
-        foreach (var u in turnVector)
-        {
-            if (!u.IsAlive)
-            {
-                u.NextTurnTime += BASE_DELAY * 1000;
-                continue;
-            }
+        timeline.Sort((a, b) => a.NextTurnTime.CompareTo(b.NextTurnTime));
 
-            u.NextTurnTime += BASE_DELAY / Mathf.Max(1, u.Spd);
-            return u;
-        }
-        return null;
+        Status unit = timeline[0];
+        unit.NextTurnTime += BASE_DELAY / Mathf.Max(1, unit.Spd);
+
+        return unit;
     }
 
     // ================= MAIN LOOP =================
@@ -87,33 +85,23 @@ public class BattleManager : MonoBehaviour
         while (!CheckEndBattle())
         {
             currentUnit = GetNextUnit();
-            if (currentUnit == null) break;
+            if (currentUnit == null)
+                break;
 
             turnCount++;
-
             State = currentUnit.PartyType == PartyType.Player
                 ? BattleState.PlayerTurn
                 : BattleState.EnemyTurn;
 
             Debug.Log($"================ TURN {turnCount} ================");
-            Debug.Log($"TURN UNIT: {currentUnit.entityName} (SPD={currentUnit.Spd})");
+            Debug.Log($"TURN: {currentUnit.entityName} (SPD={currentUnit.Spd})");
 
             LogBattleState();
 
             if (State == BattleState.PlayerTurn)
-            {
-                // 🔥 PLAYER RETARGET TRƯỚC KHI INPUT
-                RetargetIfDead_Player();
-                DebugLogCurrentTarget();
-
-                waitingForPlayerAction = true;
-                yield return new WaitUntil(() => !waitingForPlayerAction || CheckEndBattle());
-            }
+                yield return PlayerTurn();
             else
-            {
-                EnemyAutoAttack();
-                yield return null;
-            }
+                yield return EnemyTurn();
 
             yield return null;
         }
@@ -122,7 +110,16 @@ public class BattleManager : MonoBehaviour
         Debug.Log("=== BATTLE END ===");
     }
 
-    // ================= PLAYER =================
+    // ================= PLAYER TURN =================
+    private IEnumerator PlayerTurn()
+    {
+        RetargetIfDead_Player();
+        DebugLogCurrentTarget();
+
+        waitingForPlayerAction = true;
+        yield return new WaitUntil(() => !waitingForPlayerAction || CheckEndBattle());
+    }
+
     public void SelectBasicAttack()
     {
         if (!CanAcceptInput) return;
@@ -130,17 +127,14 @@ public class BattleManager : MonoBehaviour
         var target = GetEnemyBySlot(currentUnit.LastTargetSlot);
         if (target == null)
         {
-            Debug.Log("[ATTACK] No valid target");
             waitingForPlayerAction = false;
             return;
         }
 
-        Debug.Log($"[PLAYER ATTACK] {currentUnit.entityName} -> {target.entityName} (slot {currentUnit.LastTargetSlot})");
+        Debug.Log($"[PLAYER ATTACK] {currentUnit.entityName} -> {target.entityName}");
         target.TakeDamage(currentUnit, currentUnit.Atk);
 
-        // 🔥 RETARGET SAU KHI ĐÁNH
         RetargetIfDead_Player();
-
         waitingForPlayerAction = false;
     }
 
@@ -148,16 +142,47 @@ public class BattleManager : MonoBehaviour
     {
         if (!CanAcceptInput) return;
 
-        int oldSlot = currentUnit.LastTargetSlot;
-        int newSlot = StepToNextAliveEnemy(oldSlot, dir);
-        currentUnit.LastTargetSlot = newSlot;
+        int old = currentUnit.LastTargetSlot;
+        int next = StepToNextAliveEnemy(old, dir);
+        currentUnit.LastTargetSlot = next;
 
-        var t = enemyParty.GetMemberBySlot(newSlot);
+        var t = enemyParty.GetMemberBySlot(next);
         if (t != null)
-            Debug.Log($"[TARGET CHANGE] {currentUnit.entityName}: {oldSlot} -> {newSlot} ({t.entityName})");
+            Debug.Log($"[TARGET] {currentUnit.entityName}: {old} -> {next} ({t.entityName})");
     }
 
-    // ================= TARGET CORE =================
+    // ================= ENEMY TURN =================
+    private IEnumerator EnemyTurn()
+    {
+        if (!currentUnit.IsAlive)
+            yield break;
+
+        var target = RetargetEnemyTarget();
+        if (target != null)
+        {
+            Debug.Log($"[ENEMY ATTACK] {currentUnit.entityName} -> {target.entityName}");
+            target.TakeDamage(currentUnit, currentUnit.Atk);
+        }
+
+        yield return null;
+    }
+
+    private PlayerStatus RetargetEnemyTarget()
+    {
+        foreach (var p in playerParty.Members.OfType<PlayerStatus>())
+            if (p.IsAlive)
+                return p;
+
+        return null;
+    }
+
+    // ================= TARGET =================
+    private EnemyStatus GetEnemyBySlot(int slot)
+    {
+        var e = enemyParty.GetMemberBySlot(slot) as EnemyStatus;
+        return (e != null && e.IsAlive) ? e : null;
+    }
+
     private int StepToNextAliveEnemy(int start, int dir)
     {
         int count = enemyParty.Members.Count;
@@ -173,16 +198,6 @@ public class BattleManager : MonoBehaviour
         return start;
     }
 
-    private EnemyStatus GetEnemyBySlot(int slot)
-    {
-        var e = enemyParty.GetMemberBySlot(slot) as EnemyStatus;
-        if (e != null && e.IsAlive)
-            return e;
-
-        return null; // ❗ KHÔNG fallback
-    }
-
-    // ================= PLAYER RETARGET =================
     private void RetargetIfDead_Player()
     {
         int slot = currentUnit.LastTargetSlot;
@@ -194,45 +209,17 @@ public class BattleManager : MonoBehaviour
         int newSlot = StepToNextAliveEnemy(slot, +1);
         currentUnit.LastTargetSlot = newSlot;
 
-        var newTarget = enemyParty.GetMemberBySlot(newSlot);
-        if (newTarget != null)
-            Debug.Log($"[RETARGET PLAYER] {currentUnit.entityName} -> {newTarget.entityName} (slot {newSlot})");
-    }
-
-    // ================= ENEMY =================
-    private void EnemyAutoAttack()
-    {
-        if (!currentUnit.IsAlive) return;
-
-        var target = RetargetEnemyTarget();
-        if (target == null) return;
-
-        Debug.Log($"[ENEMY ATTACK] {currentUnit.entityName} -> {target.entityName}");
-        target.TakeDamage(currentUnit, currentUnit.Atk);
-    }
-
-    // 🔥 ENEMY RETARGET MỖI LƯỢT
-    private PlayerStatus RetargetEnemyTarget()
-    {
-        for (int i = 0; i < playerParty.Members.Count; i++)
-        {
-            var p = playerParty.GetMemberBySlot(i) as PlayerStatus;
-            if (p != null && p.IsAlive)
-                return p;
-        }
-        return null;
+        var t = enemyParty.GetMemberBySlot(newSlot);
+        if (t != null)
+            Debug.Log($"[RETARGET PLAYER] -> {t.entityName}");
     }
 
     // ================= DEBUG =================
     private void DebugLogCurrentTarget()
     {
-        int slot = currentUnit.LastTargetSlot;
-        var t = enemyParty.GetMemberBySlot(slot);
-
+        var t = enemyParty.GetMemberBySlot(currentUnit.LastTargetSlot);
         if (t != null)
-            Debug.Log($"[CURRENT TARGET] {currentUnit.entityName} -> slot {slot}: {t.entityName}");
-        else
-            Debug.Log($"[CURRENT TARGET] {currentUnit.entityName} has no valid target");
+            Debug.Log($"[CURRENT TARGET] {currentUnit.entityName} -> {t.entityName}");
     }
 
     private void LogBattleState()
