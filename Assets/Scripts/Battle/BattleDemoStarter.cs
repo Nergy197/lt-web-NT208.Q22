@@ -54,14 +54,6 @@ public class BattleDemoStarter : MonoBehaviour
             enemyParty.AddMember(data.CreateStatus());
         }
 
-        // ================= DEMO: FORCE KILL 1 PLAYER =================
-        if (killFirstPlayerAtStart && playerParty.Members.Count > 0)
-        {
-            var first = playerParty.Members[0];
-            first.TakeDamage(null, first.MaxHP);
-            Debug.Log($"[DEMO] {first.entityName} is killed BEFORE battle start");
-        }
-
         // ================= INIT BATTLE =================
         Debug.Log("=====================================");
         Debug.Log(" DEMO BATTLE START ");
@@ -78,28 +70,4 @@ public class BattleDemoStarter : MonoBehaviour
         battle.InitBattle(playerParty, enemyParty, 1);
     }
 
-    private void Update()
-    {
-        if (battle == null) return;
-
-        // Only allow input on PlayerTurn
-        if (battle.State != BattleState.PlayerTurn)
-            return;
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("[INPUT] SPACE -> Attack");
-            battle.SelectBasicAttack();
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            battle.ChangeTargetInput(-1);
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            battle.ChangeTargetInput(1);
-        }
-    }
 }

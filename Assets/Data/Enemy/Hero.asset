@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3bf434e84c27ce44a89a55ef58b8975, type: 3}
-  m_Name: Slime
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  entityName: Slime
-  baseHP: 20
-  baseAtk: 6
-  baseDef: 1
-  baseSpd: 2
+  m_Script: {fileID: 11500000, guid: 177d1af869d55ee43a9784d24786a902, type: 3}
+  m_Name: Hero
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerData
+  entityName: New Player
+  baseHP: 30
+  baseAtk: 8
+  baseDef: 2
+  baseSpd: 4
+  maxAP: 100

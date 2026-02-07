@@ -1,78 +1,37 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class BattleInputController : MonoBehaviour
 {
-    private CombatInputActions input;
     private BattleManager battle;
 
-    private void OnEnable()
+    private void Awake()
     {
         battle = GetComponent<BattleManager>();
         if (battle == null)
         {
-            Debug.LogError("[ERROR] BattleInputController: Missing BattleManager");
+            Debug.LogError("Missing BattleManager");
             enabled = false;
+        }
+    }
+
+    private void Update()
+    {
+        if (!battle.CanAcceptInput)
             return;
+
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+        {
+            battle.SelectBasicAttack();
         }
 
-        // INIT INPUT HERE (NOT IN AWAKE)
-        input = new CombatInputActions();
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            battle.ChangeTargetInput(+1);
+        }
 
-        // ENABLE CORRECT ACTION MAP
-        input.Battle.Enable();
-
-        // REGISTER CALLBACKS
-        input.Battle.BasicAttack.performed += OnBasicAttack;
-        //input.Battle.OpenSkillMenu.performed += OnOpenSkillMenu;
-        //input.Battle.OpenItemMenu.performed += OnOpenItemMenu;
-        //input.Battle.Confirm.performed += OnConfirm;
-        //input.Battle.Cancel.performed += OnCancel;
-        input.Battle.NextTarget.performed += OnNextTarget;
-        input.Battle.PrevTarget.performed += OnPrevTarget;
-        //input.Battle.Parry.performed += OnParry;
-
-        Debug.Log("[OK] BattleInputController ENABLED");
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            battle.ChangeTargetInput(-1);
+        }
     }
-
-    private void OnDisable()
-    {
-        if (input == null) return;
-
-        input.Battle.BasicAttack.performed -= OnBasicAttack;
-        //input.Battle.OpenSkillMenu.performed -= OnOpenSkillMenu;
-        //input.Battle.OpenItemMenu.performed -= OnOpenItemMenu;
-        //input.Battle.Confirm.performed -= OnConfirm;
-        //input.Battle.Cancel.performed -= OnCancel;
-        input.Battle.NextTarget.performed -= OnNextTarget;
-        input.Battle.PrevTarget.performed -= OnPrevTarget;
-        //input.Battle.Parry.performed -= OnParry;
-
-        input.Battle.Disable();
-        input.Dispose();
-        input = null;
-
-        Debug.Log("[STOP] BattleInputController DISABLED");
-    }
-
-    // INPUT CALLBACKS
-
-    private void OnBasicAttack(InputAction.CallbackContext ctx)
-    {
-        Debug.Log("Input: BasicAttack");
-        battle.SelectBasicAttack();
-    }
-
-    private void OnNextTarget(InputAction.CallbackContext ctx)
-    {
-        Debug.Log("Input: NextTarget");
-        battle.ChangeTargetInput(1);
-    }
-
-    private void OnPrevTarget(InputAction.CallbackContext ctx)
-    {
-        Debug.Log("Input: PrevTarget");
-        battle.ChangeTargetInput(-1);
-    }
-
 }

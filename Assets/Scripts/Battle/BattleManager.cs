@@ -11,196 +11,230 @@ public class BattleManager : MonoBehaviour
     private Party playerParty;
     private Party enemyParty;
 
-    private Queue<Status> turnOrder = new Queue<Status>();
+    // ===== SPEED BASED TURN =====
+    private List<Status> turnVector = new List<Status>();
+    private const float BASE_DELAY = 100f;
+
+    // ===== CURRENT TURN =====
     private Status currentUnit;
 
-    private int targetIndex = 0;
+    // ===== FLOW CONTROL =====
+    private bool isRunning = false;
+    private bool waitingForPlayerAction = false;
 
-    // Turn flow control
-    private bool isRunning = false;                 // prevent multiple coroutines
-    private bool waitingForPlayerAction = false;    // when true, coroutine waits for player's input
+    // ===== INPUT GATE =====
+    public bool CanAcceptInput =>
+        State == BattleState.PlayerTurn && waitingForPlayerAction;
 
     // ================= INIT =================
     public void InitBattle(Party player, Party enemy, int mapLevel)
     {
-        // Safety: prevent double initialization while battle is running
-        if (isRunning)
-        {
-            Debug.LogWarning("[WARNING] InitBattle called while battle is running. Ignoring.");
-            return;
-        }
-
         playerParty = player;
         enemyParty = enemy;
 
         foreach (var e in enemyParty.Members.OfType<EnemyStatus>())
             e.SetLevel(mapLevel);
 
-        // build turn order using TurnManager (sorted by speed, not insertion order)
-        var turnManager = new TurnManager();
-        turnOrder = turnManager.BuildTurnOrder(playerParty, enemyParty);
+        BuildTurnVector();
+
+        foreach (var u in playerParty.Members.Concat(enemyParty.Members))
+        {
+            u.ResetForBattle(BASE_DELAY);
+            u.LastTargetSlot = 0;
+        }
 
         State = BattleState.Start;
         turnCount = 0;
         currentUnit = null;
-        targetIndex = 0;
 
         Debug.Log("=== BATTLE START ===");
-        Debug.Log($"Turn Order ({turnOrder.Count} units):");
-        foreach (var u in turnOrder)
-            Debug.Log($"  {u.entityName} (SPD: {u.Spd}, HP: {u.MaxHP})");
 
-        // start the main loop (only one coroutine will run)
         if (!isRunning)
             StartCoroutine(BattleLoop());
     }
 
-    // ================= MAIN LOOP (Coroutine) =================
+    private void BuildTurnVector()
+    {
+        turnVector.Clear();
+        turnVector.AddRange(playerParty.Members);
+        turnVector.AddRange(enemyParty.Members);
+    }
+
+    // ================= SPEED CORE =================
+    private Status GetNextUnit()
+    {
+        turnVector.Sort((a, b) => a.NextTurnTime.CompareTo(b.NextTurnTime));
+
+        foreach (var u in turnVector)
+        {
+            if (!u.IsAlive)
+            {
+                u.NextTurnTime += BASE_DELAY * 1000;
+                continue;
+            }
+
+            u.NextTurnTime += BASE_DELAY / Mathf.Max(1, u.Spd);
+            return u;
+        }
+        return null;
+    }
+
+    // ================= MAIN LOOP =================
     private IEnumerator BattleLoop()
     {
         isRunning = true;
 
-        // Main loop: chạy cho tới khi CheckEndBattle() trả true
         while (!CheckEndBattle())
         {
-            // Remove dead units from turn order (prevents resurrection bug)
-            while (turnOrder.Count > 0 && !turnOrder.Peek().IsAlive)
-            {
-                var deadUnit = turnOrder.Dequeue();
-                Debug.Log($"[CLEANUP] Removing dead {deadUnit.entityName} from turn order");
-            }
+            currentUnit = GetNextUnit();
+            if (currentUnit == null) break;
 
-            // find next alive unit in queue
-            if (turnOrder.Count == 0)
-            {
-                Debug.LogWarning("Turn order is empty. Rechecking end conditions...");
-                if (playerParty.IsDefeated() || enemyParty.IsDefeated())
-                    break;
-                else
-                {
-                    Debug.LogWarning("Neither party is defeated but no alive unit found — aborting loop.");
-                    break;
-                }
-            }
-
-            Status next = turnOrder.Dequeue();
-            turnOrder.Enqueue(next);  // Move to back of queue for round-robin
-
-            if (next == null || !next.IsAlive)
-            {
-                Debug.LogError("CRITICAL: Unit in queue is null or dead. Turn order is corrupted.");
-                break;
-            }
-
-            currentUnit = next;
             turnCount++;
 
-            State = currentUnit is PlayerStatus ? BattleState.PlayerTurn : BattleState.EnemyTurn;
+            State = currentUnit.PartyType == PartyType.Player
+                ? BattleState.PlayerTurn
+                : BattleState.EnemyTurn;
 
             Debug.Log($"================ TURN {turnCount} ================");
-            Debug.Log($"--> {currentUnit.entityName} TURN ({State})");
+            Debug.Log($"TURN UNIT: {currentUnit.entityName} (SPD={currentUnit.Spd})");
 
             LogBattleState();
 
-            // PLAYER TURN: wait for player input
             if (State == BattleState.PlayerTurn)
             {
-                waitingForPlayerAction = true;
+                // 🔥 PLAYER RETARGET TRƯỚC KHI INPUT
+                RetargetIfDead_Player();
+                DebugLogCurrentTarget();
 
-                // Wait until player finishes action OR battle ends
+                waitingForPlayerAction = true;
                 yield return new WaitUntil(() => !waitingForPlayerAction || CheckEndBattle());
             }
-            else // ENEMY TURN: auto-act immediately
+            else
             {
                 EnemyAutoAttack();
                 yield return null;
             }
 
-            // allow one frame to update UI / systems before next turn
             yield return null;
         }
 
-        // finished battle
         isRunning = false;
-        Debug.Log("Battle loop ended.");
+        Debug.Log("=== BATTLE END ===");
     }
 
     // ================= PLAYER =================
     public void SelectBasicAttack()
     {
-        // Only allow when it's player's turn and currentUnit is the player
-        if (State != BattleState.PlayerTurn) return;
-        if (!(currentUnit is PlayerStatus)) return;
-        if (!currentUnit.IsAlive) // safety: if player died while waiting
-        {
-            waitingForPlayerAction = false; // resume loop (it will skip)
-            return;
-        }
+        if (!CanAcceptInput) return;
 
-        var target = GetCurrentTargetEnemy();
+        var target = GetEnemyBySlot(currentUnit.LastTargetSlot);
         if (target == null)
         {
-            Debug.Log("No valid target to attack.");
+            Debug.Log("[ATTACK] No valid target");
             waitingForPlayerAction = false;
             return;
         }
 
-        Debug.Log($"PLAYER {currentUnit.entityName} attacks {target.entityName}");
+        Debug.Log($"[PLAYER ATTACK] {currentUnit.entityName} -> {target.entityName} (slot {currentUnit.LastTargetSlot})");
         target.TakeDamage(currentUnit, currentUnit.Atk);
 
-        // After doing the action, clear waiting flag so coroutine continues to next turn
+        // 🔥 RETARGET SAU KHI ĐÁNH
+        RetargetIfDead_Player();
+
         waitingForPlayerAction = false;
     }
 
     public void ChangeTargetInput(int dir)
     {
-        if (State != BattleState.PlayerTurn) return;
+        if (!CanAcceptInput) return;
 
-        var enemies = enemyParty.Members.Where(e => e.IsAlive).ToList();
-        if (enemies.Count == 0)
-        {
-            targetIndex = 0;
-            return;
-        }
+        int oldSlot = currentUnit.LastTargetSlot;
+        int newSlot = StepToNextAliveEnemy(oldSlot, dir);
+        currentUnit.LastTargetSlot = newSlot;
 
-        // ensure targetIndex valid and stable across deaths
-        targetIndex = (targetIndex + dir) % enemies.Count;
-        if (targetIndex < 0) targetIndex += enemies.Count;
-
-        Debug.Log($"Target -> {enemies[targetIndex].entityName}");
+        var t = enemyParty.GetMemberBySlot(newSlot);
+        if (t != null)
+            Debug.Log($"[TARGET CHANGE] {currentUnit.entityName}: {oldSlot} -> {newSlot} ({t.entityName})");
     }
 
-    private EnemyStatus GetCurrentTargetEnemy()
+    // ================= TARGET CORE =================
+    private int StepToNextAliveEnemy(int start, int dir)
     {
-        var enemies = enemyParty.Members.Where(e => e.IsAlive).ToList();
-        if (enemies.Count == 0) return null;
+        int count = enemyParty.Members.Count;
+        int index = start;
 
-        // clamp targetIndex to current list
-        targetIndex = Mathf.Clamp(targetIndex, 0, enemies.Count - 1);
-        return enemies[targetIndex] as EnemyStatus;
+        for (int i = 0; i < count; i++)
+        {
+            index = (index + dir + count) % count;
+            var e = enemyParty.GetMemberBySlot(index) as EnemyStatus;
+            if (e != null && e.IsAlive)
+                return index;
+        }
+        return start;
+    }
+
+    private EnemyStatus GetEnemyBySlot(int slot)
+    {
+        var e = enemyParty.GetMemberBySlot(slot) as EnemyStatus;
+        if (e != null && e.IsAlive)
+            return e;
+
+        return null; // ❗ KHÔNG fallback
+    }
+
+    // ================= PLAYER RETARGET =================
+    private void RetargetIfDead_Player()
+    {
+        int slot = currentUnit.LastTargetSlot;
+        var target = enemyParty.GetMemberBySlot(slot) as EnemyStatus;
+
+        if (target != null && target.IsAlive)
+            return;
+
+        int newSlot = StepToNextAliveEnemy(slot, +1);
+        currentUnit.LastTargetSlot = newSlot;
+
+        var newTarget = enemyParty.GetMemberBySlot(newSlot);
+        if (newTarget != null)
+            Debug.Log($"[RETARGET PLAYER] {currentUnit.entityName} -> {newTarget.entityName} (slot {newSlot})");
     }
 
     // ================= ENEMY =================
     private void EnemyAutoAttack()
     {
-        // ensure enemy still alive
-        if (currentUnit == null || !currentUnit.IsAlive)
-        {
-            Debug.Log("EnemyAutoAttack called but currentUnit is null or dead.");
-            return;
-        }
+        if (!currentUnit.IsAlive) return;
 
-        var target = playerParty.Members
-            .OfType<PlayerStatus>()
-            .FirstOrDefault(p => p.IsAlive);
-
+        var target = RetargetEnemyTarget();
         if (target == null) return;
 
-        Debug.Log($"ENEMY {currentUnit.entityName} attacks {target.entityName}");
+        Debug.Log($"[ENEMY ATTACK] {currentUnit.entityName} -> {target.entityName}");
         target.TakeDamage(currentUnit, currentUnit.Atk);
     }
 
-    // ================= LOG =================
+    // 🔥 ENEMY RETARGET MỖI LƯỢT
+    private PlayerStatus RetargetEnemyTarget()
+    {
+        for (int i = 0; i < playerParty.Members.Count; i++)
+        {
+            var p = playerParty.GetMemberBySlot(i) as PlayerStatus;
+            if (p != null && p.IsAlive)
+                return p;
+        }
+        return null;
+    }
+
+    // ================= DEBUG =================
+    private void DebugLogCurrentTarget()
+    {
+        int slot = currentUnit.LastTargetSlot;
+        var t = enemyParty.GetMemberBySlot(slot);
+
+        if (t != null)
+            Debug.Log($"[CURRENT TARGET] {currentUnit.entityName} -> slot {slot}: {t.entityName}");
+        else
+            Debug.Log($"[CURRENT TARGET] {currentUnit.entityName} has no valid target");
+    }
+
     private void LogBattleState()
     {
         foreach (var p in playerParty.Members.OfType<PlayerStatus>())
@@ -213,9 +247,6 @@ public class BattleManager : MonoBehaviour
     // ================= END =================
     private bool CheckEndBattle()
     {
-        if (enemyParty == null || playerParty == null)
-            return true;
-
         if (enemyParty.IsDefeated())
         {
             State = BattleState.Win;

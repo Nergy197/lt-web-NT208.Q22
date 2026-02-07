@@ -16,5 +16,5 @@ MonoBehaviour:
   baseHP: 999
   baseAtk: 999
   baseDef: 999
-  baseSpd: 999
+  baseSpd: 7
   maxAP: 999
