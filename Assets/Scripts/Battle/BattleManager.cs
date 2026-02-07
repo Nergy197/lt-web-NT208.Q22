@@ -23,16 +23,22 @@ public class BattleManager : MonoBehaviour
     // ================= INIT =================
     public void InitBattle(Party player, Party enemy, int mapLevel)
     {
+        // Safety: prevent double initialization while battle is running
+        if (isRunning)
+        {
+            Debug.LogWarning("[WARNING] InitBattle called while battle is running. Ignoring.");
+            return;
+        }
+
         playerParty = player;
         enemyParty = enemy;
 
         foreach (var e in enemyParty.Members.OfType<EnemyStatus>())
             e.SetLevel(mapLevel);
 
-        // build turn order (simple: theo thứ tự add)
-        turnOrder.Clear();
-        foreach (var s in playerParty.Members.Concat(enemyParty.Members))
-            turnOrder.Enqueue(s);
+        // build turn order using TurnManager (sorted by speed, not insertion order)
+        var turnManager = new TurnManager();
+        turnOrder = turnManager.BuildTurnOrder(playerParty, enemyParty);
 
         State = BattleState.Start;
         turnCount = 0;
@@ -40,6 +46,9 @@ public class BattleManager : MonoBehaviour
         targetIndex = 0;
 
         Debug.Log("=== BATTLE START ===");
+        Debug.Log($"Turn Order ({turnOrder.Count} units):");
+        foreach (var u in turnOrder)
+            Debug.Log($"  {u.entityName} (SPD: {u.Spd}, HP: {u.MaxHP})");
 
         // start the main loop (only one coroutine will run)
         if (!isRunning)
@@ -54,31 +63,17 @@ public class BattleManager : MonoBehaviour
         // Main loop: chạy cho tới khi CheckEndBattle() trả true
         while (!CheckEndBattle())
         {
-            // find next alive unit in queue with safety
+            // Remove dead units from turn order (prevents resurrection bug)
+            while (turnOrder.Count > 0 && !turnOrder.Peek().IsAlive)
+            {
+                var deadUnit = turnOrder.Dequeue();
+                Debug.Log($"[CLEANUP] Removing dead {deadUnit.entityName} from turn order");
+            }
+
+            // find next alive unit in queue
             if (turnOrder.Count == 0)
             {
-                Debug.LogWarning("Turn order is empty. Exiting battle loop.");
-                break;
-            }
-
-            int safety = Mathf.Max(1, turnOrder.Count); // an toàn: chỉ thử tối đa Count lần
-            Status next = null;
-            for (int i = 0; i < safety; i++)
-            {
-                var s = turnOrder.Dequeue();
-                turnOrder.Enqueue(s);
-                if (s.IsAlive)
-                {
-                    next = s;
-                    break;
-                }
-            }
-
-            if (next == null)
-            {
-                // không tìm thấy unit sống trong 1 vòng queue
-                Debug.LogWarning("No alive unit found in turn order. Rechecking end conditions...");
-                // nếu party thực sự không defeated, break to avoid infinite loop
+                Debug.LogWarning("Turn order is empty. Rechecking end conditions...");
                 if (playerParty.IsDefeated() || enemyParty.IsDefeated())
                     break;
                 else
@@ -86,6 +81,15 @@ public class BattleManager : MonoBehaviour
                     Debug.LogWarning("Neither party is defeated but no alive unit found — aborting loop.");
                     break;
                 }
+            }
+
+            Status next = turnOrder.Dequeue();
+            turnOrder.Enqueue(next);  // Move to back of queue for round-robin
+
+            if (next == null || !next.IsAlive)
+            {
+                Debug.LogError("CRITICAL: Unit in queue is null or dead. Turn order is corrupted.");
+                break;
             }
 
             currentUnit = next;
@@ -98,38 +102,17 @@ public class BattleManager : MonoBehaviour
 
             LogBattleState();
 
-            // PLAYER TURN: wait for player input (SelectBasicAttack, skills, items...).
+            // PLAYER TURN: wait for player input
             if (State == BattleState.PlayerTurn)
             {
-                // If the current unit is not alive for some reason (rare), skip
-                if (!currentUnit.IsAlive)
-                {
-                    Debug.Log($"Skipping dead player {currentUnit.entityName}");
-                    yield return null;
-                    continue;
-                }
-
-                // set flag and wait until player acts
                 waitingForPlayerAction = true;
 
                 // Wait until player finishes action OR battle ends
                 yield return new WaitUntil(() => !waitingForPlayerAction || CheckEndBattle());
-
-                // after player action returns control here
-                // loop continues to next turn
             }
             else // ENEMY TURN: auto-act immediately
             {
-                // double-check enemy alive
-                if (!currentUnit.IsAlive)
-                {
-                    Debug.Log($"Skipping dead enemy {currentUnit.entityName}");
-                    yield return null;
-                    continue;
-                }
-
-                EnemyAutoAttack(); // does damage synchronously
-                // small frame delay so logs are readable and other systems update
+                EnemyAutoAttack();
                 yield return null;
             }
 

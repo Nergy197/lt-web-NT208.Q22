@@ -48,8 +48,14 @@ public abstract class Status
 
     public virtual void SetLevel(int targetLevel)
     {
+        if (targetLevel < 1) return;  // Safety: level must be >= 1
+        
+        // Only update if level actually changes, prevent resurrection on duplicate calls
+        if (this.level == targetLevel) return;
+        
         this.level = targetLevel;
-        HealFull(); 
+        HealFull();
+        Debug.Log($"{entityName} set to level {level}, HP restored to {MaxHP}");
     }
 
     public void TakeDamage(Status attacker, int rawDamage)
