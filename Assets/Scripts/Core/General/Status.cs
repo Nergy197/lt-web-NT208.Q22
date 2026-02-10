@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 using System;
 
 [System.Serializable]
@@ -112,6 +113,128 @@ public abstract class Status
     {
         Debug.Log($"{entityName} died");
         OnDeath?.Invoke(this);
+    }
+
+    // ================= STATUS EFFECT =================
+
+    private readonly List<StatusEffect> activeEffects = new List<StatusEffect>();
+
+    public virtual void ApplyStatusEffect(StatusEffect effect)
+    {
+        if (effect == null) return;
+
+        activeEffects.Add(effect);
+
+        switch (effect.effectType)
+        {
+            case StatusEffectType.BuffHeal:
+                Heal(effect.value);
+                break;
+
+            case StatusEffectType.BuffAtk:
+                baseAtk += effect.value;
+                break;
+
+            case StatusEffectType.BuffDef:
+                baseDef += effect.value;
+                break;
+
+            case StatusEffectType.BuffSpd:
+                baseSpd += effect.value;
+                break;
+
+            case StatusEffectType.DebuffAtk:
+                baseAtk -= effect.value;
+                break;
+
+            case StatusEffectType.DebuffDef:
+                baseDef -= effect.value;
+                break;
+
+            case StatusEffectType.DebuffSpd:
+                baseSpd -= effect.value;
+                break;
+
+            case StatusEffectType.Poison:
+                // xử lý theo turn trong BattleManager
+                break;
+
+            case StatusEffectType.Stun:
+                // xử lý skip turn trong BattleManager
+                break;
+        }
+
+        Debug.Log($"[EFFECT] {entityName} gained {effect.effectName}");
+    }
+
+    public void UpdateEffectDurations()
+    {
+        // Decrease duration for all active effects
+        foreach (var effect in activeEffects)
+        {
+            if (effect.duration > 0) // Only decrease positive durations (-1 is permanent)
+                effect.duration--;
+        }
+
+        // Remove expired effects and undo their stat changes
+        RemoveExpiredEffects();
+    }
+
+    private void RemoveExpiredEffects()
+    {
+        List<StatusEffect> toRemove = new List<StatusEffect>();
+
+        foreach (var effect in activeEffects)
+        {
+            if (effect.duration <= 0)
+            {
+                toRemove.Add(effect);
+                UndoStatusEffect(effect);
+            }
+        }
+
+        foreach (var effect in toRemove)
+        {
+            activeEffects.Remove(effect);
+            Debug.Log($"[EFFECT EXPIRED] {entityName} lost {effect.effectName}");
+        }
+    }
+
+    private void UndoStatusEffect(StatusEffect effect)
+    {
+        switch (effect.effectType)
+        {
+            case StatusEffectType.BuffAtk:
+                baseAtk -= effect.value;
+                break;
+
+            case StatusEffectType.BuffDef:
+                baseDef -= effect.value;
+                break;
+
+            case StatusEffectType.BuffSpd:
+                baseSpd -= effect.value;
+                break;
+
+            case StatusEffectType.DebuffAtk:
+                baseAtk += effect.value;
+                break;
+
+            case StatusEffectType.DebuffDef:
+                baseDef += effect.value;
+                break;
+
+            case StatusEffectType.DebuffSpd:
+                baseSpd += effect.value;
+                break;
+
+            case StatusEffectType.Poison:
+            case StatusEffectType.Stun:
+            case StatusEffectType.BuffHeal:
+                // BuffHeal is immediate, no undo needed
+                // Poison and Stun handled by BattleManager
+                break;
+        }
     }
 
     // ================= HEAL / REVIVE =================

@@ -115,6 +115,12 @@ public class BattleManager : MonoBehaviour
                 yield return null;
             }
 
+            // 🔥 UPDATE EFFECT DURATIONS AFTER EACH UNIT'S TURN
+            if (currentUnit != null && currentUnit.IsAlive)
+            {
+                currentUnit.UpdateEffectDurations();
+            }
+
             yield return null;
         }
 
