@@ -148,9 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c63865183adfc94ba6a2f2a26c4cfa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDataManager
-  enemyData: {fileID: 11400000, guid: 7441073512e29be4c880f157c2a5b94c, type: 2}
+  enemyData: {fileID: 11400000, guid: 1c9b81a5094f54c36a1ed220c1757eba, type: 2}
   enemyAttackDataList:
-  - {fileID: 11400000, guid: 1d6cd9324089a03419674e020ce4240f, type: 2}
+  - {fileID: 11400000, guid: 9427e603b69a6475ab5c507d55bfac68, type: 2}
 --- !u!4 &348067847
 Transform:
   m_ObjectHideFlags: 0
@@ -195,9 +195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c63865183adfc94ba6a2f2a26c4cfa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDataManager
-  enemyData: {fileID: 11400000, guid: 2f1931bc07ac34a9da857d3ade4a2b13, type: 2}
+  enemyData: {fileID: 11400000, guid: 24105cc1d43134320b355a0e2e74ce31, type: 2}
   enemyAttackDataList:
-  - {fileID: 11400000, guid: 1d6cd9324089a03419674e020ce4240f, type: 2}
+  - {fileID: 11400000, guid: 9427e603b69a6475ab5c507d55bfac68, type: 2}
 --- !u!4 &1810221760
 Transform:
   m_ObjectHideFlags: 0
@@ -316,7 +316,8 @@ GameObject:
   - component: {fileID: 1998994222}
   - component: {fileID: 1998994221}
   - component: {fileID: 1998994224}
-  - component: {fileID: 1998994223}
+  - component: {fileID: 1998994225}
+  - component: {fileID: 1998994226}
   m_Layer: 0
   m_Name: Battle System
   m_TagString: Untagged
@@ -351,18 +352,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1998994223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1998994220}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34433ad9796091d4198387f1b9854ed3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BattleInputController
 --- !u!114 &1998994224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375,8 +364,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d62495d6e6204948bd2acc2ba3042fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleDemoStarter
-  killFirstPlayerAtStart: 1
+  killFirstPlayerAtStart: 0
   showInputHint: 1
+--- !u!114 &1998994225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998994220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea1ab8b046d7743a2a095cddc90e68f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputController
+--- !u!114 &1998994226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998994220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1169ca71630bab4a8d277c1cef66675, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleRunner
 --- !u!1 &2096348640
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,9 +419,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30844e1fa8bbe384c9d301e66374c105, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDataManager
-  playerData: {fileID: 11400000, guid: ce1e09481750940eb9a8124920a2289a, type: 2}
+  playerData: {fileID: 11400000, guid: 83b89b61d55074fa8ad6b27400866970, type: 2}
   playerAttackDataList:
-  - {fileID: 11400000, guid: 065ae526922556f4b9112e9a0e6c087a, type: 2}
+  - {fileID: 11400000, guid: 1a7ac849509a149c0960bbb0789e4494, type: 2}
+  - {fileID: 11400000, guid: 92a59899ef2a741a1be760414b12ad8f, type: 2}
+  - {fileID: 11400000, guid: ed83b083a95cc492497b11806644dc6d, type: 2}
 --- !u!4 &2096348642
 Transform:
   m_ObjectHideFlags: 0
@@ -453,12 +468,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30844e1fa8bbe384c9d301e66374c105, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDataManager
-  playerData: {fileID: 11400000, guid: 13100439be6c9674e87c8e36e03dfce1, type: 2}
+  playerData: {fileID: 11400000, guid: b9c401194e8dd4105bee390ab30974f0, type: 2}
   playerAttackDataList:
-  - {fileID: 11400000, guid: 065ae526922556f4b9112e9a0e6c087a, type: 2}
-  - {fileID: 11400000, guid: 8d507bd5750c8974f8265e20de0459fe, type: 2}
-  - {fileID: 11400000, guid: 85ee5b0a3ca992a49bfbd8b74dfffaad, type: 2}
-  - {fileID: 11400000, guid: f28ea206a0cae954196f74a8f0396198, type: 2}
+  - {fileID: 11400000, guid: 1a7ac849509a149c0960bbb0789e4494, type: 2}
+  - {fileID: 11400000, guid: 92a59899ef2a741a1be760414b12ad8f, type: 2}
+  - {fileID: 11400000, guid: ed83b083a95cc492497b11806644dc6d, type: 2}
 --- !u!4 &2117477844
 Transform:
   m_ObjectHideFlags: 0

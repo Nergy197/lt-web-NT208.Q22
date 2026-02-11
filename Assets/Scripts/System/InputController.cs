@@ -21,7 +21,9 @@ public class InputController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         Input = new GameInput();
+
         BindBattleInput();
+        BindSkillMenuInput();
 
         SetMode(InputMode.Map);
     }
@@ -33,22 +35,34 @@ public class InputController : MonoBehaviour
 
         Input.Map.Disable();
         Input.Battle.Disable();
+        Input.SkillMenu.Disable();
 
-        if (mode == InputMode.Map)
-            Input.Map.Enable();
-        else
-            Input.Battle.Enable();
+        switch (mode)
+        {
+            case InputMode.Map:
+                Input.Map.Enable();
+                break;
+
+            case InputMode.Battle:
+                Input.Battle.Enable();
+                break;
+
+            case InputMode.BattleSkillMenu:
+                Input.SkillMenu.Enable();
+                break;
+        }
 
         Debug.Log($"[INPUT MODE] {mode}");
     }
 
-    // ================= BIND BATTLE =================
+    // ================= BATTLE INPUT =================
     private void BindBattleInput()
     {
         // BASIC ATTACK (E)
         Input.Battle.BasicAttack.performed += _ =>
         {
             if (!CanBattleInput()) return;
+            Debug.Log("[INPUT] Basic Attack");
             battle.SelectBasicAttack();
         };
 
@@ -56,34 +70,8 @@ public class InputController : MonoBehaviour
         Input.Battle.OpenSkillMenu.performed += _ =>
         {
             if (!CanBattleInput()) return;
-            Mode = InputMode.BattleSkillMenu;
-            Debug.Log("[BATTLE] Open Skill Menu");
-        };
-
-        // SKILL 1 (Q)
-        Input.Battle.Skill1.performed += _ =>
-        {
-            if (Mode != InputMode.BattleSkillMenu) return;
-            battle.UseSkill(0);
-            SetMode(InputMode.Battle);
-        };
-
-        // SKILL 2 (W)
-        Input.Battle.Skill2.performed += _ =>
-        {
-            if (Mode != InputMode.BattleSkillMenu) return;
-            battle.UseSkill(1);
-            SetMode(InputMode.Battle);
-        };
-
-        // CANCEL (E)
-        Input.Battle.Cancel.performed += _ =>
-        {
-            if (Mode == InputMode.BattleSkillMenu)
-            {
-                SetMode(InputMode.Battle);
-                Debug.Log("[BATTLE] Close Skill Menu");
-            }
+            Debug.Log("[INPUT] Open Skill Menu");
+            SetMode(InputMode.BattleSkillMenu);
         };
 
         // TARGET
@@ -97,6 +85,36 @@ public class InputController : MonoBehaviour
         {
             if (!CanBattleInput()) return;
             battle.ChangeTargetInput(-1);
+        };
+    }
+
+    // ================= SKILL MENU INPUT =================
+    private void BindSkillMenuInput()
+    {
+        // SKILL 1 (E)
+        Input.SkillMenu.Skill1.performed += _ =>
+        {
+            if (Mode != InputMode.BattleSkillMenu) return;
+            Debug.Log("[SKILL MENU] Skill 1");
+            battle.UseSkill(0);
+            SetMode(InputMode.Battle);
+        };
+
+        // SKILL 2 (W)
+        Input.SkillMenu.Skill2.performed += _ =>
+        {
+            if (Mode != InputMode.BattleSkillMenu) return;
+            Debug.Log("[SKILL MENU] Skill 2");
+            battle.UseSkill(1);
+            SetMode(InputMode.Battle);
+        };
+
+        // CANCEL (ESC)
+        Input.SkillMenu.Cancel.performed += _ =>
+        {
+            if (Mode != InputMode.BattleSkillMenu) return;
+            Debug.Log("[SKILL MENU] Cancel");
+            SetMode(InputMode.Battle);
         };
     }
 

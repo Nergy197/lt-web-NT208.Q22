@@ -1,46 +1,41 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Quản lý liên kết giữa EnemyData và EnemyAttackData trên cùng một GameObject
-/// </summary>
 public class EnemyDataManager : MonoBehaviour
 {
+    [Header("Base Data")]
     [SerializeField] private EnemyData enemyData;
-    [SerializeField] private List<EnemyAttackData> enemyAttackDataList = new List<EnemyAttackData>();
 
-    public EnemyData GetEnemyData() => enemyData;
-    
-    public List<EnemyAttackData> GetEnemyAttackDataList() => enemyAttackDataList;
-    
-    public void SetEnemyData(EnemyData data)
-    {
-        enemyData = data;
-    }
-    
-    public void AddAttackData(EnemyAttackData attackData)
-    {
-        if (!enemyAttackDataList.Contains(attackData))
-        {
-            enemyAttackDataList.Add(attackData);
-        }
-    }
-    
-    public void RemoveAttackData(EnemyAttackData attackData)
-    {
-        enemyAttackDataList.Remove(attackData);
-    }
+    [Header("Attack Data")]
+    [SerializeField] private List<EnemyAttackData> enemyAttackDataList = new();
 
-    private void OnValidate()
+    // ================= CREATE STATUS =================
+    public EnemyStatus CreateStatus()
     {
-        // Kiểm tra trong Editor để đảm bảo có dữ liệu
         if (enemyData == null)
         {
-            Debug.LogWarning($"GameObject '{gameObject.name}' chưa có EnemyData được gán!", gameObject);
+            Debug.LogError($"[EnemyDataManager] {name} missing EnemyData", gameObject);
+            return null;
         }
-        if (enemyAttackDataList.Count == 0)
+
+        var status = enemyData.CreateStatus();
+
+        foreach (var atk in enemyAttackDataList)
         {
-            Debug.LogWarning($"GameObject '{gameObject.name}' chưa có EnemyAttackData nào!", gameObject);
+            status.AddAttack(atk);
         }
+
+        return status;
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (enemyData == null)
+            Debug.LogWarning($"[{name}] EnemyData not assigned", gameObject);
+
+        if (enemyAttackDataList.Count == 0)
+            Debug.LogWarning($"[{name}] No EnemyAttackData assigned", gameObject);
+    }
+#endif
 }

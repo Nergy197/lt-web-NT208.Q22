@@ -1,83 +1,69 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Quản lý liên kết giữa PlayerData và PlayerAttackData trên cùng một GameObject
-/// </summary>
 public class PlayerDataManager : MonoBehaviour
 {
+    [Header("Base Data")]
     [SerializeField] private PlayerData playerData;
-    [SerializeField] private List<PlayerAttackData> playerAttackDataList = new List<PlayerAttackData>();
-    
-    private PlayerAttackData basicAttack; // Skill tốn 0 AP (tự động nhận diện)
 
-    public PlayerData GetPlayerData() => playerData;
-    
-    public List<PlayerAttackData> GetPlayerAttackDataList() => playerAttackDataList;
-    
-    public PlayerAttackData GetBasicAttack() => basicAttack;
-    
-    public void SetPlayerData(PlayerData data)
+    [Header("Attack Data")]
+    [SerializeField] private List<PlayerAttackData> playerAttackDataList = new();
+
+    private PlayerAttackData basicAttack;
+
+    // ================= CREATE RUNTIME STATUS =================
+    public PlayerStatus CreateStatus()
     {
-        playerData = data;
-    }
-    
-    public void AddAttackData(PlayerAttackData attackData)
-    {
-        if (!playerAttackDataList.Contains(attackData))
+        if (playerData == null)
         {
-            playerAttackDataList.Add(attackData);
+            Debug.LogError("[PlayerDataManager] Missing PlayerData");
+            return null;
         }
-    }
-    
-    public void RemoveAttackData(PlayerAttackData attackData)
-    {
-        playerAttackDataList.Remove(attackData);
+
+        PlayerStatus status = playerData.CreateStatus();
+
+        // Gán toàn bộ skill data
+        foreach (var atkData in playerAttackDataList)
+        {
+            status.AddSkill(atkData);
+        }
+
+        // KHÔNG cần SetBasicAttack
+        // BasicAttack sẽ tự nhận skill có apCost == 0
+
+        return status;
     }
 
-    private void Awake()
-    {
-        // Tự động nhận diện basic attack (skill tốn 0 AP)
-        AutoDetectBasicAttack();
-    }
 
-    private void AutoDetectBasicAttack()
+    // ================= BASIC ATTACK =================
+    private void DetectBasicAttack()
     {
         basicAttack = null;
-        
-        foreach (var attackData in playerAttackDataList)
+
+        foreach (var atk in playerAttackDataList)
         {
-            if (attackData.apCost == 0)
+            if (atk != null && atk.apCost == 0)
             {
-                basicAttack = attackData;
-                Debug.Log($"[PlayerDataManager] Đã xác định Basic Attack: {attackData.attackName}", gameObject);
+                basicAttack = atk;
+                Debug.Log($"[PlayerDataManager] BasicAttack = {atk.attackName}", gameObject);
                 return;
             }
         }
-        
-        if (basicAttack == null)
-        {
-            Debug.LogWarning($"[PlayerDataManager] Không tìm thấy skill tốn 0 AP cho {playerData?.entityName ?? gameObject.name}", gameObject);
-        }
+
+        Debug.LogWarning(
+            $"[PlayerDataManager] {name} has no AP=0 skill (Basic Attack)",
+            gameObject
+        );
     }
 
+#if UNITY_EDITOR
     private void OnValidate()
     {
-        // Kiểm tra trong Editor để đảm bảo có dữ liệu
         if (playerData == null)
-        {
-            Debug.LogWarning($"GameObject '{gameObject.name}' chưa có PlayerData được gán!", gameObject);
-        }
+            Debug.LogWarning($"[{name}] PlayerData not assigned", gameObject);
+
         if (playerAttackDataList.Count == 0)
-        {
-            Debug.LogWarning($"GameObject '{gameObject.name}' chưa có PlayerAttackData nào!", gameObject);
-        }
-        
-        // Kiểm tra xem có skill tốn 0 AP hay không
-        bool hasZeroAPSkill = playerAttackDataList.Exists(a => a.apCost == 0);
-        if (!hasZeroAPSkill && playerAttackDataList.Count > 0)
-        {
-            Debug.LogWarning($"GameObject '{gameObject.name}' không có skill nào tốn 0 AP (Basic Attack)!", gameObject);
-        }
+            Debug.LogWarning($"[{name}] No PlayerAttackData assigned", gameObject);
     }
+#endif
 }

@@ -266,24 +266,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Skill 1"",
-                    ""type"": ""Button"",
-                    ""id"": ""c728e72a-98de-4936-942b-4f902c68846b"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Skill 2"",
-                    ""type"": ""Button"",
-                    ""id"": ""9beb72f3-0fc7-4686-a5f7-83b055afd853"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -363,26 +345,72 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""action"": ""NextTarget"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""SkillMenu"",
+            ""id"": ""e436cdd8-17c0-44aa-9d90-c301d5bf541e"",
+            ""actions"": [
+                {
+                    ""name"": ""Skill1"",
+                    ""type"": ""Button"",
+                    ""id"": ""eb7deee3-0e3a-4e5f-9945-bf4d6e6b5b1d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Skill2"",
+                    ""type"": ""Button"",
+                    ""id"": ""1d74e96b-feae-4558-93ae-c788f0641276"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Cancel"",
+                    ""type"": ""Button"",
+                    ""id"": ""93a3a612-305b-45b9-8ea2-426e762c4d8d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
                     ""name"": """",
-                    ""id"": ""f8d2b5a8-5f5e-46f7-a1b8-a93b1fc36d41"",
+                    ""id"": ""a8066d46-11ce-4e8c-b84b-1fc186661ffd"",
                     ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Skill 1"",
+                    ""action"": ""Skill1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""023bccbd-83f5-49fe-9617-ab0b688ee952"",
+                    ""id"": ""e7de7bcb-7b21-413f-a1c8-512ef7386599"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Skill 2"",
+                    ""action"": ""Skill2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2c77529a-6ae1-4003-b2d5-0e54f930e810"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -405,14 +433,18 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         m_Battle_Cancel = m_Battle.FindAction("Cancel", throwIfNotFound: true);
         m_Battle_PrevTarget = m_Battle.FindAction("PrevTarget", throwIfNotFound: true);
         m_Battle_NextTarget = m_Battle.FindAction("NextTarget", throwIfNotFound: true);
-        m_Battle_Skill1 = m_Battle.FindAction("Skill 1", throwIfNotFound: true);
-        m_Battle_Skill2 = m_Battle.FindAction("Skill 2", throwIfNotFound: true);
+        // SkillMenu
+        m_SkillMenu = asset.FindActionMap("SkillMenu", throwIfNotFound: true);
+        m_SkillMenu_Skill1 = m_SkillMenu.FindAction("Skill1", throwIfNotFound: true);
+        m_SkillMenu_Skill2 = m_SkillMenu.FindAction("Skill2", throwIfNotFound: true);
+        m_SkillMenu_Cancel = m_SkillMenu.FindAction("Cancel", throwIfNotFound: true);
     }
 
     ~@GameInput()
     {
         UnityEngine.Debug.Assert(!m_Map.enabled, "This will cause a leak and performance issues, GameInput.Map.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Battle.enabled, "This will cause a leak and performance issues, GameInput.Battle.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_SkillMenu.enabled, "This will cause a leak and performance issues, GameInput.SkillMenu.Disable() has not been called.");
     }
 
     /// <summary>
@@ -613,8 +645,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Battle_Cancel;
     private readonly InputAction m_Battle_PrevTarget;
     private readonly InputAction m_Battle_NextTarget;
-    private readonly InputAction m_Battle_Skill1;
-    private readonly InputAction m_Battle_Skill2;
     /// <summary>
     /// Provides access to input actions defined in input action map "Battle".
     /// </summary>
@@ -654,14 +684,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Battle/NextTarget".
         /// </summary>
         public InputAction @NextTarget => m_Wrapper.m_Battle_NextTarget;
-        /// <summary>
-        /// Provides access to the underlying input action "Battle/Skill1".
-        /// </summary>
-        public InputAction @Skill1 => m_Wrapper.m_Battle_Skill1;
-        /// <summary>
-        /// Provides access to the underlying input action "Battle/Skill2".
-        /// </summary>
-        public InputAction @Skill2 => m_Wrapper.m_Battle_Skill2;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -709,12 +731,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @NextTarget.started += instance.OnNextTarget;
             @NextTarget.performed += instance.OnNextTarget;
             @NextTarget.canceled += instance.OnNextTarget;
-            @Skill1.started += instance.OnSkill1;
-            @Skill1.performed += instance.OnSkill1;
-            @Skill1.canceled += instance.OnSkill1;
-            @Skill2.started += instance.OnSkill2;
-            @Skill2.performed += instance.OnSkill2;
-            @Skill2.canceled += instance.OnSkill2;
         }
 
         /// <summary>
@@ -747,12 +763,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @NextTarget.started -= instance.OnNextTarget;
             @NextTarget.performed -= instance.OnNextTarget;
             @NextTarget.canceled -= instance.OnNextTarget;
-            @Skill1.started -= instance.OnSkill1;
-            @Skill1.performed -= instance.OnSkill1;
-            @Skill1.canceled -= instance.OnSkill1;
-            @Skill2.started -= instance.OnSkill2;
-            @Skill2.performed -= instance.OnSkill2;
-            @Skill2.canceled -= instance.OnSkill2;
         }
 
         /// <summary>
@@ -786,6 +796,124 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="BattleActions" /> instance referencing this action map.
     /// </summary>
     public BattleActions @Battle => new BattleActions(this);
+
+    // SkillMenu
+    private readonly InputActionMap m_SkillMenu;
+    private List<ISkillMenuActions> m_SkillMenuActionsCallbackInterfaces = new List<ISkillMenuActions>();
+    private readonly InputAction m_SkillMenu_Skill1;
+    private readonly InputAction m_SkillMenu_Skill2;
+    private readonly InputAction m_SkillMenu_Cancel;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "SkillMenu".
+    /// </summary>
+    public struct SkillMenuActions
+    {
+        private @GameInput m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public SkillMenuActions(@GameInput wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "SkillMenu/Skill1".
+        /// </summary>
+        public InputAction @Skill1 => m_Wrapper.m_SkillMenu_Skill1;
+        /// <summary>
+        /// Provides access to the underlying input action "SkillMenu/Skill2".
+        /// </summary>
+        public InputAction @Skill2 => m_Wrapper.m_SkillMenu_Skill2;
+        /// <summary>
+        /// Provides access to the underlying input action "SkillMenu/Cancel".
+        /// </summary>
+        public InputAction @Cancel => m_Wrapper.m_SkillMenu_Cancel;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_SkillMenu; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="SkillMenuActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(SkillMenuActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="SkillMenuActions" />
+        public void AddCallbacks(ISkillMenuActions instance)
+        {
+            if (instance == null || m_Wrapper.m_SkillMenuActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_SkillMenuActionsCallbackInterfaces.Add(instance);
+            @Skill1.started += instance.OnSkill1;
+            @Skill1.performed += instance.OnSkill1;
+            @Skill1.canceled += instance.OnSkill1;
+            @Skill2.started += instance.OnSkill2;
+            @Skill2.performed += instance.OnSkill2;
+            @Skill2.canceled += instance.OnSkill2;
+            @Cancel.started += instance.OnCancel;
+            @Cancel.performed += instance.OnCancel;
+            @Cancel.canceled += instance.OnCancel;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="SkillMenuActions" />
+        private void UnregisterCallbacks(ISkillMenuActions instance)
+        {
+            @Skill1.started -= instance.OnSkill1;
+            @Skill1.performed -= instance.OnSkill1;
+            @Skill1.canceled -= instance.OnSkill1;
+            @Skill2.started -= instance.OnSkill2;
+            @Skill2.performed -= instance.OnSkill2;
+            @Skill2.canceled -= instance.OnSkill2;
+            @Cancel.started -= instance.OnCancel;
+            @Cancel.performed -= instance.OnCancel;
+            @Cancel.canceled -= instance.OnCancel;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SkillMenuActions.UnregisterCallbacks(ISkillMenuActions)" />.
+        /// </summary>
+        /// <seealso cref="SkillMenuActions.UnregisterCallbacks(ISkillMenuActions)" />
+        public void RemoveCallbacks(ISkillMenuActions instance)
+        {
+            if (m_Wrapper.m_SkillMenuActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="SkillMenuActions.AddCallbacks(ISkillMenuActions)" />
+        /// <seealso cref="SkillMenuActions.RemoveCallbacks(ISkillMenuActions)" />
+        /// <seealso cref="SkillMenuActions.UnregisterCallbacks(ISkillMenuActions)" />
+        public void SetCallbacks(ISkillMenuActions instance)
+        {
+            foreach (var item in m_Wrapper.m_SkillMenuActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_SkillMenuActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="SkillMenuActions" /> instance referencing this action map.
+    /// </summary>
+    public SkillMenuActions @SkillMenu => new SkillMenuActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Map" which allows adding and removing callbacks.
     /// </summary>
@@ -871,19 +999,34 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnNextTarget(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "SkillMenu" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="SkillMenuActions.AddCallbacks(ISkillMenuActions)" />
+    /// <seealso cref="SkillMenuActions.RemoveCallbacks(ISkillMenuActions)" />
+    public interface ISkillMenuActions
+    {
         /// <summary>
-        /// Method invoked when associated input action "Skill 1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Skill1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkill1(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Skill 2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Skill2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkill2(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Cancel" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCancel(InputAction.CallbackContext context);
     }
 }

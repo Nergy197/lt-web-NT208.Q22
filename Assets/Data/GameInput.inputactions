@@ -180,24 +180,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "Skill 1",
-                    "type": "Button",
-                    "id": "c728e72a-98de-4936-942b-4f902c68846b",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Skill 2",
-                    "type": "Button",
-                    "id": "9beb72f3-0fc7-4686-a5f7-83b055afd853",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -277,26 +259,72 @@
                     "action": "NextTarget",
                     "isComposite": false,
                     "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "SkillMenu",
+            "id": "e436cdd8-17c0-44aa-9d90-c301d5bf541e",
+            "actions": [
+                {
+                    "name": "Skill1",
+                    "type": "Button",
+                    "id": "eb7deee3-0e3a-4e5f-9945-bf4d6e6b5b1d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
+                    "name": "Skill2",
+                    "type": "Button",
+                    "id": "1d74e96b-feae-4558-93ae-c788f0641276",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "93a3a612-305b-45b9-8ea2-426e762c4d8d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
                     "name": "",
-                    "id": "f8d2b5a8-5f5e-46f7-a1b8-a93b1fc36d41",
+                    "id": "a8066d46-11ce-4e8c-b84b-1fc186661ffd",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Skill 1",
+                    "action": "Skill1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "023bccbd-83f5-49fe-9617-ab0b688ee952",
+                    "id": "e7de7bcb-7b21-413f-a1c8-512ef7386599",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Skill 2",
+                    "action": "Skill2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2c77529a-6ae1-4003-b2d5-0e54f930e810",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
