@@ -1,8 +1,10 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovementTest : MonoBehaviour
 {
     public float speed = 5f;
+
     private Rigidbody2D rb;
     private Vector2 move;
 
@@ -13,12 +15,20 @@ public class PlayerMovementTest : MonoBehaviour
 
     void Update()
     {
-        move.x = Input.GetAxisRaw("Horizontal");
-        move.y = Input.GetAxisRaw("Vertical");
+        if (InputController.Instance == null)
+            return;
+
+        if (InputController.Instance.Mode != InputMode.Map)
+        {
+            move = Vector2.zero;
+            return;
+        }
+
+        move = InputController.Instance.Input.Map.Moves.ReadValue<Vector2>();
     }
 
     void FixedUpdate()
     {
-        rb.linearVelocity = move.normalized * speed;
+        rb.linearVelocity = move * speed;
     }
 }
