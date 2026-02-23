@@ -11,7 +11,7 @@ public class MapManager : MonoBehaviour
     public int currentMapLevel;
 
     [Header("Random Encounter")]
-    public float encounterRate = 0.05f; // 5% chance per step
+    public float encounterRate = 0.02f; // 2% chance per step
     private int stepsSinceLastEncounter = 0;
 
     private void Awake()
