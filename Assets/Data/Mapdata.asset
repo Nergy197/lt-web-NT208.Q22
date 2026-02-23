@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e797ba1db8ba4401caef36d3e9b2a536, type: 3}
+  m_Name: Mapdata
+  m_EditorClassIdentifier: Assembly-CSharp::Mapdata
+  mapName: "\u0111\u1EA7m l\u1EA7y \u01B0\u1EDBt \xE1t"
+  mapId: 0
+  enemyLevel: 1
+  possibleEnemies:
+  - {fileID: 11400000, guid: 1c9b81a5094f54c36a1ed220c1757eba, type: 2}
+  - {fileID: 11400000, guid: 24105cc1d43134320b355a0e2e74ce31, type: 2}
+  - {fileID: 11400000, guid: 1c9b81a5094f54c36a1ed220c1757eba, type: 2}
+  - {fileID: 11400000, guid: 24105cc1d43134320b355a0e2e74ce31, type: 2}
+  enemyBuffs: []
+  enemyDebuffs: []
+  playerBuffs: []
+  playerDebuffs: []

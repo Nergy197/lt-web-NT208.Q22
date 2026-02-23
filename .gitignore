@@ -1,0 +1,73 @@
+####################################
+# UNITY GENERATED
+####################################
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+
+####################################
+# UNITY CACHE / ARTIFACTS
+####################################
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+
+####################################
+# VISUAL STUDIO / RIDER
+####################################
+.vs/
+.idea/
+.vscode/
+*.DotSettings
+*.DotSettings.user
+
+####################################
+# OS JUNK
+####################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+####################################
+# INPUT SYSTEM (GENERATED)
+####################################
+# Auto-generated C# from InputActions
+*InputActions.cs
+
+# Optional: ignore InputAction backups
+*.inputactions.backup
+
+####################################
+# UNITY ADDRESSABLE / CACHE
+####################################
+[Aa]ssets/AddressableAssetsData/*/Build
+[Aa]ssets/AddressableAssetsData/*/PlayerBuildData
+
+####################################
+# AUDIO / VIDEO CACHE
+####################################
+*.wav.meta
+*.mp3.meta
+*.mp4.meta
+
+####################################
+# CRASH / PROFILING
+####################################
+sysinfo.txt
+*.stacktrace
+
+####################################
+# OPTIONAL – LOCAL CONFIG
+####################################
+*.env

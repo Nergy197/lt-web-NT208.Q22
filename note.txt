@@ -1,0 +1,1 @@
+cái logic party đang lỗi, pull code về chạy cái BattleScene.unity trong asset để chạy thử demo roi fix
