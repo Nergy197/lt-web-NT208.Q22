@@ -143,6 +143,10 @@ public abstract class Status
                 baseSpd += effect.value;
                 break;
 
+            case StatusEffectType.BuffHP:
+                baseHP += effect.value;
+                break;
+
             case StatusEffectType.DebuffAtk:
                 baseAtk -= effect.value;
                 break;
@@ -214,6 +218,10 @@ public abstract class Status
 
             case StatusEffectType.BuffSpd:
                 baseSpd -= effect.value;
+                break;
+
+            case StatusEffectType.BuffHP:
+                baseHP -= effect.value;
                 break;
 
             case StatusEffectType.DebuffAtk:

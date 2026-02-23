@@ -17,11 +17,11 @@ public class Mapdata : ScriptableObject
 
     [Header("=== ENEMY CONFIGURATION ===")]
     public List<StatusEffect> enemyBuffs = new List<StatusEffect>();
-    public List<StatusEffect> enemyDebuffs = new List<StatusEffect>();
+    public List<StatusEffect> enemyDebuffs = new List<StatusEffect>();        
 
     [Header("=== PLAYER EFFECTS (APPLIED WHEN BATTLE STARTS) ===")]
     public List<StatusEffect> playerBuffs = new List<StatusEffect>();
-    public List<StatusEffect> playerDebuffs = new List<StatusEffect>();
+    public List<StatusEffect> playerDebuffs = new List<StatusEffect>();       
 
     // ---------------- APPLY ----------------
     public void ApplyPlayerEffects(PlayerStatus player)
@@ -96,10 +96,10 @@ public class Mapdata : ScriptableObject
         }
 
         // normalize durations: 0 duration means immediate only; we prefer -1 (perm) or positive turns.
-        playerBuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });
-        playerDebuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });
+        playerBuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });   
+        playerDebuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; }); 
 
-        Debug.Log($"[Mapdata] Generated {playerBuffs.Count} player buffs and {playerDebuffs.Count} player debuffs for map '{mapName}' (level {enemyLevel})");
+        Debug.Log($"[Mapdata] Generated {playerBuffs.Count} player buffs and {playerDebuffs.Count} player debuffs for map '{mapName}' (level {enemyLevel})"); 
     }
 
     // optional: generate enemy effects similarly
@@ -130,8 +130,8 @@ public class Mapdata : ScriptableObject
         }
 
         // normalize durations: 0 duration means immediate only; we prefer -1 (perm) or positive turns.
-        enemyBuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });
-        enemyDebuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });
+        enemyBuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });    
+        enemyDebuffs.ForEach(e => { if (e.duration == 0) e.duration = 1; });  
 
         Debug.Log($"[Mapdata] Generated {enemyBuffs.Count} enemy buffs and {enemyDebuffs.Count} enemy debuffs for map '{mapName}'");
     }
@@ -144,7 +144,7 @@ public class Mapdata : ScriptableObject
             Debug.LogWarning($"[Mapdata] No enemies defined for map '{mapName}'");
             return null;
         }
-        return possibleEnemies[Random.Range(0, possibleEnemies.Count)];
+        return possibleEnemies[Random.Range(0, possibleEnemies.Count)];       
     }
 
     public void ClearAllEffects()
