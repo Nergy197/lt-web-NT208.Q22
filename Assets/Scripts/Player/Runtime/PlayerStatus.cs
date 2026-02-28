@@ -5,28 +5,36 @@ using System.Collections.Generic;
 public class PlayerStatus : Status
 {
     // ================= AP SYSTEM =================
+
     public int MaxAP { get; private set; }
+
     public int currentAP;
 
     public bool CanUseAP(int cost) => currentAP >= cost;
+
     public void UseAP(int cost) => currentAP -= cost;
+
     public void RestoreAP(int amount) =>
         currentAP = Mathf.Min(MaxAP, currentAP + amount);
+
     public void RestoreFullAP() => currentAP = MaxAP;
 
+
+
     // ================= SKILL SYSTEM =================
+
     private readonly List<PlayerAttackData> skills = new();
 
     public IReadOnlyList<PlayerAttackData> Skills => skills;
+
     public PlayerAttackData BasicAttack { get; private set; }
 
-    /// <summary>
-    /// Add skill cho player.
-    /// Skill có apCost == 0 sẽ tự động làm BasicAttack (chỉ 1 skill).
-    /// </summary>
+
+
     public void AddSkill(PlayerAttackData attack)
     {
         if (attack == null) return;
+
         if (skills.Contains(attack)) return;
 
         skills.Add(attack);
@@ -34,9 +42,12 @@ public class PlayerStatus : Status
         if (attack.apCost == 0 && BasicAttack == null)
         {
             BasicAttack = attack;
-            Debug.Log($"[PlayerStatus] BasicAttack set to {attack.attackName}");
+
+            Debug.Log($"BasicAttack = {attack.attackName}");
         }
     }
+
+
 
     public PlayerAttackData GetSkillByIndex(int index)
     {
@@ -46,40 +57,121 @@ public class PlayerStatus : Status
         return skills[index];
     }
 
+
+
     // ================= PARRY SYSTEM =================
-    private bool canParry = false;
-    public void EnableParry() => canParry = true;
+
+    private bool parryWindowOpen = false;
+
+    private bool parryRequested = false;
+
+    public bool WasParried { get; private set; }
+
+
+
+    // EnemyAttack gọi
+
+    public void OpenParryWindow()
+    {
+        parryWindowOpen = true;
+
+        parryRequested = false;
+
+        WasParried = false;
+
+        Debug.Log("[PARRY] Window OPEN");
+    }
+
+
+
+    // EnemyAttack gọi
+
+    public void CloseParryWindow()
+    {
+        parryWindowOpen = false;
+
+        Debug.Log("[PARRY] Window CLOSED");
+    }
+
+
+
+    // InputController gọi khi player bấm SPACE
+
+    public void RequestParry()
+    {
+        if (!parryWindowOpen)
+        {
+            Debug.Log("[PARRY] Ignored (no window)");
+            return;
+        }
+
+        parryRequested = true;
+
+        Debug.Log("[PARRY] Requested");
+    }
+
+
+
+    // EnemyAttack gọi tại impact frame
 
     public bool ConsumeParry()
     {
-        if (!canParry) return false;
-        canParry = false;
+        if (!parryWindowOpen)
+            return false;
+
+        if (!parryRequested)
+            return false;
+
+        parryWindowOpen = false;
+
+        parryRequested = false;
+
+        WasParried = true;
+
+        Debug.Log("[PARRY] SUCCESS");
+
         return true;
     }
 
+
+
     // ================= EXP SYSTEM =================
+
     public int currentExp = 0;
+
     public int expToNextLevel => level * 100;
+
+
 
     public void GainExp(int amount)
     {
         currentExp += amount;
+
         while (currentExp >= expToNextLevel)
         {
             currentExp -= expToNextLevel;
+
             LevelUp();
         }
     }
 
+
+
     private void LevelUp()
     {
         level++;
+
         HealFull();
+
         RestoreFullAP();
-        Debug.Log($"{entityName} leveled up to {level}!");
+
+        Debug.Log($"{entityName} level up {level}");
     }
 
+
+
     // ================= CONSTRUCTOR =================
+
     public PlayerStatus(
         string name,
         int baseHP,
@@ -90,6 +182,7 @@ public class PlayerStatus : Status
     ) : base(name, baseHP, baseAtk, baseDef, baseSpd)
     {
         MaxAP = maxAP;
+
         currentAP = MaxAP;
     }
 }

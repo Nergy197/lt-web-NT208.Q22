@@ -5,9 +5,14 @@ public class InputController : MonoBehaviour
     public static InputController Instance { get; private set; }
 
     public GameInput Input { get; private set; }
+
     public InputMode Mode { get; private set; }
 
     private BattleManager battle;
+
+
+
+    // ================= INIT =================
 
     private void Awake()
     {
@@ -18,17 +23,32 @@ public class InputController : MonoBehaviour
         }
 
         Instance = this;
+
         DontDestroyOnLoad(gameObject);
 
         Input = new GameInput();
 
+        Input.Enable();
+
         BindBattleInput();
+
         BindSkillMenuInput();
 
         SetMode(InputMode.Map);
     }
 
+
+
+    private void OnDestroy()
+    {
+        if (Input != null)
+            Input.Disable();
+    }
+
+
+
     // ================= MODE =================
+
     public void SetMode(InputMode mode)
     {
         Mode = mode;
@@ -52,89 +72,137 @@ public class InputController : MonoBehaviour
                 break;
         }
 
-        Debug.Log($"[INPUT MODE] {mode}");
+        Debug.Log("[INPUT MODE] " + mode);
     }
 
+
+
     // ================= BATTLE INPUT =================
+
     private void BindBattleInput()
     {
-        // BASIC ATTACK (E)
-        Input.Battle.BasicAttack.performed += _ =>
+
+        // BASIC ATTACK
+
+        Input.Battle.BasicAttack.performed += ctx =>
         {
             if (!CanBattleInput()) return;
-            Debug.Log("[INPUT] Basic Attack");
+
             battle.SelectBasicAttack();
         };
 
-        // OPEN SKILL MENU (W)
-        Input.Battle.OpenSkillMenu.performed += _ =>
+
+
+        // SKILL MENU
+
+        Input.Battle.OpenSkillMenu.performed += ctx =>
         {
             if (!CanBattleInput()) return;
-            Debug.Log("[INPUT] Open Skill Menu");
+
             SetMode(InputMode.BattleSkillMenu);
         };
 
+
+
         // TARGET
-        Input.Battle.NextTarget.performed += _ =>
+
+        Input.Battle.PrevTarget.performed += ctx =>
         {
             if (!CanBattleInput()) return;
+
+            battle.ChangeTargetInput(-1);
+        };
+
+
+        Input.Battle.NextTarget.performed += ctx =>
+        {
+            if (!CanBattleInput()) return;
+
             battle.ChangeTargetInput(+1);
         };
 
-        Input.Battle.PrevTarget.performed += _ =>
+
+
+        // PARRY INPUT
+
+        Input.Battle.Parry.performed += ctx =>
         {
-            if (!CanBattleInput()) return;
-            battle.ChangeTargetInput(-1);
+            if (battle == null)
+                return;
+
+
+            PlayerStatus player = battle.GetAlivePlayer();
+
+
+            if (player == null)
+                return;
+
+
+            player.RequestParry();
         };
+
     }
 
-    // ================= SKILL MENU INPUT =================
+
+
+    // ================= SKILL MENU =================
+
     private void BindSkillMenuInput()
     {
-        // SKILL 1 (E)
-        Input.SkillMenu.Skill1.performed += _ =>
+        Input.SkillMenu.Skill1.performed += ctx =>
         {
             if (Mode != InputMode.BattleSkillMenu) return;
-            Debug.Log("[SKILL MENU] Skill 1");
+
             battle.UseSkill(0);
+
             SetMode(InputMode.Battle);
         };
 
-        // SKILL 2 (W)
-        Input.SkillMenu.Skill2.performed += _ =>
+
+        Input.SkillMenu.Skill2.performed += ctx =>
         {
             if (Mode != InputMode.BattleSkillMenu) return;
-            Debug.Log("[SKILL MENU] Skill 2");
+
             battle.UseSkill(1);
+
             SetMode(InputMode.Battle);
         };
 
-        // CANCEL (ESC)
-        Input.SkillMenu.Cancel.performed += _ =>
+
+        Input.SkillMenu.Cancel.performed += ctx =>
         {
             if (Mode != InputMode.BattleSkillMenu) return;
-            Debug.Log("[SKILL MENU] Cancel");
+
             SetMode(InputMode.Battle);
         };
     }
+
+
 
     private bool CanBattleInput()
     {
         return Mode == InputMode.Battle
-            && battle != null
-            && battle.CanAcceptInput;
+            && battle != null;
     }
 
-    // ================= BIND BATTLE MANAGER =================
+
+
+    // ================= BIND =================
+
     public void BindBattleManager(BattleManager bm)
     {
         battle = bm;
+
         SetMode(InputMode.Battle);
     }
+
+
 
     public void UnbindBattleManager()
     {
         battle = null;
+
         SetMode(InputMode.Map);
     }
+
 }

@@ -1,100 +1,175 @@
 using UnityEngine;
-using System.Linq;
 
 public class BattleDemoStarter : MonoBehaviour
 {
+    [Header("References")]
+
+    [SerializeField]
     private BattleManager battle;
 
+    [SerializeField]
+    private InputController inputController;
+
+
+
     [Header("Demo Options")]
-    public bool killFirstPlayerAtStart = false;
-    public bool showInputHint = true;
+
+    public bool autoStartBattle = true;
+
+
+
+    // ================= INIT =================
 
     private void Awake()
     {
-        battle = FindFirstObjectByType<BattleManager>();
         if (battle == null)
-        {
-            Debug.LogError("[DEMO] BattleManager not found in scene");
-        }
+            battle = FindObjectOfType<BattleManager>();
+
+
+        if (inputController == null)
+            inputController = FindObjectOfType<InputController>();
     }
+
+
 
     private void Start()
     {
-        // ================= CREATE PARTIES =================
-        Party playerParty = new Party(PartyType.Player);
-        Party enemyParty  = new Party(PartyType.Enemy);
+        if (autoStartBattle)
+            StartDemo();
+    }
 
-        // ================= FIND PLAYER OBJECTS =================
-        var playerManagers = FindObjectsOfType<PlayerDataManager>();
-        if (playerManagers.Length == 0)
+
+
+    // ================= DEMO START =================
+
+    public void StartDemo()
+    {
+
+        if (battle == null)
         {
-            Debug.LogError("[DEMO] No PlayerDataManager found in scene");
+            Debug.LogError("BattleManager not found");
+
             return;
         }
 
-        foreach (var pm in playerManagers)
-        {
-            var status = pm.CreateStatus();
-            if (status == null) continue;
 
-            playerParty.AddMember(status);
-        }
 
-        // ================= FIND ENEMY OBJECTS =================
-        var enemyManagers = FindObjectsOfType<EnemyDataManager>();
-        if (enemyManagers.Length == 0)
-        {
-            Debug.LogError("[DEMO] No EnemyDataManager found in scene");
+        Party playerParty = CreatePlayerParty();
+
+        Party enemyParty = CreateEnemyParty();
+
+
+
+        if (playerParty == null || enemyParty == null)
             return;
-        }
 
-        foreach (var em in enemyManagers)
+
+
+        Debug.Log("=== DEMO START ===");
+
+
+
+        battle.InitBattle(playerParty, enemyParty, 1);
+
+
+
+        if (inputController != null)
         {
-            var status = em.CreateStatus();
-            if (status == null) continue;
+            inputController.BindBattleManager(battle);
 
-            enemyParty.AddMember(status);
-        }
-
-        // ================= OPTIONAL TEST =================
-        if (killFirstPlayerAtStart)
-        {
-            var p = playerParty.Members.OfType<PlayerStatus>().FirstOrDefault();
-            if (p != null)
-            {
-                p.TakeDamage(p, 99999);
-                Debug.Log("[DEMO] First player killed to test skip dead unit");
-            }
-        }
-
-        // ================= INIT BATTLE =================
-        Debug.Log("=====================================");
-        Debug.Log(" DEMO BATTLE START (SCENE OBJECTS) ");
-        Debug.Log("=====================================");
-        Debug.Log($"Players: {playerParty.Members.Count}");
-        Debug.Log($"Enemies: {enemyParty.Members.Count}");
-
-        if (showInputHint)
-        {
-            Debug.Log("INPUT:");
-            Debug.Log(" SPACE : Basic attack");
-            Debug.Log(" W     : Open skill menu");
-            Debug.Log(" Q/E   : Use skill");
-            Debug.Log(" A/D   : Change target");
-        }
-
-        battle.InitBattle(playerParty, enemyParty, mapLevel: 1);
-        var input = FindObjectOfType<InputController>();
-        if (input != null)
-        {
-            input.SetMode(InputMode.Battle);
-            input.BindBattleManager(battle);
-            Debug.Log("[INPUT MODE] Battle");
-        }
-        else
-        {
-            Debug.LogError("InputController not found!");
+            inputController.SetMode(InputMode.Battle);
         }
 
     }
+
+
+
+    // ================= CREATE PLAYER =================
+
+    private Party CreatePlayerParty()
+    {
+
+        PlayerDataManager[] managers =
+            FindObjectsOfType<PlayerDataManager>();
+
+
+
+        if (managers.Length == 0)
+        {
+            Debug.LogError("No PlayerDataManager found");
+
+            return null;
+        }
+
+
+
+        Party party = new Party(PartyType.Player);
+
+
+
+        foreach (PlayerDataManager m in managers)
+        {
+
+            PlayerStatus status = m.CreateStatus();
+
+
+            if (status != null)
+            {
+                party.AddMember(status);
+
+                Debug.Log("Add Player: " + status.entityName);
+            }
+
+        }
+
+
+
+        return party;
+    }
+
+
+
+    // ================= CREATE ENEMY =================
+
+    private Party CreateEnemyParty()
+    {
+
+        EnemyDataManager[] managers =
+            FindObjectsOfType<EnemyDataManager>();
+
+
+
+        if (managers.Length == 0)
+        {
+            Debug.LogError("No EnemyDataManager found");
+
+            return null;
+        }
+
+
+
+        Party party = new Party(PartyType.Enemy);
+
+
+
+        foreach (EnemyDataManager m in managers)
+        {
+
+            EnemyStatus status = m.CreateStatus();
+
+
+            if (status != null)
+            {
+                party.AddMember(status);
+
+                Debug.Log("Add Enemy: " + status.entityName);
+            }
+
+        }
+
+
+
+        return party;
+    }
+
 }

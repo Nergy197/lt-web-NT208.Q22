@@ -266,6 +266,15 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Parry"",
+                    ""type"": ""Button"",
+                    ""id"": ""7a8b9c0d-1e2f-4a5b-6c7d-8e9f0a1b2c3d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -343,6 +352,17 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""NextTarget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7b9c0d1e-2f4a-5b6c-7d8e-9f0a1b2c3d4e"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Parry"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -433,6 +453,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         m_Battle_Cancel = m_Battle.FindAction("Cancel", throwIfNotFound: true);
         m_Battle_PrevTarget = m_Battle.FindAction("PrevTarget", throwIfNotFound: true);
         m_Battle_NextTarget = m_Battle.FindAction("NextTarget", throwIfNotFound: true);
+        m_Battle_Parry = m_Battle.FindAction("Parry", throwIfNotFound: true);
         // SkillMenu
         m_SkillMenu = asset.FindActionMap("SkillMenu", throwIfNotFound: true);
         m_SkillMenu_Skill1 = m_SkillMenu.FindAction("Skill1", throwIfNotFound: true);
@@ -645,6 +666,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Battle_Cancel;
     private readonly InputAction m_Battle_PrevTarget;
     private readonly InputAction m_Battle_NextTarget;
+    private readonly InputAction m_Battle_Parry;
     /// <summary>
     /// Provides access to input actions defined in input action map "Battle".
     /// </summary>
@@ -684,6 +706,10 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Battle/NextTarget".
         /// </summary>
         public InputAction @NextTarget => m_Wrapper.m_Battle_NextTarget;
+        /// <summary>
+        /// Provides access to the underlying input action "Battle/Parry".
+        /// </summary>
+        public InputAction @Parry => m_Wrapper.m_Battle_Parry;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -731,6 +757,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @NextTarget.started += instance.OnNextTarget;
             @NextTarget.performed += instance.OnNextTarget;
             @NextTarget.canceled += instance.OnNextTarget;
+            @Parry.started += instance.OnParry;
+            @Parry.performed += instance.OnParry;
+            @Parry.canceled += instance.OnParry;
         }
 
         /// <summary>
@@ -763,6 +792,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @NextTarget.started -= instance.OnNextTarget;
             @NextTarget.performed -= instance.OnNextTarget;
             @NextTarget.canceled -= instance.OnNextTarget;
+            @Parry.started -= instance.OnParry;
+            @Parry.performed -= instance.OnParry;
+            @Parry.canceled -= instance.OnParry;
         }
 
         /// <summary>
@@ -999,6 +1031,13 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnNextTarget(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Parry" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnParry(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "SkillMenu" which allows adding and removing callbacks.

@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "lt-web-NT208.Q22-main.slnx"
+    "dotnet.defaultSolution": "lt-web-NT208.Q22.slnx"
 }

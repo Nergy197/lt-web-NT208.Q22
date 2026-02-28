@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 public class BattleManager : MonoBehaviour
 {
@@ -10,273 +9,400 @@ public class BattleManager : MonoBehaviour
     private Party playerParty;
     private Party enemyParty;
 
-    private readonly List<Status> timeline = new();
-    private const float BASE_DELAY = 100f;
+    private List<Status> timeline = new List<Status>();
 
     private Status currentUnit;
+
     private bool waitingForPlayerAction;
+
     private bool isRunning;
 
-    public bool CanAcceptInput =>
-        State == BattleState.PlayerTurn && waitingForPlayerAction;
+    private const float BASE_DELAY = 100f;
+
+
 
     // ================= INIT =================
+
     public void InitBattle(Party player, Party enemy, int mapLevel)
     {
-        Debug.Log("====================================");
-        Debug.Log("[BATTLE] InitBattle()");
-        Debug.Log($"Players: {player.Members.Count}, Enemies: {enemy.Members.Count}");
+        Debug.Log("=== INIT BATTLE ===");
+
+        StopAllCoroutines();
 
         playerParty = player;
         enemyParty = enemy;
 
-        foreach (var e in enemyParty.Members.OfType<EnemyStatus>())
-        {
-            e.SetLevel(mapLevel);
-            Debug.Log($"[BATTLE] Enemy {e.entityName} set to level {mapLevel}");
-        }
+        waitingForPlayerAction = false;
 
         timeline.Clear();
-        timeline.AddRange(playerParty.Members);
-        timeline.AddRange(enemyParty.Members);
 
-        foreach (var u in timeline)
-        {
-            u.ResetForBattle(BASE_DELAY);
-            u.LastTargetSlot = 0;
-            Debug.Log($"[BATTLE] Add to timeline: {u.entityName} (SPD={u.Spd})");
-        }
+        AddPartyToTimeline(playerParty);
+        AddPartyToTimeline(enemyParty);
 
         State = BattleState.Start;
 
-        if (!isRunning)
-            StartCoroutine(BattleLoop());
+        StartCoroutine(BattleLoop());
     }
 
+
+
+    private void AddPartyToTimeline(Party party)
+    {
+        foreach (Status s in party.Members)
+        {
+            s.ResetForBattle(BASE_DELAY);
+
+            s.LastTargetSlot = 0;
+
+            timeline.Add(s);
+
+            Debug.Log("Add timeline: " + s.entityName);
+        }
+    }
+
+
+
     // ================= MAIN LOOP =================
+
     private IEnumerator BattleLoop()
     {
         isRunning = true;
-        Debug.Log("[BATTLE] BattleLoop START");
 
-        while (!CheckEndBattle())
+        while (true)
         {
+
+            if (CheckEndBattle())
+                break;
+
+
             currentUnit = GetNextUnit();
-            if (currentUnit == null) break;
 
-            State = currentUnit.PartyType == PartyType.Player
-                ? BattleState.PlayerTurn
-                : BattleState.EnemyTurn;
 
-            Debug.Log("------------------------------------");
-            Debug.Log($"[TURN] {currentUnit.entityName} | State = {State}");
+            if (currentUnit == null)
+                break;
 
-            if (State == BattleState.PlayerTurn)
+
+
+            if (currentUnit.PartyType == PartyType.Player)
+            {
+                State = BattleState.PlayerTurn;
+
                 yield return PlayerTurn();
+            }
             else
+            {
+                State = BattleState.EnemyTurn;
+
                 yield return EnemyTurn();
+            }
+
+
 
             if (currentUnit.IsAlive)
-            {
                 currentUnit.UpdateEffectDurations();
-                Debug.Log($"[TURN END] {currentUnit.entityName} effects updated");
-            }
+
 
             yield return null;
         }
 
+
         isRunning = false;
+
         Debug.Log("=== BATTLE END ===");
     }
 
+
+
+    // ================= TIMELINE =================
+
     private Status GetNextUnit()
     {
-        timeline.RemoveAll(u => !u.IsAlive);
+        RemoveDeadFromTimeline();
+
 
         if (timeline.Count == 0)
             return null;
 
-        timeline.Sort((a, b) => a.NextTurnTime.CompareTo(b.NextTurnTime));
 
-        var unit = timeline[0];
-        unit.NextTurnTime += BASE_DELAY / Mathf.Max(1, unit.Spd);
+        timeline.Sort((a, b) =>
+            a.NextTurnTime.CompareTo(b.NextTurnTime));
 
-        Debug.Log($"[TIMELINE] Next unit: {unit.entityName}");
+
+        Status unit = timeline[0];
+
+
+        float spd = Mathf.Max(0.1f, unit.Spd);
+
+
+        unit.NextTurnTime += BASE_DELAY / spd;
+
+
+        Debug.Log("Next turn: " + unit.entityName);
+
+
         return unit;
     }
 
-    // ================= PLAYER TURN =================
-    private IEnumerator PlayerTurn()
+
+
+    private void RemoveDeadFromTimeline()
     {
-        RetargetIfDead_Player();
-
-        Debug.Log($"[PLAYER TURN] {currentUnit.entityName} waiting for input");
-        waitingForPlayerAction = true;
-
-        yield return new WaitUntil(() => !waitingForPlayerAction);
-
-        Debug.Log($"[PLAYER TURN END] {currentUnit.entityName}");
+        timeline.RemoveAll(unit => !unit.IsAlive);
     }
 
+
+
+    // ================= PLAYER TURN =================
+
+    private IEnumerator PlayerTurn()
+    {
+        RetargetIfDead();
+
+        waitingForPlayerAction = true;
+
+        Debug.Log("Player turn: waiting input");
+
+        yield return new WaitUntil(() => waitingForPlayerAction == false);
+
+        Debug.Log("Player turn end");
+    }
+
+
+
+    private void EndPlayerAction()
+    {
+        waitingForPlayerAction = false;
+    }
+
+
+
     // ================= BASIC ATTACK =================
+
     public void SelectBasicAttack()
     {
-        Debug.Log("[INPUT] SelectBasicAttack()");
-
-        if (!CanAcceptInput)
-        {
-            Debug.LogWarning("[INPUT] Cannot accept input now");
+        if (!waitingForPlayerAction)
             return;
-        }
 
-        var player = currentUnit as PlayerStatus;
-        var target = GetEnemyBySlot(currentUnit.LastTargetSlot);
 
-        if (player == null || target == null || player.BasicAttack == null)
+        PlayerStatus player = currentUnit as PlayerStatus;
+
+
+        if (player == null)
+            return;
+
+
+        EnemyStatus target = GetEnemyTarget();
+
+
+        if (target == null)
         {
-            Debug.LogWarning("[BASIC ATTACK] Invalid player / target / basic attack");
             EndPlayerAction();
             return;
         }
+
 
         var attack = player.BasicAttack.CreateInstance();
 
-        Debug.Log($"[BASIC ATTACK] {player.entityName} -> {target.entityName}");
-        Debug.Log($"[ATTACK DATA] {player.BasicAttack.attackName}");
+        attack.Use(player, target);
+
+        EndPlayerAction();
+    }
+
+
+
+    // ================= SKILL =================
+
+    public void UseSkill(int index)
+    {
+        if (!waitingForPlayerAction)
+            return;
+
+
+        PlayerStatus player = currentUnit as PlayerStatus;
+
+
+        if (player == null)
+            return;
+
+
+        EnemyStatus target = GetEnemyTarget();
+
+
+        if (target == null)
+        {
+            EndPlayerAction();
+            return;
+        }
+
+
+        var skill = player.GetSkillByIndex(index);
+
+
+        if (skill == null)
+        {
+            EndPlayerAction();
+            return;
+        }
+
+
+        var attack = skill.CreateInstance();
 
         attack.Use(player, target);
 
         EndPlayerAction();
     }
 
-    // ================= SKILL =================
-    public void UseSkill(int skillIndex)
+
+
+    // ================= ENEMY TURN =================
+
+    private IEnumerator EnemyTurn()
     {
-        Debug.Log($"[INPUT] UseSkill({skillIndex})");
 
-        if (!CanAcceptInput)
+        PlayerStatus target = GetAlivePlayer();
+
+
+        if (target == null)
+            yield break;
+
+
+        EnemyStatus enemy = currentUnit as EnemyStatus;
+
+
+        if (enemy == null)
+            yield break;
+
+
+
+        var attackData = enemy.GetRandomAttack();
+
+
+        if (attackData != null)
         {
-            Debug.LogWarning("[INPUT] Cannot accept input now");
-            return;
+            Debug.Log(enemy.entityName + " attack");
+
+            var attack = attackData.CreateInstance();
+
+            attack.Use(enemy, target);
+        }
+        else
+        {
+            target.TakeDamage(enemy, enemy.Atk);
         }
 
-        var player = currentUnit as PlayerStatus;
-        var target = GetEnemyBySlot(currentUnit.LastTargetSlot);
 
-        if (player == null || target == null)
+        yield return new WaitForSeconds(0.5f);
+    }
+
+
+
+    // ================= TARGET =================
+
+    private EnemyStatus GetEnemyTarget()
+    {
+        return enemyParty
+            .GetMemberBySlot(currentUnit.LastTargetSlot)
+            as EnemyStatus;
+    }
+
+
+
+    public PlayerStatus GetAlivePlayer()
+    {
+        foreach (Status s in playerParty.Members)
         {
-            Debug.LogWarning("[SKILL] Invalid player or target");
-            EndPlayerAction();
-            return;
+            PlayerStatus p = s as PlayerStatus;
+
+            if (p != null && p.IsAlive)
+                return p;
         }
 
-        var skillData = player.GetSkillByIndex(skillIndex);
-        if (skillData == null)
-        {
-            Debug.LogWarning($"[SKILL] No skill at index {skillIndex}");
-            EndPlayerAction();
-            return;
-        }
-
-        var attack = skillData.CreateInstance();
-
-        Debug.Log($"[SKILL] {player.entityName} uses {skillData.attackName}");
-        Debug.Log($"[TARGET] -> {target.entityName}");
-
-        attack.Use(player, target);
-
-        EndPlayerAction();
+        return null;
     }
 
     // ================= TARGET INPUT =================
-    public void ChangeTargetInput(int dir)
-    {
-        if (!CanAcceptInput) return;
 
-        int old = currentUnit.LastTargetSlot;
-        int next = StepToNextAliveEnemy(old, dir);
+    public void ChangeTargetInput(int direction)
+    {
+        if (currentUnit == null)
+            return;
+
+        int current = currentUnit.LastTargetSlot;
+
+        int next = GetNextAliveEnemySlot(current, direction);
+
         currentUnit.LastTargetSlot = next;
 
-        var t = enemyParty.GetMemberBySlot(next);
-        if (t != null)
-            Debug.Log($"[TARGET] {currentUnit.entityName}: {old} -> {next} ({t.entityName})");
+        EnemyStatus target =
+            enemyParty.GetMemberBySlot(next) as EnemyStatus;
+
+        if (target != null)
+        {
+            Debug.Log("Target changed to: " + target.entityName);
+        }
     }
 
-    private int StepToNextAliveEnemy(int start, int dir)
+
+
+    private int GetNextAliveEnemySlot(int start, int direction)
     {
         int count = enemyParty.Members.Count;
+
         int index = start;
 
         for (int i = 0; i < count; i++)
         {
-            index = (index + dir + count) % count;
-            var e = enemyParty.GetMemberBySlot(index) as EnemyStatus;
+            index = (index + direction + count) % count;
+
+            EnemyStatus e =
+                enemyParty.GetMemberBySlot(index) as EnemyStatus;
+
             if (e != null && e.IsAlive)
                 return index;
         }
+
         return start;
     }
 
-    private void RetargetIfDead_Player()
+    private void RetargetIfDead()
     {
-        var target = GetEnemyBySlot(currentUnit.LastTargetSlot);
-        if (target != null) return;
-
-        int newSlot = StepToNextAliveEnemy(currentUnit.LastTargetSlot, +1);
-        currentUnit.LastTargetSlot = newSlot;
-
-        var t = enemyParty.GetMemberBySlot(newSlot);
-        if (t != null)
-            Debug.Log($"[RETARGET] New target: {t.entityName}");
-    }
-
-    // ================= ENEMY =================
-    private IEnumerator EnemyTurn()
-    {
-        var target = playerParty.Members
-            .OfType<PlayerStatus>()
-            .FirstOrDefault(p => p.IsAlive);
-
-        if (target != null)
+        for (int i = 0; i < enemyParty.Members.Count; i++)
         {
-            Debug.Log($"[ENEMY ATTACK] {currentUnit.entityName} -> {target.entityName}");
-            target.TakeDamage(currentUnit, currentUnit.Atk);
+            EnemyStatus e =
+                enemyParty.GetMemberBySlot(i) as EnemyStatus;
+
+            if (e != null && e.IsAlive)
+            {
+                currentUnit.LastTargetSlot = i;
+                return;
+            }
         }
-
-        yield return null;
     }
 
-    // ================= TARGET =================
-    private EnemyStatus GetEnemyBySlot(int slot)
-    {
-        var e = enemyParty.GetMemberBySlot(slot) as EnemyStatus;
-        return (e != null && e.IsAlive) ? e : null;
-    }
 
-    // ================= END =================
+
     private bool CheckEndBattle()
     {
         if (enemyParty.IsDefeated())
         {
             State = BattleState.Win;
-            Debug.Log("[BATTLE RESULT] PLAYER WIN");
+
+            Debug.Log("PLAYER WIN");
+
             return true;
         }
+
 
         if (playerParty.IsDefeated())
         {
             State = BattleState.Lose;
-            Debug.Log("[BATTLE RESULT] PLAYER LOSE");
+
+            Debug.Log("PLAYER LOSE");
+
             return true;
         }
 
-        return false;
-    }
 
-    private void EndPlayerAction()
-    {
-        Debug.Log($"[END ACTION] {currentUnit.entityName}");
-        RetargetIfDead_Player();
-        waitingForPlayerAction = false;
+        return false;
     }
 }
