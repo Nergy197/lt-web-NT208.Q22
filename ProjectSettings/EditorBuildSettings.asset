@@ -6,11 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/MapScene.unity
-    guid: 6886b6622a896d2429382ce652a1ba90
+    path: Assets/Scenes/MapScene.unity
+    guid: b40a258a6d562ce49a0a3ca74939d97d
   - enabled: 1
-    path: Assets/BattleScene.unity
-    guid: d222e02e416a9614daccf03d104d12b8
+    path: Assets/Scenes/BattleScene.unity
+    guid: baf12ec06eb9bc04ca482e2272b04f43
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: a2aae26292cee4965811d0bd03a1745b, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -1,0 +1,14 @@
+[
+ {
+  "_id": "player001",
+
+  "party":
+  [
+   {
+    "entityName":"Hero",
+    "level":1,
+    "currentHP":100
+   }
+  ]
+ }
+]

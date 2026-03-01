@@ -71,3 +71,4 @@ sysinfo.txt
 # OPTIONAL – LOCAL CONFIG
 ####################################
 *.env
+node_modules/
