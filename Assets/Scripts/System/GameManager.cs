@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -7,6 +8,8 @@ using System.Text;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+
+
 
     [Header("Backend")]
     public string loadURL =
@@ -16,13 +19,17 @@ public class GameManager : MonoBehaviour
         "http://127.0.0.1:3000/player/save";
 
 
+
     [Header("Runtime")]
     public Party playerParty;
+
+    public bool isLoaded = false;
+
 
 
     [Header("Database")]
     public List<PlayerData> playerDatabase =
-        new List<PlayerData>();
+        new();
 
 
 
@@ -58,47 +65,41 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Loading Player Party...");
 
+
         UnityWebRequest req =
             UnityWebRequest.Get(loadURL);
+
 
         yield return req.SendWebRequest();
 
 
-        if (req.result !=
-            UnityWebRequest.Result.Success)
+
+        if (req.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError(req.error);
-
             yield break;
         }
 
 
+
         CreatePartyFromJson(
             req.downloadHandler.text);
+
+
+
+        isLoaded = true;
+
+
+        Debug.Log("PLAYER READY");
     }
 
 
 
     void CreatePartyFromJson(string json)
     {
-        if (string.IsNullOrEmpty(json))
-        {
-            Debug.LogError("JSON is empty");
-
-            return;
-        }
-
-
         PlayerSave save =
             JsonUtility.FromJson<PlayerSave>(json);
 
-
-        if (save == null)
-        {
-            Debug.LogError("Save is NULL");
-
-            return;
-        }
 
 
         playerParty =
@@ -110,6 +111,7 @@ public class GameManager : MonoBehaviour
         {
             PlayerData data =
                 FindPlayerData(unit.entityName);
+
 
 
             if (data == null)
@@ -128,18 +130,37 @@ public class GameManager : MonoBehaviour
 
 
 
+            if (status == null)
+            {
+                Debug.LogError(
+                "CreateStatus FAILED");
+
+                continue;
+            }
+
+
+
             status.SetLevel(unit.level);
+
 
 
             status.currentHP =
                 Mathf.Clamp(
-                    unit.currentHP,
-                    1,
-                    status.MaxHP);
+                unit.currentHP,
+                1,
+                status.MaxHP);
 
 
 
             playerParty.AddMember(status);
+
+
+
+            Debug.Log(
+            $"Loaded {status.entityName} | " +
+            $"HP:{status.currentHP}/{status.MaxHP} | " +
+            $"Skills:{status.SkillCount} | " +
+            $"Basic:{status.BasicAttack}");
         }
 
 
@@ -160,10 +181,8 @@ public class GameManager : MonoBehaviour
 
 
             if (p.entityName == name)
-
                 return p;
         }
-
 
         return null;
     }
@@ -173,6 +192,22 @@ public class GameManager : MonoBehaviour
     public Party GetPlayerParty()
     {
         return playerParty;
+    }
+
+
+
+    // ================= START GAME =================
+
+    public void StartGame()
+    {
+        if (!isLoaded)
+        {
+            Debug.Log("Player not loaded yet");
+            return;
+        }
+
+
+        SceneManager.LoadScene("MapScene");
     }
 
 
@@ -188,15 +223,6 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SaveRoutine()
     {
-        if (playerParty == null)
-        {
-            Debug.LogError("Party NULL");
-
-            yield break;
-        }
-
-
-
         PlayerSave save =
             new PlayerSave();
 
@@ -276,8 +302,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("SAVE FAILED");
+            Debug.LogError(
+            "SAVE FAILED: "
+            + req.error);
         }
     }
-
 }

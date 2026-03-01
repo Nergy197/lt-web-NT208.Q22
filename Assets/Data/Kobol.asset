@@ -17,3 +17,5 @@ MonoBehaviour:
   baseAtk: 6
   baseDef: 1
   baseSpd: 2
+  attacks:
+  - {fileID: 11400000, guid: 9427e603b69a6475ab5c507d55bfac68, type: 2}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InputController : MonoBehaviour
 {
@@ -10,14 +11,13 @@ public class InputController : MonoBehaviour
 
     private BattleManager battle;
 
-
-
     // ================= INIT =================
 
-    private void Awake()
+    void Awake()
     {
         if (Instance != null)
         {
+            Debug.Log("[INPUT] Destroy duplicate");
             Destroy(gameObject);
             return;
         }
@@ -26,189 +26,119 @@ public class InputController : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
 
-
         Input = new GameInput();
 
         Input.Enable();
-
 
         BindBattleInput();
 
         BindSkillMenuInput();
 
-
         SetMode(InputMode.Map);
+
+        Debug.Log("[INPUT] Awake complete");
     }
 
-
-
-    // ================= SET MODE =================
+    // ================= MODE =================
 
     public void SetMode(InputMode mode)
     {
-        if (Input == null)
-            return;
-
-
-        // QUAN TRỌNG: disable ALL trước
-        Input.Map.Disable();
-
-        Input.Battle.Disable();
-
-        Input.SkillMenu.Disable();
-
-
         Mode = mode;
 
+        Input.Map.Disable();
+        Input.Battle.Disable();
+        Input.SkillMenu.Disable();
 
         switch (mode)
         {
             case InputMode.Map:
 
                 Input.Map.Enable();
-
                 break;
-
 
             case InputMode.Battle:
 
                 Input.Battle.Enable();
-
                 break;
-
 
             case InputMode.BattleSkillMenu:
 
                 Input.SkillMenu.Enable();
-
                 break;
         }
-
 
         Debug.Log("[INPUT MODE] " + mode);
     }
 
+    // ================= BIND =================
 
-
-    // ================= BIND BATTLE =================
-
-    public void BindBattleManager(
-        BattleManager bm)
+    public void BindBattleManager(BattleManager bm)
     {
         battle = bm;
 
         SetMode(InputMode.Battle);
 
-        Debug.Log("Battle Input Bound");
+        Debug.Log("[INPUT] Battle bound");
     }
-
-
 
     public void UnbindBattleManager()
     {
         battle = null;
 
-
-        // QUAN TRỌNG
-        Input.Battle.Disable();
-
-        Input.SkillMenu.Disable();
-
-
         SetMode(InputMode.Map);
 
-        Debug.Log("Battle Input Unbound");
+        Debug.Log("[INPUT] Battle unbound");
     }
 
+    // ================= BATTLE INPUT =================
 
-
-    // ================= DESTROY =================
-
-    private void OnDestroy()
-    {
-        Cleanup();
-    }
-
-
-    private void OnDisable()
-    {
-        Cleanup();
-    }
-
-
-
-    private void Cleanup()
-    {
-        if (Input == null)
-            return;
-
-
-        Input.Map.Disable();
-
-        Input.Battle.Disable();
-
-        Input.SkillMenu.Disable();
-
-
-        Input.Disable();
-
-
-        Input.Dispose();
-
-
-        Input = null;
-
-
-        Debug.Log("GameInput Cleaned");
-    }
-
-
-
-    // ================= INPUT EVENTS =================
-
-    private void BindBattleInput()
+    void BindBattleInput()
     {
         Input.Battle.BasicAttack.performed += ctx =>
         {
-            if (battle != null)
+            Debug.Log("[INPUT] BasicAttack");
 
-                battle.SelectBasicAttack();
+            battle?.SelectBasicAttack();
         };
-
 
         Input.Battle.NextTarget.performed += ctx =>
         {
-            if (battle != null)
+            Debug.Log("[INPUT] NextTarget");
 
-                battle.ChangeTargetInput(1);
+            battle?.ChangeTargetInput(1);
         };
-
 
         Input.Battle.PrevTarget.performed += ctx =>
         {
-            if (battle != null)
+            Debug.Log("[INPUT] PrevTarget");
 
-                battle.ChangeTargetInput(-1);
+            battle?.ChangeTargetInput(-1);
+        };
+
+        Input.Battle.Parry.performed += ctx =>
+        {
+            Debug.Log("[INPUT] Parry");
+
+            battle?.RequestParry();
         };
     }
 
+    // ================= SKILL INPUT =================
 
-
-    private void BindSkillMenuInput()
+    void BindSkillMenuInput()
     {
         Input.SkillMenu.Skill1.performed += ctx =>
         {
-            if (battle != null)
+            Debug.Log("[INPUT] Skill1");
 
-                battle.UseSkill(0);
+            battle?.UseSkill(0);
         };
-
 
         Input.SkillMenu.Skill2.performed += ctx =>
         {
-            if (battle != null)
+            Debug.Log("[INPUT] Skill2");
 
-                battle.UseSkill(1);
+            battle?.UseSkill(1);
         };
     }
 

@@ -18,3 +18,7 @@ MonoBehaviour:
   baseDef: 2
   baseSpd: 6
   maxAP: 100
+  attacks:
+  - {fileID: 11400000, guid: 1a7ac849509a149c0960bbb0789e4494, type: 2}
+  - {fileID: 11400000, guid: 92a59899ef2a741a1be760414b12ad8f, type: 2}
+  - {fileID: 11400000, guid: ed83b083a95cc492497b11806644dc6d, type: 2}

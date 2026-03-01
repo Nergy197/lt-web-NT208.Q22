@@ -6,13 +6,16 @@ public class MapManager : MonoBehaviour
 {
     public static MapManager Instance;
 
+
+
     [Header("Current Map")]
     public Mapdata currentMap;
 
 
+
     [Header("Battle Data")]
 
-    // DANH SÁCH ENEMY thay vì 1 enemy
+    // ScriptableObject EnemyData
     public List<EnemyData> currentEnemies =
         new List<EnemyData>();
 
@@ -21,12 +24,16 @@ public class MapManager : MonoBehaviour
     public bool isInBattle = false;
 
 
+
     [Header("Random Encounter")]
+
     public float encounterRate = 0.02f;
 
     private int stepsSinceLastEncounter = 0;
 
 
+
+    // ================= INIT =================
 
     private void Awake()
     {
@@ -44,6 +51,8 @@ public class MapManager : MonoBehaviour
 
 
 
+    // ================= SET MAP =================
+
     public void SetMap(Mapdata map)
     {
         currentMap = map;
@@ -51,9 +60,11 @@ public class MapManager : MonoBehaviour
         Debug.Log(
         $"[MapManager] Loaded Map: {map.mapName}");
 
+
         currentMap.GenerateRandomEnemyEffects();
 
         currentMap.GenerateRandomPlayerEffects();
+
 
         stepsSinceLastEncounter = 0;
 
@@ -62,14 +73,19 @@ public class MapManager : MonoBehaviour
 
 
 
+    // ================= CHECK ENCOUNTER =================
+
     public void CheckForEncounter()
     {
         if (isInBattle)
             return;
 
 
-        if (currentMap == null ||
-            currentMap.possibleEnemies.Count == 0)
+        if (currentMap == null)
+            return;
+
+
+        if (currentMap.possibleEnemies.Count == 0)
             return;
 
 
@@ -95,26 +111,36 @@ public class MapManager : MonoBehaviour
             Random.Range(1, 4);
 
 
+
         for (int i = 0; i < count; i++)
         {
             EnemyData enemy =
                 currentMap.GetRandomEnemy();
 
 
+            if (enemy == null)
+                continue;
+
+
             currentEnemies.Add(enemy);
         }
+
 
 
         currentMapLevel =
             currentMap.enemyLevel;
 
 
-        Debug.Log("Encounter:");
+
+        Debug.Log("===== ENCOUNTER =====");
+
 
         foreach (var e in currentEnemies)
         {
-            Debug.Log("- " + e.name);
+            Debug.Log(
+            $"Enemy: {e.entityName} | Attacks: {e.attacks.Count}");
         }
+
 
 
         StartBattle();
@@ -130,22 +156,32 @@ public class MapManager : MonoBehaviour
             return;
 
 
+        if (currentEnemies.Count == 0)
+        {
+            Debug.LogError("No enemies to battle");
+            return;
+        }
+
+
         isInBattle = true;
 
 
-        SceneManager
-        .LoadScene("BattleScene");
+        SceneManager.LoadScene("BattleScene");
     }
 
 
+
+    // ================= END BATTLE =================
 
     public void EndBattle()
     {
         isInBattle = false;
 
 
-        SceneManager
-        .LoadScene("MapScene");
+        currentEnemies.Clear();
+
+
+        SceneManager.LoadScene("MapScene");
     }
 
 
@@ -155,7 +191,11 @@ public class MapManager : MonoBehaviour
     public void ApplyPlayerEffects(
         PlayerStatus player)
     {
-        currentMap?.ApplyPlayerEffects(player);
+        if (currentMap == null)
+            return;
+
+
+        currentMap.ApplyPlayerEffects(player);
     }
 
 
@@ -163,7 +203,43 @@ public class MapManager : MonoBehaviour
     public void ApplyEnemyEffects(
         EnemyStatus enemy)
     {
-        currentMap?.ApplyEnemyEffects(enemy);
+        if (currentMap == null)
+            return;
+
+
+        currentMap.ApplyEnemyEffects(enemy);
     }
 
+
+
+    // ================= CREATE ENEMY STATUS =================
+
+    public List<EnemyStatus> CreateEnemyStatuses()
+    {
+        List<EnemyStatus> list =
+            new List<EnemyStatus>();
+
+
+        foreach (var data in currentEnemies)
+        {
+            if (data == null)
+                continue;
+
+
+            EnemyStatus enemy =
+                data.CreateStatus();
+
+
+            enemy.SetLevel(currentMapLevel);
+
+
+            ApplyEnemyEffects(enemy);
+
+
+            list.Add(enemy);
+        }
+
+
+        return list;
+    }
 }

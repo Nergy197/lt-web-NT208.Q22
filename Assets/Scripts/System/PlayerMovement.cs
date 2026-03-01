@@ -1,40 +1,72 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerMovementTest : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 5f;
+    private InputController input;
 
     private Rigidbody2D rb;
+
     private Vector2 move;
+
+    public float speed = 5f;
+
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    void Update()
-    {
-        if (InputController.Instance == null)
-            return;
 
-        if (InputController.Instance.Mode != InputMode.Map)
+    void Start()
+    {
+        input = InputController.Instance;
+
+        if (input == null)
         {
-            move = Vector2.zero;
+            Debug.LogError("InputController NULL");
             return;
         }
 
-        move = InputController.Instance.Input.Map.Moves.ReadValue<Vector2>();
+
+        input.Input.Map.Moves.performed += ctx =>
+        {
+            move = ctx.ReadValue<Vector2>();
+
+            Debug.Log("MOVE INPUT: " + move);
+            TryEncounter();
+        };
+
+
+        input.Input.Map.Moves.canceled += ctx =>
+        {
+            move = Vector2.zero;
+        };
+
+
+        Debug.Log("PLAYER READY");
     }
+
+
 
     void FixedUpdate()
     {
         rb.linearVelocity = move * speed;
+    }
 
-        // Check for random encounter if moving
-        if (move != Vector2.zero && MapManager.Instance != null)
+
+
+    // ================= ENCOUNTER =================
+
+    void TryEncounter()
+    {
+        if (MapManager.Instance == null)
         {
-            MapManager.Instance.CheckForEncounter();
+            Debug.LogWarning("MapManager NULL");
+            return;
         }
+
+        MapManager.Instance.CheckForEncounter();
     }
 }

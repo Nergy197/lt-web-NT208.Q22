@@ -7,7 +7,7 @@
    {
     "entityName":"Hero",
     "level":1,
-    "currentHP":100
+    "currentHP":1000
    }
   ]
  }

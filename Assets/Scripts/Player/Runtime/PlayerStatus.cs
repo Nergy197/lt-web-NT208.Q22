@@ -27,23 +27,41 @@ public class PlayerStatus : Status
 
     public IReadOnlyList<PlayerAttackData> Skills => skills;
 
+    public int SkillCount => skills.Count;
+
     public PlayerAttackData BasicAttack { get; private set; }
 
 
 
     public void AddSkill(PlayerAttackData attack)
     {
-        if (attack == null) return;
+        if (attack == null)
+        {
+            Debug.LogError("AddSkill NULL");
+            return;
+        }
 
-        if (skills.Contains(attack)) return;
+        if (skills.Contains(attack))
+            return;
+
 
         skills.Add(attack);
 
-        if (attack.apCost == 0 && BasicAttack == null)
-        {
-            BasicAttack = attack;
 
-            Debug.Log($"BasicAttack = {attack.attackName}");
+        Debug.Log(
+        $"AddSkill: {attack.attackName} | AP:{attack.apCost}");
+
+
+        // Detect Basic Attack
+        if (attack.apCost == 0)
+        {
+            if (BasicAttack == null)
+            {
+                BasicAttack = attack;
+
+                Debug.Log(
+                $"BasicAttack SET: {attack.attackName}");
+            }
         }
     }
 
@@ -59,6 +77,30 @@ public class PlayerStatus : Status
 
 
 
+    // ================= INIT =================
+
+    public void InitializeSkills(List<PlayerAttackData> list)
+    {
+        skills.Clear();
+
+        BasicAttack = null;
+
+
+        foreach (var atk in list)
+        {
+            AddSkill(atk);
+        }
+
+
+        if (BasicAttack == null)
+        {
+            Debug.LogError(
+            $"{entityName} has NO BASIC ATTACK");
+        }
+    }
+
+
+
     // ================= PARRY SYSTEM =================
 
     private bool parryWindowOpen = false;
@@ -69,8 +111,6 @@ public class PlayerStatus : Status
 
 
 
-    // EnemyAttack gọi
-
     public void OpenParryWindow()
     {
         parryWindowOpen = true;
@@ -78,41 +118,26 @@ public class PlayerStatus : Status
         parryRequested = false;
 
         WasParried = false;
-
-        Debug.Log("[PARRY] Window OPEN");
     }
 
 
-
-    // EnemyAttack gọi
 
     public void CloseParryWindow()
     {
         parryWindowOpen = false;
-
-        Debug.Log("[PARRY] Window CLOSED");
     }
 
 
-
-    // InputController gọi khi player bấm SPACE
 
     public void RequestParry()
     {
         if (!parryWindowOpen)
-        {
-            Debug.Log("[PARRY] Ignored (no window)");
             return;
-        }
 
         parryRequested = true;
-
-        Debug.Log("[PARRY] Requested");
     }
 
 
-
-    // EnemyAttack gọi tại impact frame
 
     public bool ConsumeParry()
     {
@@ -127,8 +152,6 @@ public class PlayerStatus : Status
         parryRequested = false;
 
         WasParried = true;
-
-        Debug.Log("[PARRY] SUCCESS");
 
         return true;
     }
@@ -165,7 +188,8 @@ public class PlayerStatus : Status
 
         RestoreFullAP();
 
-        Debug.Log($"{entityName} level up {level}");
+        Debug.Log(
+        $"{entityName} level up {level}");
     }
 
 
