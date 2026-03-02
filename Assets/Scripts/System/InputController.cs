@@ -121,6 +121,13 @@ public class InputController : MonoBehaviour
 
             battle?.RequestParry();
         };
+
+        Input.Battle.OpenSkillMenu.performed += ctx =>
+        {
+            Debug.Log("[INPUT] OpenSkillMenu");
+
+            SetMode(InputMode.BattleSkillMenu);
+        };
     }
 
     // ================= SKILL INPUT =================
@@ -139,6 +146,13 @@ public class InputController : MonoBehaviour
             Debug.Log("[INPUT] Skill2");
 
             battle?.UseSkill(1);
+        };
+
+        Input.SkillMenu.Cancel.performed += ctx =>
+        {
+            Debug.Log("[INPUT] CancelSkillMenu");
+
+            SetMode(InputMode.Battle);
         };
     }
 

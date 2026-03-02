@@ -116,6 +116,13 @@ public class BattleManager : MonoBehaviour
 
         var enemy = GetEnemyTarget();
 
+        if (enemy == null)
+        {
+            Debug.LogWarning("[BATTLE] No valid enemy target for basic attack");
+            waitingForPlayerAction = false;
+            return;
+        }
+
         Debug.Log("[ACTION] Attack " + enemy.entityName);
 
         player.BasicAttack
@@ -131,7 +138,21 @@ public class BattleManager : MonoBehaviour
 
         var enemy = GetEnemyTarget();
 
+        if (enemy == null)
+        {
+            Debug.LogWarning("[BATTLE] No valid enemy target for skill");
+            waitingForPlayerAction = false;
+            return;
+        }
+
         var skill = player.GetSkillByIndex(index);
+
+        if (skill == null)
+        {
+            Debug.LogWarning($"[BATTLE] Skill at index {index} not found for {player.entityName}");
+            waitingForPlayerAction = false;
+            return;
+        }
 
         skill
         .CreateInstance()
