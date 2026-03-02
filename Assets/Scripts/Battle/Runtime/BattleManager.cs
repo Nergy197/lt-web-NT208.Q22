@@ -15,15 +15,25 @@ public class BattleManager : MonoBehaviour
 
     private const float BASE_DELAY = 100f;
 
+    // ================= DEBUG HELPER =================
+
+    void Log(string msg)
+    {
+        Debug.Log(msg);
+
+        if (BattleDebugUI.Instance != null)
+            BattleDebugUI.Instance.Log(msg);
+    }
+
     // ================= START =================
 
     IEnumerator Start()
     {
-        Debug.Log("[BATTLE] Start");
+        Log("[BATTLE] Start");
 
         yield return new WaitUntil(() =>
-        GameManager.Instance != null &&
-        GameManager.Instance.isLoaded);
+            GameManager.Instance != null &&
+            GameManager.Instance.isLoaded);
 
         playerParty = GameManager.Instance.GetPlayerParty();
 
@@ -46,7 +56,7 @@ public class BattleManager : MonoBehaviour
 
             enemyParty.AddMember(e);
 
-            Debug.Log("[BATTLE] Spawn enemy: " + e.entityName);
+            Log("[BATTLE] Spawn enemy: " + e.entityName);
         }
     }
 
@@ -60,6 +70,8 @@ public class BattleManager : MonoBehaviour
 
         AddParty(enemyParty);
 
+        Log("[BATTLE] Init Complete");
+
         StartCoroutine(BattleLoop());
     }
 
@@ -70,6 +82,8 @@ public class BattleManager : MonoBehaviour
             s.ResetForBattle(BASE_DELAY);
 
             timeline.Add(s);
+
+            Log("[BATTLE] Added: " + s.entityName);
         }
     }
 
@@ -87,7 +101,7 @@ public class BattleManager : MonoBehaviour
             if (!currentUnit.IsAlive)
                 continue;
 
-            Debug.Log("[TURN] " + currentUnit.entityName);
+            Log("[TURN] " + currentUnit.entityName);
 
             if (currentUnit is PlayerStatus)
                 yield return PlayerTurn();
@@ -104,10 +118,10 @@ public class BattleManager : MonoBehaviour
     {
         waitingForPlayerAction = true;
 
-        Debug.Log("[TURN] Player waiting");
+        Log("[TURN] Waiting Player Action");
 
         yield return new WaitUntil(() =>
-        waitingForPlayerAction == false);
+            waitingForPlayerAction == false);
     }
 
     public void SelectBasicAttack()
@@ -118,16 +132,17 @@ public class BattleManager : MonoBehaviour
 
         if (enemy == null)
         {
-            Debug.LogWarning("[BATTLE] No valid enemy target for basic attack");
+            Log("[ERROR] No enemy target");
+
             waitingForPlayerAction = false;
             return;
         }
 
-        Debug.Log("[ACTION] Attack " + enemy.entityName);
+        Log("[ACTION] Attack → " + enemy.entityName);
 
         player.BasicAttack
-        .CreateInstance()
-        .Use(player, enemy);
+            .CreateInstance()
+            .Use(player, enemy);
 
         waitingForPlayerAction = false;
     }
@@ -140,7 +155,8 @@ public class BattleManager : MonoBehaviour
 
         if (enemy == null)
         {
-            Debug.LogWarning("[BATTLE] No valid enemy target for skill");
+            Log("[ERROR] No enemy target");
+
             waitingForPlayerAction = false;
             return;
         }
@@ -149,14 +165,16 @@ public class BattleManager : MonoBehaviour
 
         if (skill == null)
         {
-            Debug.LogWarning($"[BATTLE] Skill at index {index} not found for {player.entityName}");
+            Log("[ERROR] Skill not found");
+
             waitingForPlayerAction = false;
             return;
         }
 
-        skill
-        .CreateInstance()
-        .Use(player, enemy);
+        Log("[ACTION] Skill → " + skill.name);
+
+        skill.CreateInstance()
+            .Use(player, enemy);
 
         waitingForPlayerAction = false;
     }
@@ -166,6 +184,8 @@ public class BattleManager : MonoBehaviour
         var player = currentUnit as PlayerStatus;
 
         player?.RequestParry();
+
+        Log("[ACTION] Parry");
     }
 
     // ================= ENEMY =================
@@ -176,11 +196,11 @@ public class BattleManager : MonoBehaviour
 
         var player = GetAlivePlayer();
 
-        Debug.Log("[ENEMY] Attack " + player.entityName);
+        Log("[ENEMY] Attack → " + player.entityName);
 
         enemy.GetRandomAttack()
-        .CreateInstance()
-        .Use(enemy, player);
+            .CreateInstance()
+            .Use(enemy, player);
 
         yield return new WaitForSeconds(1f);
     }
@@ -207,7 +227,7 @@ public class BattleManager : MonoBehaviour
 
     public void ChangeTargetInput(int dir)
     {
-        Debug.Log("[TARGET] change " + dir);
+        Log("[TARGET] Change → " + dir);
     }
 
     // ================= TIMELINE =================
@@ -215,12 +235,11 @@ public class BattleManager : MonoBehaviour
     Status GetNextUnit()
     {
         timeline.Sort((a, b) =>
-        a.NextTurnTime.CompareTo(b.NextTurnTime));
+            a.NextTurnTime.CompareTo(b.NextTurnTime));
 
         var unit = timeline[0];
 
-        unit.NextTurnTime +=
-        BASE_DELAY / unit.Spd;
+        unit.NextTurnTime += BASE_DELAY / unit.Spd;
 
         return unit;
     }
@@ -231,13 +250,13 @@ public class BattleManager : MonoBehaviour
     {
         if (enemyParty.IsDefeated())
         {
-            Debug.Log("[BATTLE] WIN");
+            Log("[BATTLE] WIN");
             return true;
         }
 
         if (playerParty.IsDefeated())
         {
-            Debug.Log("[BATTLE] LOSE");
+            Log("[BATTLE] LOSE");
             return true;
         }
 
@@ -246,7 +265,7 @@ public class BattleManager : MonoBehaviour
 
     void EndBattle()
     {
-        Debug.Log("[BATTLE] End");
+        Log("[BATTLE] End");
 
         GameManager.Instance.SavePlayerParty();
 
@@ -254,5 +273,4 @@ public class BattleManager : MonoBehaviour
 
         MapManager.Instance.EndBattle();
     }
-
 }

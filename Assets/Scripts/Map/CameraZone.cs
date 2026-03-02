@@ -1,5 +1,5 @@
 using UnityEngine;
-using Unity.Cinemachine; // Lưu ý: Unity 6 dùng namespace mới này
+using Unity.Cinemachine; 
 
 public class CameraZone : MonoBehaviour
 {
