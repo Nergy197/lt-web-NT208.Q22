@@ -9,29 +9,16 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-
-
     [Header("Backend")]
-    public string loadURL =
-        "http://127.0.0.1:3000/player/player001";
-
-    public string saveURL =
-        "http://127.0.0.1:3000/player/save";
-
-
+    public string loadURL = "/player/player001";
+    public string saveURL = "/player/save";
 
     [Header("Runtime")]
     public Party playerParty;
-
     public bool isLoaded = false;
 
-
-
     [Header("Database")]
-    public List<PlayerData> playerDatabase =
-        new();
-
-
+    public List<PlayerData> playerDatabase = new();
 
     // ================= INIT =================
 
@@ -40,7 +27,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -50,14 +36,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-
     void Start()
     {
         StartCoroutine(LoadPlayerParty());
     }
-
-
 
     // ================= LOAD =================
 
@@ -65,112 +47,62 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Loading Player Party...");
 
-
-        UnityWebRequest req =
-            UnityWebRequest.Get(loadURL);
-
-
+        UnityWebRequest req = UnityWebRequest.Get(loadURL);
         yield return req.SendWebRequest();
-
-
 
         if (req.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError(req.error);
+            Debug.LogError("LOAD FAILED: " + req.error);
             yield break;
         }
 
-
-
-        CreatePartyFromJson(
-            req.downloadHandler.text);
-
-
+        CreatePartyFromJson(req.downloadHandler.text);
 
         isLoaded = true;
-
-
         Debug.Log("PLAYER READY");
     }
 
-
-
     void CreatePartyFromJson(string json)
     {
-        PlayerSave save =
-            JsonUtility.FromJson<PlayerSave>(json);
+        PlayerSave save = JsonUtility.FromJson<PlayerSave>(json);
 
-
-
-        playerParty =
-            new Party(PartyType.Player);
-
-
+        playerParty = new Party(PartyType.Player);
 
         foreach (UnitSave unit in save.party)
         {
-            PlayerData data =
-                FindPlayerData(unit.entityName);
-
-
+            PlayerData data = FindPlayerData(unit.entityName);
 
             if (data == null)
             {
-                Debug.LogError(
-                "Missing PlayerData: "
-                + unit.entityName);
-
+                Debug.LogError("Missing PlayerData: " + unit.entityName);
                 continue;
             }
 
-
-
-            PlayerStatus status =
-                data.CreateStatus();
-
-
+            PlayerStatus status = data.CreateStatus();
 
             if (status == null)
             {
-                Debug.LogError(
-                "CreateStatus FAILED");
-
+                Debug.LogError("CreateStatus FAILED");
                 continue;
             }
 
-
-
             status.SetLevel(unit.level);
 
-
-
             status.currentHP =
-                Mathf.Clamp(
-                unit.currentHP,
-                1,
-                status.MaxHP);
-
-
+                Mathf.Clamp(unit.currentHP, 1, status.MaxHP);
 
             playerParty.AddMember(status);
 
-
-
             Debug.Log(
-            $"Loaded {status.entityName} | " +
-            $"HP:{status.currentHP}/{status.MaxHP} | " +
-            $"Skills:{status.SkillCount} | " +
-            $"Basic:{status.BasicAttack}");
+                $"Loaded {status.entityName} | " +
+                $"HP:{status.currentHP}/{status.MaxHP} | " +
+                $"Skills:{status.SkillCount} | " +
+                $"Basic:{status.BasicAttack}"
+            );
         }
 
-
-
-        Debug.Log(
-        "Party Loaded SUCCESS: "
-        + playerParty.Members.Count);
+        Debug.Log("Party Loaded SUCCESS: " + playerParty.Members.Count);
     }
-
-
 
     PlayerData FindPlayerData(string name)
     {
@@ -179,7 +111,6 @@ public class GameManager : MonoBehaviour
             if (p == null)
                 continue;
 
-
             if (p.entityName == name)
                 return p;
         }
@@ -187,14 +118,10 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-
-
     public Party GetPlayerParty()
     {
         return playerParty;
     }
-
-
 
     // ================= START GAME =================
 
@@ -206,11 +133,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-
         SceneManager.LoadScene("MapScene");
     }
-
-
 
     // ================= SAVE =================
 
@@ -219,92 +143,41 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SaveRoutine());
     }
 
-
-
     IEnumerator SaveRoutine()
     {
-        PlayerSave save =
-            new PlayerSave();
-
-
+        PlayerSave save = new PlayerSave();
         save._id = "player001";
-
-
-        save.party =
-            new List<UnitSave>();
-
-
+        save.party = new List<UnitSave>();
 
         foreach (Status s in playerParty.Members)
         {
-            UnitSave unit =
-                new UnitSave();
-
-
-            unit.entityName =
-                s.entityName;
-
-
-            unit.level =
-                s.level;
-
-
-            unit.currentHP =
-                s.currentHP;
-
-
+            UnitSave unit = new UnitSave();
+            unit.entityName = s.entityName;
+            unit.level = s.level;
+            unit.currentHP = s.currentHP;
             save.party.Add(unit);
         }
 
+        string json = JsonUtility.ToJson(save);
 
+        UnityWebRequest req = new UnityWebRequest(saveURL, "POST");
 
-        string json =
-            JsonUtility.ToJson(save);
+        byte[] body = Encoding.UTF8.GetBytes(json);
 
+        req.uploadHandler = new UploadHandlerRaw(body);
+        req.downloadHandler = new DownloadHandlerBuffer();
 
-
-        UnityWebRequest req =
-            new UnityWebRequest(
-                saveURL,
-                "POST");
-
-
-
-        byte[] body =
-            Encoding.UTF8.GetBytes(json);
-
-
-
-        req.uploadHandler =
-            new UploadHandlerRaw(body);
-
-
-
-        req.downloadHandler =
-            new DownloadHandlerBuffer();
-
-
-
-        req.SetRequestHeader(
-            "Content-Type",
-            "application/json");
-
-
+        req.SetRequestHeader("Content-Type", "application/json");
 
         yield return req.SendWebRequest();
 
-
-
-        if (req.result ==
-            UnityWebRequest.Result.Success)
+        if (req.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("SAVE SUCCESS");
         }
         else
         {
-            Debug.LogError(
-            "SAVE FAILED: "
-            + req.error);
+            Debug.LogError("SAVE FAILED: " + req.error);
         }
     }
 }

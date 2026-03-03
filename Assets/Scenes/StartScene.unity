@@ -435,8 +435,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84a330fea47eedb42bcdecda034f7f9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  loadURL: http://127.0.0.1:3000/player/player001
-  saveURL: http://127.0.0.1:3000/player/save
+  loadURL: /player/player001
+  saveURL: /player/save
   isLoaded: 0
   playerDatabase:
   - {fileID: 11400000, guid: b9c401194e8dd4105bee390ab30974f0, type: 2}
