@@ -128,6 +128,13 @@ public class InputController : MonoBehaviour
 
             SetMode(InputMode.BattleSkillMenu);
         };
+
+        Input.Battle.OpenItemMenu.performed += ctx =>
+        {
+            Debug.Log("[INPUT] HealAlly (Q)");
+
+            battle?.HealAlly();
+        };
     }
 
     // ================= SKILL INPUT =================
@@ -139,6 +146,8 @@ public class InputController : MonoBehaviour
             Debug.Log("[INPUT] Skill1");
 
             battle?.UseSkill(0);
+
+            SetMode(InputMode.Battle);
         };
 
         Input.SkillMenu.Skill2.performed += ctx =>
@@ -146,6 +155,8 @@ public class InputController : MonoBehaviour
             Debug.Log("[INPUT] Skill2");
 
             battle?.UseSkill(1);
+
+            SetMode(InputMode.Battle);
         };
 
         Input.SkillMenu.Cancel.performed += ctx =>

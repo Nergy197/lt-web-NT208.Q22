@@ -151,6 +151,12 @@ public class BattleManager : MonoBehaviour
     {
         var player = currentUnit as PlayerStatus;
 
+        if (player == null)
+        {
+            Log("[ERROR] Current unit is not a player");
+            return;
+        }
+
         var enemy = GetEnemyTarget();
 
         if (enemy == null)
@@ -165,13 +171,21 @@ public class BattleManager : MonoBehaviour
 
         if (skill == null)
         {
-            Log("[ERROR] Skill not found");
+            Log("[ERROR] Skill[" + index + "] not found (player has " + player.SkillCount + " skills)");
 
             waitingForPlayerAction = false;
             return;
         }
 
-        Log("[ACTION] Skill → " + skill.name);
+        if (!player.CanUseAP(skill.apCost))
+        {
+            Log("[ERROR] Not enough AP: need " + skill.apCost + ", have " + player.currentAP);
+
+            waitingForPlayerAction = false;
+            return;
+        }
+
+        Log("[ACTION] Skill[" + index + "] → " + skill.attackName + " (AP: " + skill.apCost + ")");
 
         skill.CreateInstance()
             .Use(player, enemy);
@@ -186,6 +200,59 @@ public class BattleManager : MonoBehaviour
         player?.RequestParry();
 
         Log("[ACTION] Parry");
+    }
+
+    // ================= HEAL =================
+
+    public void HealAlly()
+    {
+        var player = currentUnit as PlayerStatus;
+
+        if (player == null)
+        {
+            Log("[ERROR] Current unit is not a player");
+            return;
+        }
+
+        var ally = GetLowestHPAlly();
+
+        if (ally == null)
+        {
+            Log("[ERROR] No ally to heal");
+
+            waitingForPlayerAction = false;
+            return;
+        }
+
+        int healAmount = Mathf.RoundToInt(player.Atk * 0.5f);
+
+        int hpBefore = ally.currentHP;
+
+        ally.Heal(healAmount);
+
+        Log("[ACTION] Heal → " + ally.entityName
+            + " (HP: " + hpBefore + " → " + ally.currentHP + ")");
+
+        waitingForPlayerAction = false;
+    }
+
+    PlayerStatus GetLowestHPAlly()
+    {
+        PlayerStatus lowest = null;
+
+        foreach (var p in playerParty.Members)
+        {
+            if (!p.IsAlive) continue;
+
+            var ps = p as PlayerStatus;
+
+            if (ps == null) continue;
+
+            if (lowest == null || ps.currentHP < lowest.currentHP)
+                lowest = ps;
+        }
+
+        return lowest;
     }
 
     // ================= ENEMY =================
