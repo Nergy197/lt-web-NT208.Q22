@@ -22,6 +22,18 @@ public class EnemyStatus : Status
         this.isAggressive = isAggressive;
     }
 
+    // ================= BATTLE LIFECYCLE =================
+
+    /// <summary>
+    /// BUG FIX: Enemy luôn reset HP về Max khi vào battle.
+    /// Player KHÔNG override → giữ HP từ save data.
+    /// </summary>
+    public override void ResetForBattle(float baseDelay)
+    {
+        base.ResetForBattle(baseDelay);
+        currentHP = MaxHP;
+    }
+
     // ================= ATTACK =================
     public void AddAttack(EnemyAttackData attack)
     {

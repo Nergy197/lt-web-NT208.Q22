@@ -48,6 +48,15 @@ public class PlayerMovement : MonoBehaviour
             UpdateAnimation();
         };
 
+        // Khôi phục vị trí nhân vật sau khi quay từ BattleScene về
+        if (GameManager.Instance != null &&
+            GameManager.Instance.TryGetLastMapPosition(out Vector2 savedPos))
+        {
+            transform.position = savedPos;
+            GameManager.Instance.ClearMapPosition();
+            Debug.Log($"[PlayerMovement] Restored position: {savedPos}");
+        }
+
         Debug.Log("PLAYER READY");
     }
 

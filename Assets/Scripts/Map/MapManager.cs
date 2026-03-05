@@ -166,6 +166,15 @@ public class MapManager : MonoBehaviour
         isInBattle = true;
 
 
+        // Lưu vị trí nhân vật trước khi chuyển sang BattleScene
+        GameObject playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null && GameManager.Instance != null)
+        {
+            GameManager.Instance.SetLastMapPosition(playerObj.transform.position);
+            Debug.Log($"[MapManager] Saved player position: {playerObj.transform.position}");
+        }
+
+
         SceneManager.LoadScene("BattleScene");
     }
 

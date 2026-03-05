@@ -1,9 +1,15 @@
 const express = require("express");
+const cors = require("cors");
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
 
 const app = express();
+
+/* ================= MIDDLEWARE ================= */
+
+// BUG FIX: Thêm CORS để Unity WebGL có thể gọi API
+app.use(cors());
 app.use(express.json());
 
 /* ================= DATABASE ================= */
@@ -59,6 +65,10 @@ app.get("/player/:id", async (req, res) => {
       .collection("players")
       .findOne({ _id: req.params.id });
 
+    if (!player) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
     res.json(player);
   } catch (err) {
     console.error(err);
@@ -68,6 +78,10 @@ app.get("/player/:id", async (req, res) => {
 
 app.post("/player/save", async (req, res) => {
   try {
+    if (!req.body._id) {
+      return res.status(400).json({ error: "Missing _id" });
+    }
+
     await db.collection("players").updateOne(
       { _id: req.body._id },
       { $set: { party: req.body.party } },
@@ -121,15 +135,14 @@ client.connect()
 
     app.listen(3000, () => {
       console.log("Server running on port 3000");
+
+      // BUG FIX: SPA fallback phải đăng ký SAU tất cả API routes
+      // và SAU khi server đã listen, tránh override các route API
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "public/index.html"));
+      });
     });
   })
   .catch(err => {
     console.error(err);
   });
-
-/* ================= SPA FALLBACK ================= */
-
-// Nếu không phải API thì trả về index.html (Unity WebGL)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});

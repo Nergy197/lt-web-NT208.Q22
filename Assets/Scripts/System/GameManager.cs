@@ -10,12 +10,38 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("Backend")]
+    // Editor: tự động dùng "http://localhost:3000" | WebGL build: dùng URL tương đối ""
+    [HideInInspector] public string backendBaseURL = "";
     public string loadURL = "/player/player001";
     public string saveURL = "/player/save";
+
+    string FullURL(string path) => backendBaseURL + path;
 
     [Header("Runtime")]
     public Party playerParty;
     public bool isLoaded = false;
+
+    [Header("Map Position")]
+    // Vị trí nhân vật trên map trước khi vào battle (persist qua scene load)
+    private Vector2 lastMapPosition = Vector2.zero;
+    private bool hasMapPosition = false;
+
+    public void SetLastMapPosition(Vector2 pos)
+    {
+        lastMapPosition = pos;
+        hasMapPosition = true;
+    }
+
+    public bool TryGetLastMapPosition(out Vector2 pos)
+    {
+        pos = lastMapPosition;
+        return hasMapPosition;
+    }
+
+    public void ClearMapPosition()
+    {
+        hasMapPosition = false;
+    }
 
     [Header("Database")]
     public List<PlayerData> playerDatabase = new();
@@ -28,6 +54,16 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            // Tự động chọn base URL:
+            // - WebGL build: URL tương đối, không cần base
+            // - Unity Editor / Standalone: dùng localhost
+#if UNITY_EDITOR || UNITY_STANDALONE
+            backendBaseURL = "http://localhost:3000";
+#else
+            backendBaseURL = ""; // WebGL: relative URL
+#endif
+            Debug.Log("[GM] backendBaseURL = " + backendBaseURL);
         }
         else
         {
@@ -45,18 +81,22 @@ public class GameManager : MonoBehaviour
 
     IEnumerator LoadPlayerParty()
     {
-        Debug.Log("Loading Player Party...");
+        string url = FullURL(loadURL);
+        Debug.Log("[LOAD] Requesting: " + url);
 
-        UnityWebRequest req = UnityWebRequest.Get(loadURL);
+        UnityWebRequest req = UnityWebRequest.Get(url);
         yield return req.SendWebRequest();
 
         if (req.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("LOAD FAILED: " + req.error);
+            Debug.LogError("[LOAD FAILED] " + req.error + " | URL: " + url);
             yield break;
         }
 
-        CreatePartyFromJson(req.downloadHandler.text);
+        string json = req.downloadHandler.text;
+        Debug.Log("[LOAD] Raw JSON: " + json);
+
+        CreatePartyFromJson(json);
 
         isLoaded = true;
         Debug.Log("PLAYER READY");
@@ -66,6 +106,18 @@ public class GameManager : MonoBehaviour
     {
         PlayerSave save = JsonUtility.FromJson<PlayerSave>(json);
 
+        if (save == null)
+        {
+            Debug.LogError("[LOAD] JsonUtility parse thất bại. JSON: " + json);
+            return;
+        }
+
+        if (save.party == null || save.party.Count == 0)
+        {
+            Debug.LogError("[LOAD] save.party rỗng hoặc null. JSON: " + json);
+            return;
+        }
+
         playerParty = new Party(PartyType.Player);
 
         foreach (UnitSave unit in save.party)
@@ -74,7 +126,7 @@ public class GameManager : MonoBehaviour
 
             if (data == null)
             {
-                Debug.LogError("Missing PlayerData: " + unit.entityName);
+                Debug.LogError("[LOAD] Missing PlayerData: " + unit.entityName);
                 continue;
             }
 
@@ -82,26 +134,24 @@ public class GameManager : MonoBehaviour
 
             if (status == null)
             {
-                Debug.LogError("CreateStatus FAILED");
+                Debug.LogError("[LOAD] CreateStatus FAILED for: " + unit.entityName);
                 continue;
             }
 
             status.SetLevel(unit.level);
-
-            status.currentHP =
-                Mathf.Clamp(unit.currentHP, 1, status.MaxHP);
+            status.currentHP = Mathf.Clamp(unit.currentHP, 1, status.MaxHP);
 
             playerParty.AddMember(status);
 
             Debug.Log(
-                $"Loaded {status.entityName} | " +
+                $"[LOAD] {status.entityName} | " +
+                $"Lv:{status.level} | " +
                 $"HP:{status.currentHP}/{status.MaxHP} | " +
-                $"Skills:{status.SkillCount} | " +
-                $"Basic:{status.BasicAttack}"
+                $"Skills:{status.SkillCount}"
             );
         }
 
-        Debug.Log("Party Loaded SUCCESS: " + playerParty.Members.Count);
+        Debug.Log("[LOAD] Party OK: " + playerParty.Members.Count + " member(s)");
     }
 
     PlayerData FindPlayerData(string name)
@@ -160,7 +210,8 @@ public class GameManager : MonoBehaviour
 
         string json = JsonUtility.ToJson(save);
 
-        UnityWebRequest req = new UnityWebRequest(saveURL, "POST");
+        string url = FullURL(saveURL);
+        UnityWebRequest req = new UnityWebRequest(url, "POST");
 
         byte[] body = Encoding.UTF8.GetBytes(json);
 

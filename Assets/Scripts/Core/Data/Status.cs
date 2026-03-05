@@ -71,11 +71,13 @@ public abstract class Status
     // ================= BATTLE LIFECYCLE =================
 
     /// <summary>
-    /// Gọi khi bắt đầu mỗi trận battle
+    /// Gọi khi bắt đầu mỗi trận battle.
+    /// BUG FIX: Không reset currentHP ở đây — HP của Player đã được load từ DB.
+    /// Chỉ reset NextTurnTime phục vụ timeline.
+    /// EnemyStatus sẽ override để reset HP về Max.
     /// </summary>
     public virtual void ResetForBattle(float baseDelay)
     {
-        currentHP = MaxHP;
         NextTurnTime = baseDelay / Mathf.Max(1, Spd);
     }
 
@@ -109,6 +111,22 @@ public abstract class Status
         }
     }
 
+    /// <summary>
+    /// BUG FIX: Poison damage bất qua Def (true damage per turn).
+    /// </summary>
+    public void TakePoisonDamage(int damage)
+    {
+        if (!IsAlive) return;
+
+        currentHP -= Mathf.Max(1, damage);
+
+        if (currentHP <= 0)
+        {
+            currentHP = 0;
+            Die();
+        }
+    }
+
     protected virtual void Die()
     {
         Debug.Log($"{entityName} died");
@@ -119,56 +137,66 @@ public abstract class Status
 
     private readonly List<StatusEffect> activeEffects = new List<StatusEffect>();
 
+    /// <summary>
+    /// BUG FIX: Expose active effects để BattleManager xử lý Poison/Stun mỗi lượt.
+    /// </summary>
+    public IReadOnlyList<StatusEffect> GetActiveEffects() => activeEffects;
+
     public virtual void ApplyStatusEffect(StatusEffect effect)
     {
         if (effect == null) return;
 
-        activeEffects.Add(effect);
+        // Clone để tránh ghi đè duration lên ScriptableObject gốc
+        // (duration-- trong UpdateEffectDurations sẽ chỉ ảnh hưởng bản sao)
+        StatusEffect clone = effect.Clone();
 
-        switch (effect.effectType)
+        activeEffects.Add(clone);
+
+        switch (clone.effectType)
         {
             case StatusEffectType.BuffHeal:
-                Heal(effect.value);
+                Heal(clone.value);
                 break;
 
             case StatusEffectType.BuffAtk:
-                baseAtk += effect.value;
+                baseAtk += clone.value;
                 break;
 
             case StatusEffectType.BuffDef:
-                baseDef += effect.value;
+                baseDef += clone.value;
                 break;
 
             case StatusEffectType.BuffSpd:
-                baseSpd += effect.value;
+                baseSpd += clone.value;
                 break;
 
             case StatusEffectType.BuffHP:
-                baseHP += effect.value;
+                baseHP += clone.value;
                 break;
 
             case StatusEffectType.DebuffAtk:
-                baseAtk -= effect.value;
+                baseAtk -= clone.value;
                 break;
 
             case StatusEffectType.DebuffDef:
-                baseDef -= effect.value;
+                baseDef -= clone.value;
                 break;
 
             case StatusEffectType.DebuffSpd:
-                baseSpd -= effect.value;
+                baseSpd -= clone.value;
                 break;
 
             case StatusEffectType.Poison:
-                // xử lý theo turn trong BattleManager
+                // xử lý theo turn trong BattleManager.ProcessTurnEffects
                 break;
 
             case StatusEffectType.Stun:
-                // xử lý skip turn trong BattleManager
+                // xử lý skip turn trong BattleManager.ProcessTurnEffects
                 break;
         }
 
-        Debug.Log($"[EFFECT] {entityName} gained {effect.effectName}");
+        Debug.Log($"[EFFECT] {entityName} gained {clone.effectName} " +
+                  $"(dur:{clone.duration}, val:{clone.value})");
     }
 
     public void UpdateEffectDurations()

@@ -8,11 +8,11 @@ public class EnemyAttackHit
 {
     public bool canBeParried = true;
 
-    // thời gian trước khi đòn đánh xảy ra
-    public float windUpTime = 10f;
+    // thời gian chuẩn bị trước khi đòn đánh xảy ra (giây)
+    public float windUpTime = 0.5f;
 
-    // thời gian player có thể parry
-    public float parryWindowDuration = 10f;
+    // thời gian player có thểấn parry (giây)
+    public float parryWindowDuration = 0.8f;
 
     public float damageMultiplier = 1f;
 

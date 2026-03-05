@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public class BattleManager : MonoBehaviour
 {
+    // Expose cho PlayerAttack.FindLowestHPAlly()
+    public static BattleManager Instance { get; private set; }
+    public Party PlayerParty => playerParty;
+
     private Party playerParty;
     private Party enemyParty;
 
@@ -11,7 +15,13 @@ public class BattleManager : MonoBehaviour
 
     private Status currentUnit;
 
-    private bool waitingForPlayerAction;
+    private bool waitingForPlayerAction = false;
+
+    // FIX: Cở cờ xử lý attack coroutine chưa kết thúc
+    private bool waitingForAttackFinish = false;
+
+    // BUG FIX: Track win/lose để trao EXP đúng lúc
+    private bool playerWon = false;
 
     private const float BASE_DELAY = 100f;
 
@@ -29,7 +39,12 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator Start()
     {
+        Instance = this;
+
         Log("[BATTLE] Start");
+
+        // Đăng ký lắng nghe event attack kết thúc
+        BattleEvents.OnAttackFinished += OnAttackFinished;
 
         yield return new WaitUntil(() =>
             GameManager.Instance != null &&
@@ -42,6 +57,20 @@ public class BattleManager : MonoBehaviour
         InputController.Instance.BindBattleManager(this);
 
         InitBattle();
+    }
+
+    void OnDestroy()
+    {
+        // Hủy đăng ký khi bị destroy (chuyển scene)
+        BattleEvents.OnAttackFinished -= OnAttackFinished;
+
+        if (Instance == this) Instance = null;
+    }
+
+    void OnAttackFinished()
+    {
+        waitingForAttackFinish = false;
+        Log("[ATTACK] Finished");
     }
 
     // ================= LOAD ENEMY =================
@@ -103,13 +132,58 @@ public class BattleManager : MonoBehaviour
 
             Log("[TURN] " + currentUnit.entityName);
 
+            // BUG FIX: Xử lý Poison damage và Stun trước khi unit hành động
+            bool isStunned = ProcessTurnEffects(currentUnit);
+
+            if (isStunned)
+            {
+                Log($"[STUN] {currentUnit.entityName} bị Stun, mất lượt!");
+                currentUnit.UpdateEffectDurations();
+                continue;
+            }
+
             if (currentUnit is PlayerStatus)
                 yield return PlayerTurn();
             else
                 yield return EnemyTurn();
+
+            // BUG FIX: Cập nhật thời gian còn lại của status effects sau mỗi lượt
+            currentUnit.UpdateEffectDurations();
         }
 
         EndBattle();
+    }
+
+    // BUG FIX: Xử lý Poison và Stun mỗi đầu lượt
+    // Trả về true nếu unit bị Stun (mất lượt)
+    bool ProcessTurnEffects(Status unit)
+    {
+        bool stunned = false;
+
+        // Đọc danh sách effects qua reflection-free cách: dùng interface
+        // Vì activeEffects là private, ta xử lý thông qua method mới trong Status
+        var effects = unit.GetActiveEffects();
+
+        foreach (var effect in effects)
+        {
+            switch (effect.effectType)
+            {
+                case StatusEffectType.Poison:
+                    if (unit.IsAlive && effect.value > 0)
+                    {
+                        int poisonDmg = effect.value;
+                        unit.TakePoisonDamage(poisonDmg);
+                        Log($"[POISON] {unit.entityName} mất {poisonDmg} HP (còn {unit.currentHP})");
+                    }
+                    break;
+
+                case StatusEffectType.Stun:
+                    stunned = true;
+                    break;
+            }
+        }
+
+        return stunned;
     }
 
     // ================= PLAYER =================
@@ -117,15 +191,25 @@ public class BattleManager : MonoBehaviour
     IEnumerator PlayerTurn()
     {
         waitingForPlayerAction = true;
+        waitingForAttackFinish = false;
 
         Log("[TURN] Waiting Player Action");
 
-        yield return new WaitUntil(() =>
-            waitingForPlayerAction == false);
+        // Bước 1: Đợi player chọn hành động
+        yield return new WaitUntil(() => !waitingForPlayerAction);
+
+        // Bước 2: Đợi attack coroutine chạy xong (nếu có)
+        if (waitingForAttackFinish)
+        {
+            Log("[TURN] Waiting for attack to finish...");
+            yield return new WaitUntil(() => !waitingForAttackFinish);
+        }
     }
 
     public void SelectBasicAttack()
     {
+        if (!waitingForPlayerAction) return; // chặn input khi không phải lượt player
+
         var player = currentUnit as PlayerStatus;
 
         var enemy = GetEnemyTarget();
@@ -133,22 +217,26 @@ public class BattleManager : MonoBehaviour
         if (enemy == null)
         {
             Log("[ERROR] No enemy target");
-
             waitingForPlayerAction = false;
             return;
         }
 
         Log("[ACTION] Attack → " + enemy.entityName);
 
+        // Đánh dấu đang chờ attack coroutine TRƯỚC khi gọi .Use()
+        waitingForAttackFinish = true;
         player.BasicAttack
             .CreateInstance()
             .Use(player, enemy);
 
+        // Cho phép BattleLoop đi tiếp — PlayerTurn sẽ chờ nốt waitingForAttackFinish
         waitingForPlayerAction = false;
     }
 
     public void UseSkill(int index)
     {
+        if (!waitingForPlayerAction) return; // chặn input khi không phải lượt player
+
         var player = currentUnit as PlayerStatus;
 
         if (player == null)
@@ -162,7 +250,6 @@ public class BattleManager : MonoBehaviour
         if (enemy == null)
         {
             Log("[ERROR] No enemy target");
-
             waitingForPlayerAction = false;
             return;
         }
@@ -172,7 +259,6 @@ public class BattleManager : MonoBehaviour
         if (skill == null)
         {
             Log("[ERROR] Skill[" + index + "] not found (player has " + player.SkillCount + " skills)");
-
             waitingForPlayerAction = false;
             return;
         }
@@ -180,13 +266,14 @@ public class BattleManager : MonoBehaviour
         if (!player.CanUseAP(skill.apCost))
         {
             Log("[ERROR] Not enough AP: need " + skill.apCost + ", have " + player.currentAP);
-
             waitingForPlayerAction = false;
             return;
         }
 
         Log("[ACTION] Skill[" + index + "] → " + skill.attackName + " (AP: " + skill.apCost + ")");
 
+        // Đánh dấu đang chờ attack coroutine TRƯỚC khi gọi .Use()
+        waitingForAttackFinish = true;
         skill.CreateInstance()
             .Use(player, enemy);
 
@@ -263,13 +350,25 @@ public class BattleManager : MonoBehaviour
 
         var player = GetAlivePlayer();
 
+        if (player == null)
+        {
+            Log("[ENEMY] No alive player target");
+            yield break;
+        }
+
         Log("[ENEMY] Attack → " + player.entityName);
+
+        // Đánh dấu đợi attack coroutine (giống PlayerTurn)
+        // Parry window nằm BÊN TRONG EnemyAttack.Execute(), nên phải đợi nó xong
+        waitingForAttackFinish = true;
 
         enemy.GetRandomAttack()
             .CreateInstance()
             .Use(enemy, player);
 
-        yield return new WaitForSeconds(1f);
+        // Đợi parry window + toàn bộ attack hoàn thành
+        // (OnAttackFinished sẽ set waitingForAttackFinish = false)
+        yield return new WaitUntil(() => !waitingForAttackFinish);
     }
 
     // ================= TARGET =================
@@ -318,12 +417,14 @@ public class BattleManager : MonoBehaviour
         if (enemyParty.IsDefeated())
         {
             Log("[BATTLE] WIN");
+            playerWon = true;
             return true;
         }
 
         if (playerParty.IsDefeated())
         {
             Log("[BATTLE] LOSE");
+            playerWon = false;
             return true;
         }
 
@@ -333,6 +434,31 @@ public class BattleManager : MonoBehaviour
     void EndBattle()
     {
         Log("[BATTLE] End");
+
+        // BUG FIX: Trao EXP cho toàn bộ player còn sống nếu thắng
+        if (playerWon)
+        {
+            int totalExp = 0;
+
+            foreach (var e in enemyParty.Members)
+            {
+                var es = e as EnemyStatus;
+                if (es != null)
+                    totalExp += es.GetExpReward();
+            }
+
+            Log($"[EXP] Earned {totalExp} EXP total");
+
+            foreach (var p in playerParty.Members)
+            {
+                var ps = p as PlayerStatus;
+                if (ps != null && ps.IsAlive)
+                {
+                    ps.GainExp(totalExp);
+                    Log($"[EXP] {ps.entityName}: +{totalExp} EXP (Level {ps.level})");
+                }
+            }
+        }
 
         GameManager.Instance.SavePlayerParty();
 

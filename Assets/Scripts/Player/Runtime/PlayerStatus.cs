@@ -41,28 +41,28 @@ public class PlayerStatus : Status
             return;
         }
 
-        if (skills.Contains(attack))
-            return;
-
-
-        skills.Add(attack);
-
-
-        Debug.Log(
-        $"AddSkill: {attack.attackName} | AP:{attack.apCost}");
-
-
-        // Detect Basic Attack
+        // Basic Attack (apCost == 0): chỉ lưu vào BasicAttack, KHÔNG thêm vào skills[]
+        // → skill menu sẽ không hiển thị basic attack
         if (attack.apCost == 0)
         {
             if (BasicAttack == null)
             {
                 BasicAttack = attack;
-
-                Debug.Log(
-                $"BasicAttack SET: {attack.attackName}");
+                Debug.Log($"BasicAttack SET: {attack.attackName}");
             }
+            else
+            {
+                Debug.LogWarning($"BasicAttack đã có ({BasicAttack.attackName}), bỏ qua: {attack.attackName}");
+            }
+            return; // Không thêm vào skills[]
         }
+
+        if (skills.Contains(attack))
+            return;
+
+        skills.Add(attack);
+
+        Debug.Log($"AddSkill: {attack.attackName} | AP:{attack.apCost} | Index:{skills.Count - 1}");
     }
 
 

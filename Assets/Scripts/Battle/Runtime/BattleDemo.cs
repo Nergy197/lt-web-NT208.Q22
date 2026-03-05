@@ -85,7 +85,7 @@ public class BattleDemo : MonoBehaviour
 
         player.InitializeSkills(skills);
 
-        Log($"[DEMO] Player: HP={player.HP}, AP={player.currentAP}, Skills={player.SkillCount}");
+        Log($"[DEMO] Player: HP={player.currentHP}/{player.MaxHP}, AP={player.currentAP}, Skills={player.SkillCount}");
     }
 
     void SetupEnemy()
@@ -101,7 +101,7 @@ public class BattleDemo : MonoBehaviour
             Log("[DEMO] No enemyData assigned → using fallback Goblin");
         }
 
-        Log($"[DEMO] Enemy: {enemy.entityName} HP={enemy.HP}");
+        Log($"[DEMO] Enemy: {enemy.entityName} HP={enemy.currentHP}/{enemy.MaxHP}");
     }
 
     // =========================================================
@@ -114,9 +114,9 @@ public class BattleDemo : MonoBehaviour
             return;
         }
 
-        int hpBefore = enemy.HP;
+        int hpBefore = enemy.currentHP;
         player.BasicAttack.CreateInstance().Use(player, enemy);
-        Log($"[DEMO] BasicAttack done. Enemy HP: {hpBefore} → {enemy.HP}");
+        Log($"[DEMO] BasicAttack done. Enemy HP: {hpBefore} → {enemy.currentHP}");
     }
 
     void TestSkill(int index)
@@ -134,10 +134,10 @@ public class BattleDemo : MonoBehaviour
             return;
         }
 
-        int hpBefore = enemy.HP;
+        int hpBefore = enemy.currentHP;
         int apBefore = player.currentAP;
         skill.CreateInstance().Use(player, enemy);
-        Log($"[DEMO] Skill[{index}] '{skill.attackName}' done. AP: {apBefore}→{player.currentAP}, EnemyHP: {hpBefore}→{enemy.HP}");
+        Log($"[DEMO] Skill[{index}] '{skill.attackName}' done. AP: {apBefore}→{player.currentAP}, EnemyHP: {hpBefore}→{enemy.currentHP}");
     }
 
     void TestSkillNoAP()

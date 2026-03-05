@@ -15,6 +15,15 @@ public class StatusEffect
         value = val;
         duration = dur;
     }
+
+    /// <summary>
+    /// Tạo bản sao độc lập — bắt buộc dùng trước khi thêm vào activeEffects
+    /// để tránh ghi đè lên dữ liệu ScriptableObject gốc.
+    /// </summary>
+    public StatusEffect Clone()
+    {
+        return new StatusEffect(effectName, effectType, value, duration);
+    }
 }
 
 public enum StatusEffectType
