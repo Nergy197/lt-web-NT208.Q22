@@ -107,32 +107,35 @@ public class PlayerStatus : Status
 
     private bool parryRequested = false;
 
+    private float parryCooldownEndTime = 0f;
+
     public bool WasParried { get; private set; }
-
-
 
     public void OpenParryWindow()
     {
         parryWindowOpen = true;
-
         parryRequested = false;
-
         WasParried = false;
     }
-
-
 
     public void CloseParryWindow()
     {
         parryWindowOpen = false;
     }
 
-
-
     public void RequestParry()
     {
-        if (!parryWindowOpen)
+        // Đang bị phạt không cho ấn
+        if (Time.time < parryCooldownEndTime)
             return;
+
+        // Cửa sổ chưa mở mà cố ấn -> Phạt penalty 1 giây
+        if (!parryWindowOpen)
+        {
+            parryCooldownEndTime = Time.time + 1.0f;
+            Debug.Log($"[PARRY PENALTY] {entityName} bấm hụt/spam! Bị khóa parry 1 giây.");
+            return;
+        }
 
         parryRequested = true;
     }

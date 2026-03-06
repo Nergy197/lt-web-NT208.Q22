@@ -22,6 +22,7 @@ public class BattleManager : MonoBehaviour
 
     // BUG FIX: Track win/lose để trao EXP đúng lúc
     private bool playerWon = false;
+    private bool playerFled = false;
 
     private const float BASE_DELAY = 100f;
 
@@ -286,16 +287,53 @@ public class BattleManager : MonoBehaviour
 
     public void RequestParry()
     {
-        var player = currentUnit as PlayerStatus;
-
-        player?.RequestParry();
-
-        Log("[ACTION] Parry");
+        foreach (var p in playerParty.Members)
+        {
+            var ps = p as PlayerStatus;
+            if (ps != null && ps.IsAlive)
+            {
+                ps.RequestParry();
+            }
+        }
+        Log("[ACTION] Parry Requested");
     }
 
-    // NOTE: HealAlly đã được chuyển sang PlayerAttackData (skill hệ thống).
-    // Tạo PlayerAttackData với hits rỗng + effect BuffHeal target LowestHPAlly trong Inspector.
+    // ================= FLEE =================
 
+    public void TryFlee()
+    {
+        if (!waitingForPlayerAction) return;
+
+        var player = currentUnit as PlayerStatus;
+        if (player == null) return;
+
+        Log("[ACTION] Try Flee");
+
+        // Tìm quái vật nhanh nhất
+        int maxEnemySpd = 1;
+        foreach (var e in enemyParty.Members)
+        {
+            if (e.IsAlive && e.Spd > maxEnemySpd)
+                maxEnemySpd = e.Spd;
+        }
+
+        // Tỉ lệ cơ bản 50%, cộng trừ 5% cho mỗi điểm chênh lệch Speed
+        float chance = 0.5f + (player.Spd - maxEnemySpd) * 0.05f;
+        chance = Mathf.Clamp(chance, 0.1f, 0.95f); // Tối thiểu 10%, tối đa 95%
+
+        if (Random.value <= chance)
+        {
+            Log("[FLEE] Success! Escaping battle...");
+            playerFled = true;
+            // Không đợi attack finish vì flee kết thúc battle ngay
+        }
+        else
+        {
+            Log("[FLEE] Failed! Turn wasted.");
+        }
+
+        waitingForPlayerAction = false;
+    }
 
     // ================= ENEMY =================
 
@@ -405,6 +443,12 @@ public class BattleManager : MonoBehaviour
 
     bool CheckEndBattle()
     {
+        if (playerFled)
+        {
+            // playerWon vẫn false -> không nhận EXP
+            return true;
+        }
+
         if (enemyParty.IsDefeated())
         {
             Log("[BATTLE] WIN");
