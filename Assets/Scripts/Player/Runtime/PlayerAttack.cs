@@ -36,6 +36,12 @@ public class PlayerAttack : AttackBase
     // Bắt buộc implement từ AttackBase
     public override void Use(Status attacker, Status target)
     {
+        if (attacker.SpawnedModel != null)
+        {
+            var visual = attacker.SpawnedModel.GetComponent<UnitVisual>();
+            if (visual != null) visual.PlayAttack();
+        }
+
         this.attacker = attacker;
         this.target = target;
         StartAttack(attacker, target);

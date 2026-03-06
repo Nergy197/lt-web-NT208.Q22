@@ -13,4 +13,16 @@ MonoBehaviour:
   m_Name: EnemyAttackData 1
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackData
   attackName: New Enemy Attack
-  hits: []
+  hits:
+  - canBeParried: 1
+    windUpTime: 0
+    damageMultiplier: 0
+    repeat: 0
+    delayBetweenHits: 0
+    timingOffsets: []
+  - canBeParried: 1
+    windUpTime: 0
+    damageMultiplier: 0
+    repeat: 0
+    delayBetweenHits: 0
+    timingOffsets: []

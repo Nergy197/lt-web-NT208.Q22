@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Hero
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   entityName: Hero
+  battlePrefab: {fileID: 6725201968008359588, guid: 3ad0bdd3f4c711d458387eeb2f22de7a, type: 3}
   baseHP: 30
   baseAtk: 8
   baseDef: 2

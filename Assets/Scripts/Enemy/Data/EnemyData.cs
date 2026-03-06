@@ -7,6 +7,9 @@ public class EnemyData : ScriptableObject
     [Header("Info")]
     public string entityName = "New Enemy";
 
+    [Header("Battle Visual")]
+    public GameObject battlePrefab; // Model/Sprite được spawn khi vào battle
+
 
     [Header("Base Stats")]
     public int baseHP = 20;
@@ -22,13 +25,11 @@ public class EnemyData : ScriptableObject
 
     public EnemyStatus CreateStatus()
     {
-        var e =
-            new EnemyStatus(
-                entityName,
-                baseHP,
-                baseAtk,
-                baseDef,
-                baseSpd);
+        var e = new EnemyStatus(
+            entityName, baseHP, baseAtk, baseDef, baseSpd
+        );
+
+        e.battlePrefab = battlePrefab;
 
 
         // ADD ATTACK

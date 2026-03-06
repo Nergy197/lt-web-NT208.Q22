@@ -10,6 +10,7 @@ public abstract class Status
     [NonSerialized] public float NextTurnTime;      // speed-based timeline
     [NonSerialized] public int BattleSlotId = -1;   // slot cố định trong battle
     [NonSerialized] public PartyType PartyType;     // Player / Enemy
+    [NonSerialized] public GameObject SpawnedModel; // Model đã được spawn ra scene
 
     // ================= EVENTS =================
 
@@ -104,6 +105,12 @@ public abstract class Status
         int finalDmg = Mathf.Max(1, rawDamage - Def);
         currentHP -= finalDmg;
 
+        if (SpawnedModel != null)
+        {
+            var visual = SpawnedModel.GetComponent<UnitVisual>();
+            if (visual != null) visual.PlayHit();
+        }
+
         if (currentHP <= 0)
         {
             currentHP = 0;
@@ -130,7 +137,15 @@ public abstract class Status
     protected virtual void Die()
     {
         Debug.Log($"{entityName} died");
+
+        if (SpawnedModel != null)
+        {
+            var visual = SpawnedModel.GetComponent<UnitVisual>();
+            if (visual != null) visual.PlayDie();
+        }
+
         OnDeath?.Invoke(this);
+        EventManager.Publish(GameEvent.UnitDied, this);
     }
 
     // ================= STATUS EFFECT =================
@@ -300,6 +315,7 @@ public abstract class Status
 
         currentHP = Mathf.Clamp(hpAmount, 1, MaxHP);
         OnRevive?.Invoke(this);
+        EventManager.Publish(GameEvent.UnitRevived, this);
 
         Debug.Log($"{entityName} revived with {currentHP} HP");
     }

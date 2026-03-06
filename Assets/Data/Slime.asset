@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Slime
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   entityName: Slime
+  battlePrefab: {fileID: 4967428545325034550, guid: ab0635dc269884a55a3a1f54b92214d6, type: 3}
   baseHP: 20
   baseAtk: 6
   baseDef: 1

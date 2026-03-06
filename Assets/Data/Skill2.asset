@@ -20,3 +20,10 @@ MonoBehaviour:
     repeat: 0
     delayBetweenHits: 0
     timingOffsets: []
+  effects:
+  - effect:
+      effectName: 
+      effectType: 4
+      value: 0
+      duration: 0
+    target: 0

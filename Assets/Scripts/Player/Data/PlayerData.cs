@@ -7,6 +7,9 @@ public class PlayerData : ScriptableObject
     [Header("Info")]
     public string entityName = "New Player";
 
+    [Header("Battle Visual")]
+    public GameObject battlePrefab; // Model/Sprite được spawn khi vào battle
+
 
     [Header("Base Stats")]
     public int baseHP = 30;
@@ -23,15 +26,11 @@ public class PlayerData : ScriptableObject
 
     public PlayerStatus CreateStatus()
     {
-        var p =
-            new PlayerStatus(
-                entityName,
-                baseHP,
-                baseAtk,
-                baseDef,
-                baseSpd,
-                maxAP
-            );
+        var p = new PlayerStatus(
+            entityName, baseHP, baseAtk, baseDef, baseSpd, maxAP
+        );
+
+        p.battlePrefab = battlePrefab;
 
 
         // ================= ADD ATTACK =================

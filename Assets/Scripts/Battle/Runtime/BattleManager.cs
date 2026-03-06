@@ -30,6 +30,19 @@ public class BattleManager : MonoBehaviour
     private int currentTargetIndex = 0;
     private int currentAllyTargetIndex = 0;
 
+    // ================= SPAWN SLOTS =================
+    [Header("Spawn Positions")]
+    [SerializeField] private Transform playerSpawnAnchor;  // Điểm giữa của party player
+    [SerializeField] private Transform enemySpawnAnchor;   // Điểm giữa của party enemy
+    [SerializeField] private float spawnSpacing = 2f;      // Khoảng cách giữa các thành viên
+
+    // ================= UI CURSOR =================
+    [Header("UI System")]
+    [SerializeField] private GameObject targetCursor; // Kéo Prefab/GameObject vòng tròn/trỏ chuột vào đây
+    [SerializeField] private Vector3 cursorOffset = new Vector3(0, 0f, 0); // Đặt Y = 0 để hiện bụng/chính giữa (Thay đổi trong Inspector)
+
+    private bool isTargetingAlly = false; // Thuộc tính để nhận biết lúc nào đang nhắm vào Ally
+
     // ================= DEBUG HELPER =================
 
     void Log(string msg)
@@ -78,6 +91,42 @@ public class BattleManager : MonoBehaviour
         Log("[ATTACK] Finished");
     }
 
+    // ================= UPDATE UI =================
+
+    void Update()
+    {
+        if (targetCursor == null) return;
+
+        // Nếu chưa tới lượt người chơi, luôn tắt con trỏ
+        if (!waitingForPlayerAction)
+        {
+            if (targetCursor.activeSelf) targetCursor.SetActive(false);
+            return;
+        }
+
+        // Hiện và di chuyển con trỏ dựa trên việc đang target Địch hay Ta
+        Status currentSelectedTarget = null;
+
+        if (isTargetingAlly)
+        {
+            currentSelectedTarget = GetAllyTarget();
+        }
+        else
+        {
+            currentSelectedTarget = GetEnemyTarget();
+        }
+
+        if (currentSelectedTarget != null && currentSelectedTarget.SpawnedModel != null)
+        {
+            if (!targetCursor.activeSelf) targetCursor.SetActive(true);
+            targetCursor.transform.position = currentSelectedTarget.SpawnedModel.transform.position + cursorOffset;
+        }
+        else
+        {
+            if (targetCursor.activeSelf) targetCursor.SetActive(false);
+        }
+    }
+
     // ================= LOAD ENEMY =================
 
     void LoadEnemy()
@@ -101,12 +150,63 @@ public class BattleManager : MonoBehaviour
         timeline.Clear();
 
         AddParty(playerParty);
-
         AddParty(enemyParty);
+
+        SpawnParty(playerParty, playerSpawnAnchor, spawnSpacing);
+        SpawnParty(enemyParty, enemySpawnAnchor, spawnSpacing);
 
         Log("[BATTLE] Init Complete");
 
+        EventManager.Publish(GameEvent.BattleStart);
+
         StartCoroutine(BattleLoop());
+    }
+
+    void SpawnParty(Party party, Transform anchor, float spacing)
+    {
+        if (anchor == null)
+        {
+            Log("[WARN] No spawn anchor for " + party.Type);
+            return;
+        }
+
+        int count = party.Members.Count;
+
+        // Căn giữa nhóm xung quanh anchor
+        // VD: 3 người, spacing=2 → positions: -2, 0, +2
+        float totalWidth = (count - 1) * spacing;
+        float startOffset = -totalWidth / 2f;
+
+        for (int i = 0; i < count; i++)
+        {
+            var member = party.Members[i];
+
+            GameObject prefab = null;
+
+            if (member is PlayerStatus ps)
+                prefab = ps.battlePrefab;
+            else if (member is EnemyStatus es)
+                prefab = es.battlePrefab;
+
+            if (prefab == null)
+            {
+                Log("[WARN] No battlePrefab for " + member.entityName);
+                member.BattleSlotId = i;
+                continue;
+            }
+
+            // Tính vị trí spawn dàn theo trục Y (hàng dọc)
+            // Lấy âm (-) để index 0 đứng đầu hàng (ở trên cùng), index tiếp theo xếp dần xuống dưới
+            Vector3 offset = new Vector3(0, -(startOffset + i * spacing), 0);
+            Vector3 spawnPos = anchor.position + offset;
+
+            var model = Object.Instantiate(prefab, spawnPos, anchor.rotation);
+
+            member.SpawnedModel = model;
+            member.BattleSlotId = i;
+
+            Log($"[SPAWN] {member.entityName} → {spawnPos}");
+        }
     }
 
     void AddParty(Party party)
@@ -407,18 +507,23 @@ public class BattleManager : MonoBehaviour
         foreach (var e in enemyParty.Members)
             if (e.IsAlive) aliveEnemies.Add(e as EnemyStatus);
 
-        if (aliveEnemies.Count > 0)
-        {
-            currentTargetIndex = (currentTargetIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
-            Log("[TARGET ENEMY] → " + aliveEnemies[currentTargetIndex].entityName);
-        }
-
         // 2. Cycle qua danh sách ally còn sống (dùng chung 1 input)
         var aliveAllies = new System.Collections.Generic.List<PlayerStatus>();
         foreach (var p in playerParty.Members)
             if (p.IsAlive) aliveAllies.Add(p as PlayerStatus);
 
-        if (aliveAllies.Count > 0)
+        // Chuyển đổi trạng thái nhắm mục tiêu nếu bấm nút nhưng bên kia không còn ai
+        // Hoặc có thể thêm logic phím bấm riêng biệt để đổi giữa Target Địch / Target Ta.
+        // Ở đây mình tạm thời đổi lại trạng thái isTargetingAlly = false mặc định để nó luôn nhảy ở Địch, 
+        // Sau này bạn có thể map nút riêng để bật isTargetingAlly lên true.
+        isTargetingAlly = false;
+
+        if (!isTargetingAlly && aliveEnemies.Count > 0)
+        {
+            currentTargetIndex = (currentTargetIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
+            Log("[TARGET ENEMY] → " + aliveEnemies[currentTargetIndex].entityName);
+        }
+        else if (isTargetingAlly && aliveAllies.Count > 0)
         {
             currentAllyTargetIndex = (currentAllyTargetIndex + dir + aliveAllies.Count) % aliveAllies.Count;
             Log("[TARGET ALLY] → " + aliveAllies[currentAllyTargetIndex].entityName);
@@ -470,27 +575,48 @@ public class BattleManager : MonoBehaviour
     {
         Log("[BATTLE] End");
 
-        // BUG FIX: Trao EXP cho toàn bộ player còn sống nếu thắng
+        // Phát event kết quả trận đấu
+        if (playerFled)
+            EventManager.Publish(GameEvent.BattleFlee);
+        else if (playerWon)
+            EventManager.Publish(GameEvent.BattleWin);
+        else
+            EventManager.Publish(GameEvent.BattleLose);
+
+        // Trao EXP nếu thắng
         if (playerWon)
         {
-            int totalExp = 0;
+            // 1. Tính level trung bình của cả party (để scale EXP)
+            int aliveCount = 0;
+            int levelSum = 0;
+            foreach (var p in playerParty.Members)
+            {
+                var ps = p as PlayerStatus;
+                if (ps != null && ps.IsAlive) { aliveCount++; levelSum += ps.level; }
+            }
+            int avgLevel = aliveCount > 0 ? Mathf.Max(1, levelSum / aliveCount) : 1;
 
+            // 2. Cộng EXP từ tất cả kẻ địch (đã cân bằng theo chênh lệch cấp)
+            int totalExp = 0;
             foreach (var e in enemyParty.Members)
             {
                 var es = e as EnemyStatus;
                 if (es != null)
-                    totalExp += es.GetExpReward();
+                    totalExp += es.GetExpReward(avgLevel);
             }
 
-            Log($"[EXP] Earned {totalExp} EXP total");
+            // 3. Chia đều cho số người còn sống
+            int expPerPlayer = aliveCount > 0 ? Mathf.Max(1, totalExp / aliveCount) : 0;
+
+            Log($"[EXP] Total: {totalExp} | Alive: {aliveCount} | Each: {expPerPlayer} (AvgLv {avgLevel})");
 
             foreach (var p in playerParty.Members)
             {
                 var ps = p as PlayerStatus;
                 if (ps != null && ps.IsAlive)
                 {
-                    ps.GainExp(totalExp);
-                    Log($"[EXP] {ps.entityName}: +{totalExp} EXP (Level {ps.level})");
+                    ps.GainExp(expPerPlayer);
+                    Log($"[EXP] {ps.entityName}: +{expPerPlayer} EXP → Lv{ps.level} ({ps.currentExp}/{ps.expToNextLevel})");
                 }
             }
         }

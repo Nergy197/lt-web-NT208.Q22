@@ -6,6 +6,8 @@ public class PlayerStatus : Status
 {
     // ================= AP SYSTEM =================
 
+    public GameObject battlePrefab; // Set bởi PlayerData.CreateStatus()
+
     public int MaxAP { get; private set; }
 
     public int currentAP;
@@ -151,10 +153,14 @@ public class PlayerStatus : Status
             return false;
 
         parryWindowOpen = false;
-
         parryRequested = false;
-
         WasParried = true;
+
+        if (SpawnedModel != null)
+        {
+            var visual = SpawnedModel.GetComponent<UnitVisual>();
+            if (visual != null) visual.PlayParry();
+        }
 
         return true;
     }
@@ -165,7 +171,9 @@ public class PlayerStatus : Status
 
     public int currentExp = 0;
 
-    public int expToNextLevel => level * 100;
+    // Công thức EXP cần lên cấp — dạng cong để tránh grind nhàm chán
+    // Level 1→10  VD: Lv1=100, Lv5=559, Lv10=1581, Lv20=4472, Lv30=8219
+    public int expToNextLevel => Mathf.RoundToInt(100 * Mathf.Pow(level, 1.5f));
 
 
 
@@ -191,8 +199,9 @@ public class PlayerStatus : Status
 
         RestoreFullAP();
 
-        Debug.Log(
-        $"{entityName} level up {level}");
+        Debug.Log($"{entityName} level up {level}");
+
+        EventManager.Publish(GameEvent.UnitLevelUp, this);
     }
 
 

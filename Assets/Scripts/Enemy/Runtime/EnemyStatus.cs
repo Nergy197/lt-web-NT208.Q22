@@ -7,6 +7,7 @@ public class EnemyStatus : Status
     private readonly List<EnemyAttackData> attacks = new();
     private int baseExpReward = 20;
     private bool isAggressive = true;
+    public GameObject battlePrefab; // Set bởi EnemyData.CreateStatus()
 
     public EnemyStatus(
         string name,
@@ -51,8 +52,21 @@ public class EnemyStatus : Status
     }
 
     // ================= EXP =================
-    public int GetExpReward()
+
+    /// <summary>
+    /// Tính EXP thưởng được cân bằng theo chênh lệch cấp.
+    /// <br/>- Quái cao hơn Player → thưởng EXP nhiều hơn (bonus)
+    /// <br/>- Quái quá yếu hơn Player → penalty (tối thiểu 10%)
+    /// </summary>
+    public int GetExpReward(int playerAvgLevel = 1)
     {
-        return Mathf.RoundToInt(baseExpReward * (1f + level * 0.2f));
+        float baseExp = baseExpReward * (1f + level * 0.2f);
+
+        // Hệ số chênh lệch: mỗi cấp chênh = ±10%
+        int diff = level - playerAvgLevel;
+        float scale = 1f + diff * 0.1f;
+        scale = Mathf.Clamp(scale, 0.1f, 2.0f);
+
+        return Mathf.Max(1, Mathf.RoundToInt(baseExp * scale));
     }
 }
