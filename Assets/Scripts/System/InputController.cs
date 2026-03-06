@@ -129,11 +129,11 @@ public class InputController : MonoBehaviour
             SetMode(InputMode.BattleSkillMenu);
         };
 
+        // NOTE: HealAlly đã chuyển sang PlayerAttackData (skill system).
+        // OpenItemMenu hiện tại dành cho item menu — chưa implement.
         Input.Battle.OpenItemMenu.performed += ctx =>
         {
-            Debug.Log("[INPUT] HealAlly (Q)");
-
-            battle?.HealAlly();
+            Debug.Log("[INPUT] OpenItemMenu (chưa implement)");
         };
     }
 

@@ -38,9 +38,9 @@ public abstract class Status
     // ================= REAL-TIME CALCULATION =================
 
     public int MaxHP => baseHP + (hpGrowth * (level - 1));
-    public int Atk   => baseAtk + (atkGrowth * (level - 1));
-    public int Def   => baseDef + (defGrowth * (level - 1));
-    public int Spd   => baseSpd + (spdGrowth * (level - 1));
+    public int Atk => baseAtk + (atkGrowth * (level - 1));
+    public int Def => baseDef + (defGrowth * (level - 1));
+    public int Spd => baseSpd + (spdGrowth * (level - 1));
 
     // ================= DYNAMIC STATE =================
 
@@ -53,13 +53,13 @@ public abstract class Status
     {
         entityName = name;
 
-        baseHP  = hp;
+        baseHP = hp;
         baseAtk = atk;
         baseDef = def;
         baseSpd = spd;
 
         // Growth auto-calc
-        hpGrowth  = Mathf.RoundToInt(hp * 0.2f);
+        hpGrowth = Mathf.RoundToInt(hp * 0.2f);
         atkGrowth = Mathf.Max(1, Mathf.RoundToInt(atk * 0.15f));
         defGrowth = Mathf.Max(1, Mathf.RoundToInt(def * 0.1f));
         spdGrowth = 1;
@@ -159,31 +159,38 @@ public abstract class Status
                 break;
 
             case StatusEffectType.BuffAtk:
-                baseAtk += clone.value;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseAtk * (clone.value / 100f)));
+                baseAtk += clone.appliedValue;
                 break;
 
             case StatusEffectType.BuffDef:
-                baseDef += clone.value;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseDef * (clone.value / 100f)));
+                baseDef += clone.appliedValue;
                 break;
 
             case StatusEffectType.BuffSpd:
-                baseSpd += clone.value;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseSpd * (clone.value / 100f)));
+                baseSpd += clone.appliedValue;
                 break;
 
             case StatusEffectType.BuffHP:
-                baseHP += clone.value;
+                clone.appliedValue = clone.value;
+                baseHP += clone.appliedValue;
                 break;
 
             case StatusEffectType.DebuffAtk:
-                baseAtk -= clone.value;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseAtk * (clone.value / 100f)));
+                baseAtk -= clone.appliedValue;
                 break;
 
             case StatusEffectType.DebuffDef:
-                baseDef -= clone.value;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseDef * (clone.value / 100f)));
+                baseDef -= clone.appliedValue;
                 break;
 
             case StatusEffectType.DebuffSpd:
-                baseSpd -= clone.value;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseSpd * (clone.value / 100f)));
+                baseSpd -= clone.appliedValue;
                 break;
 
             case StatusEffectType.Poison:
@@ -237,31 +244,31 @@ public abstract class Status
         switch (effect.effectType)
         {
             case StatusEffectType.BuffAtk:
-                baseAtk -= effect.value;
+                baseAtk -= effect.appliedValue;
                 break;
 
             case StatusEffectType.BuffDef:
-                baseDef -= effect.value;
+                baseDef -= effect.appliedValue;
                 break;
 
             case StatusEffectType.BuffSpd:
-                baseSpd -= effect.value;
+                baseSpd -= effect.appliedValue;
                 break;
 
             case StatusEffectType.BuffHP:
-                baseHP -= effect.value;
+                baseHP -= effect.appliedValue;
                 break;
 
             case StatusEffectType.DebuffAtk:
-                baseAtk += effect.value;
+                baseAtk += effect.appliedValue;
                 break;
 
             case StatusEffectType.DebuffDef:
-                baseDef += effect.value;
+                baseDef += effect.appliedValue;
                 break;
 
             case StatusEffectType.DebuffSpd:
-                baseSpd += effect.value;
+                baseSpd += effect.appliedValue;
                 break;
 
             case StatusEffectType.Poison:

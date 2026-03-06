@@ -7,7 +7,7 @@ public enum SkillEffectTarget
 {
     Self,           // áp lên người dùng skill
     Enemy,          // áp lên enemy bị nhắm
-    LowestHPAlly    // áp lên đồng đội HP thấp nhất
+    SelectedAlly    // áp lên đồng đội được chỉ định (tùy chọn)
 }
 
 [System.Serializable]
@@ -57,11 +57,11 @@ public class PlayerAttackData : ScriptableObject
         {
             hitObjs.Add(new PlayerAttackHit
             {
-                windUpTime       = h.windUpTime,
+                windUpTime = h.windUpTime,
                 damageMultiplier = h.damageMultiplier,
-                repeat           = Mathf.Max(1, h.repeat),
+                repeat = Mathf.Max(1, h.repeat),
                 delayBetweenHits = h.delayBetweenHits,
-                timingOffsets    = new List<float>(h.timingOffsets)
+                timingOffsets = new List<float>(h.timingOffsets)
             });
         }
 

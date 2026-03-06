@@ -27,17 +27,17 @@ public class PlayerAttack : AttackBase
         List<PlayerAttackHit> hits,
         List<SkillEffectEntry> effects = null)
     {
-        Name          = name;
-        this.apCost   = apCost;
-        this.hits     = hits;
-        this.effects  = effects ?? new List<SkillEffectEntry>();
+        Name = name;
+        this.apCost = apCost;
+        this.hits = hits;
+        this.effects = effects ?? new List<SkillEffectEntry>();
     }
 
     // Bắt buộc implement từ AttackBase
     public override void Use(Status attacker, Status target)
     {
         this.attacker = attacker;
-        this.target   = target;
+        this.target = target;
         StartAttack(attacker, target);
     }
 
@@ -46,7 +46,7 @@ public class PlayerAttack : AttackBase
     protected override IEnumerator Prepare()
     {
         player = attacker as PlayerStatus;
-        enemy  = target  as EnemyStatus;
+        enemy = target as EnemyStatus;
 
         if (player == null || enemy == null)
             yield break;
@@ -135,28 +135,22 @@ public class PlayerAttack : AttackBase
             case SkillEffectTarget.Enemy:
                 return enemy;
 
-            case SkillEffectTarget.LowestHPAlly:
-                return FindLowestHPAlly();
+            case SkillEffectTarget.SelectedAlly:
+                return GetSelectedAlly();
 
             default:
                 return enemy;
         }
     }
 
-    Status FindLowestHPAlly()
+    Status GetSelectedAlly()
     {
-        if (BattleManager.Instance == null) return player;
-
-        Status lowest = null;
-
-        foreach (var m in BattleManager.Instance.PlayerParty.Members)
+        if (BattleManager.Instance != null && BattleManager.Instance.PlayerParty != null)
         {
-            if (!m.IsAlive) continue;
-
-            if (lowest == null || m.currentHP < lowest.currentHP)
-                lowest = m;
+            var ally = BattleManager.Instance.GetAllyTarget();
+            if (ally != null) return ally;
         }
 
-        return lowest ?? player;
+        return player;
     }
 }

@@ -25,6 +25,10 @@ public class BattleManager : MonoBehaviour
 
     private const float BASE_DELAY = 100f;
 
+    // FIX 3: Target selection
+    private int currentTargetIndex = 0;
+    private int currentAllyTargetIndex = 0;
+
     // ================= DEBUG HELPER =================
 
     void Log(string msg)
@@ -289,58 +293,9 @@ public class BattleManager : MonoBehaviour
         Log("[ACTION] Parry");
     }
 
-    // ================= HEAL =================
+    // NOTE: HealAlly đã được chuyển sang PlayerAttackData (skill hệ thống).
+    // Tạo PlayerAttackData với hits rỗng + effect BuffHeal target LowestHPAlly trong Inspector.
 
-    public void HealAlly()
-    {
-        var player = currentUnit as PlayerStatus;
-
-        if (player == null)
-        {
-            Log("[ERROR] Current unit is not a player");
-            return;
-        }
-
-        var ally = GetLowestHPAlly();
-
-        if (ally == null)
-        {
-            Log("[ERROR] No ally to heal");
-
-            waitingForPlayerAction = false;
-            return;
-        }
-
-        int healAmount = Mathf.RoundToInt(player.Atk * 0.5f);
-
-        int hpBefore = ally.currentHP;
-
-        ally.Heal(healAmount);
-
-        Log("[ACTION] Heal → " + ally.entityName
-            + " (HP: " + hpBefore + " → " + ally.currentHP + ")");
-
-        waitingForPlayerAction = false;
-    }
-
-    PlayerStatus GetLowestHPAlly()
-    {
-        PlayerStatus lowest = null;
-
-        foreach (var p in playerParty.Members)
-        {
-            if (!p.IsAlive) continue;
-
-            var ps = p as PlayerStatus;
-
-            if (ps == null) continue;
-
-            if (lowest == null || ps.currentHP < lowest.currentHP)
-                lowest = ps;
-        }
-
-        return lowest;
-    }
 
     // ================= ENEMY =================
 
@@ -375,11 +330,15 @@ public class BattleManager : MonoBehaviour
 
     EnemyStatus GetEnemyTarget()
     {
+        // FIX 3: Trả về enemy theo currentTargetIndex, auto-clamp khi target chết
+        var alive = new System.Collections.Generic.List<EnemyStatus>();
         foreach (var e in enemyParty.Members)
-            if (e.IsAlive)
-                return e as EnemyStatus;
+            if (e.IsAlive) alive.Add(e as EnemyStatus);
 
-        return null;
+        if (alive.Count == 0) return null;
+
+        currentTargetIndex = Mathf.Clamp(currentTargetIndex, 0, alive.Count - 1);
+        return alive[currentTargetIndex];
     }
 
     PlayerStatus GetAlivePlayer()
@@ -391,9 +350,41 @@ public class BattleManager : MonoBehaviour
         return null;
     }
 
+    public PlayerStatus GetAllyTarget()
+    {
+        var alive = new System.Collections.Generic.List<PlayerStatus>();
+        foreach (var p in playerParty.Members)
+            if (p.IsAlive) alive.Add(p as PlayerStatus);
+
+        if (alive.Count == 0) return null;
+
+        currentAllyTargetIndex = Mathf.Clamp(currentAllyTargetIndex, 0, alive.Count - 1);
+        return alive[currentAllyTargetIndex];
+    }
+
     public void ChangeTargetInput(int dir)
     {
-        Log("[TARGET] Change → " + dir);
+        // 1. Cycle qua danh sách enemy còn sống
+        var aliveEnemies = new System.Collections.Generic.List<EnemyStatus>();
+        foreach (var e in enemyParty.Members)
+            if (e.IsAlive) aliveEnemies.Add(e as EnemyStatus);
+
+        if (aliveEnemies.Count > 0)
+        {
+            currentTargetIndex = (currentTargetIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
+            Log("[TARGET ENEMY] → " + aliveEnemies[currentTargetIndex].entityName);
+        }
+
+        // 2. Cycle qua danh sách ally còn sống (dùng chung 1 input)
+        var aliveAllies = new System.Collections.Generic.List<PlayerStatus>();
+        foreach (var p in playerParty.Members)
+            if (p.IsAlive) aliveAllies.Add(p as PlayerStatus);
+
+        if (aliveAllies.Count > 0)
+        {
+            currentAllyTargetIndex = (currentAllyTargetIndex + dir + aliveAllies.Count) % aliveAllies.Count;
+            Log("[TARGET ALLY] → " + aliveAllies[currentAllyTargetIndex].entityName);
+        }
     }
 
     // ================= TIMELINE =================

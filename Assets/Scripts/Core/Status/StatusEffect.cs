@@ -5,7 +5,8 @@ public class StatusEffect
 {
     public string effectName;
     public StatusEffectType effectType;
-    public int value;
+    public int value; // % đối với Atk, Def, Spd, flat value đối với HP, Heal, Poison
+    [System.NonSerialized] public int appliedValue; // dùng để nhớ số stat thực tế đã cộng/trừ để undo
     public int duration; // số turn (-1 = vĩnh viễn)
 
     public StatusEffect(string name, StatusEffectType type, int val, int dur = -1)

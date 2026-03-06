@@ -71,68 +71,59 @@ public class EnemyAttack : AttackBase
     {
         foreach (var hit in hits)
         {
+            // ================= OPEN PARRY WINDOW =================
+            // Parry window mở 1 lần cho mỗi hit (trước khi các repeat xảy ra)
 
             bool parried = false;
-
-
-
-            // ================= OPEN PARRY WINDOW =================
 
             if (hit.canBeParried)
             {
                 player.OpenParryWindow();
-
                 Debug.Log("PARRY WINDOW OPEN for " + hit.parryWindowDuration + " seconds");
 
                 float timer = 0;
-
-
                 while (timer < hit.parryWindowDuration)
                 {
-                    if (player.ConsumeParry())
-                    {
-                        parried = true;
-
-                        break;
-                    }
-
+                    if (player.ConsumeParry()) { parried = true; break; }
                     timer += Time.deltaTime;
-
                     yield return null;
                 }
 
                 player.CloseParryWindow();
-
                 Debug.Log("PARRY WINDOW CLOSED");
             }
 
+            // ================= IMPACT (with repeat) =================
+            // FIX 2: vòng lặp repeat — giống PlayerAttack
 
-
-            // ================= IMPACT =================
-
-            if (!player.IsAlive)
-                yield break;
-
-
-
-            if (parried)
+            for (int i = 0; i < Mathf.Max(1, hit.repeat); i++)
             {
-                int counter = player.Atk / 2;
+                if (!player.IsAlive) yield break;
 
-                enemy.TakeDamage(player, counter);
+                if (parried && i == 0)
+                {
+                    // Counter chỉ xảy ra ở repeat đầu tiên
+                    int counter = player.Atk / 2;
+                    enemy.TakeDamage(player, counter);
+                    Debug.Log("PARRY SUCCESS → COUNTER DAMAGE: " + counter);
+                }
+                else if (!parried)
+                {
+                    int damage = Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier);
+                    player.TakeDamage(enemy, damage);
+                    Debug.Log($"PLAYER HIT [{i + 1}/{hit.repeat}]: " + damage);
+                }
 
-                Debug.Log("PARRY SUCCESS → COUNTER DAMAGE: " + counter);
+                // Delay giữa các repeat (bỏ qua sau repeat cuối)
+                if (i < hit.repeat - 1)
+                {
+                    float delay = hit.delayBetweenHits;
+                    if (hit.timingOffsets != null && i < hit.timingOffsets.Count)
+                        delay = hit.timingOffsets[i];
+                    if (delay > 0f)
+                        yield return new WaitForSeconds(delay);
+                }
             }
-            else
-            {
-                int damage =
-                    Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier);
-
-                player.TakeDamage(enemy, damage);
-
-                Debug.Log("PLAYER HIT: " + damage);
-            }
-
         }
     }
 
