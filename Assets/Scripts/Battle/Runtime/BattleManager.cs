@@ -575,13 +575,31 @@ public class BattleManager : MonoBehaviour
     {
         Log("[BATTLE] End");
 
-        // Phát event kết quả trận đấu
+        // Phát event kết quả trận đấu + quest progression
         if (playerFled)
+        {
             EventManager.Publish(GameEvent.BattleFlee);
+        }
         else if (playerWon)
+        {
             EventManager.Publish(GameEvent.BattleWin);
+
+            // Thắng → hoàn thành "Dẫn quân ra trận" và "Đánh giá thực lực địch" (Q002)
+            QuestManager.Instance?.CompleteObjective("Q002", "O2");
+            QuestManager.Instance?.CompleteObjective("Q002", "O3");
+
+            // Skip Q003.O1 = đã thấy đủ sức mạnh của địch dù không thua
+            QuestManager.Instance?.CompleteObjective("Q003", "O1");
+        }
         else
+        {
             EventManager.Publish(GameEvent.BattleLose);
+
+            // Thua trận → trigger Q003 "Thất bại đầu tiên" (O1: đối diện thất bại)
+            QuestManager.Instance?.CompleteObjective("Q002", "O2"); // trận đã xảy ra
+            QuestManager.Instance?.CompleteObjective("Q002", "O3"); // đã thấy địch
+            QuestManager.Instance?.CompleteObjective("Q003", "O1"); // nếm mùi thất bại
+        }
 
         // Trao EXP nếu thắng
         if (playerWon)

@@ -17,6 +17,10 @@ public class GameManager : MonoBehaviour
 
     string FullURL(string path) => backendBaseURL + path;
 
+    [Header("Quest")]
+    [Tooltip("Kéo QuestManager GameObject vào đây, hoặc để trống nếu QuestManager.Instance đã tồn tại.")]
+    public QuestManager questManager;
+
     [Header("Runtime")]
     public Party playerParty;
     public bool isLoaded = false;
@@ -104,6 +108,10 @@ public class GameManager : MonoBehaviour
 
         isLoaded = true;
         Debug.Log("PLAYER READY");
+
+        // Khởi động quest đầu tiên của game
+        var qm = questManager != null ? questManager : QuestManager.Instance;
+        qm?.StartQuest("Q001");
     }
 
     void CreatePartyFromJson(string json)
