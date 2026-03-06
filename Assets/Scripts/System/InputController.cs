@@ -31,8 +31,8 @@ public class InputController : MonoBehaviour
         Input.Enable();
 
         BindBattleInput();
-
         BindSkillMenuInput();
+        BindSavePointMenuInput();
 
         SetMode(InputMode.Map);
 
@@ -58,22 +58,26 @@ public class InputController : MonoBehaviour
         Input.Map.Disable();
         Input.Battle.Disable();
         Input.SkillMenu.Disable();
+        Input.SavePointMenu.Disable();
 
         switch (mode)
         {
             case InputMode.Map:
-
                 Input.Map.Enable();
                 break;
 
             case InputMode.Battle:
-
                 Input.Battle.Enable();
                 break;
 
             case InputMode.BattleSkillMenu:
-
                 Input.SkillMenu.Enable();
+                break;
+
+            case InputMode.UI:
+                // Chặn toàn bộ input Map/Battle/Skill đã Disable ở trên
+                // SavePointMenu action map được enable ở đây
+                Input.SavePointMenu.Enable();
                 break;
         }
 
@@ -178,6 +182,23 @@ public class InputController : MonoBehaviour
             Debug.Log("[INPUT] CancelSkillMenu");
 
             SetMode(InputMode.Battle);
+        };
+    }
+
+    // ================= SAVE POINT INPUT =================
+
+    void BindSavePointMenuInput()
+    {
+        Input.SavePointMenu.Swap.performed += ctx =>
+        {
+            Debug.Log("[INPUT] SavePoint Swap Party (F)");
+            SavePointUI.Instance?.OnSwapOrder();
+        };
+
+        Input.SavePointMenu.Close.performed += ctx =>
+        {
+            Debug.Log("[INPUT] SavePoint Close (Esc)");
+            SavePointUI.Instance?.OnClose();
         };
     }
 

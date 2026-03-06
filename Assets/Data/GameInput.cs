@@ -179,7 +179,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""7d18e9fd-03c7-4491-abed-14a0a0392042"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -300,8 +300,30 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""ccdc06d2-b1ad-45ad-b0cb-838de7b68924"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Basic Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""e0cdaceb-49c7-4f3e-8407-7229eabe1906"",
                     ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Open Skill Menu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""67d00ff9-f797-4a66-a500-5e9a3adfa8a2"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -322,8 +344,30 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""5c4c1737-d2a4-445e-bbca-389dcab15f10"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Open Item Menu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""f67aa46f-4551-4890-9a01-96a94bbd7f9b"",
                     ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Confirm"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c0dac7a3-4f80-47ba-b041-ad9941ee51bf"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -434,8 +478,30 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""efcdd272-d814-4a97-8367-33c01b51a795"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Skill1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""e7de7bcb-7b21-413f-a1c8-512ef7386599"",
                     ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Skill2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f088a1d4-63c1-4b85-8250-799a6d68a5a0"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -451,6 +517,116 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""SavePointMenu"",
+            ""id"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
+            ""actions"": [
+                {
+                    ""name"": ""Heal"",
+                    ""type"": ""Button"",
+                    ""id"": ""b2c3d4e5-f6a7-8901-bcde-f12345678901"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Save"",
+                    ""type"": ""Button"",
+                    ""id"": ""c3d4e5f6-a7b8-9012-cdef-123456789012"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Swap"",
+                    ""type"": ""Button"",
+                    ""id"": ""e6f7g8h9-i0j1-2345-k678-345678901234"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Close"",
+                    ""type"": ""Button"",
+                    ""id"": ""d4e5f6a7-b8c9-0123-def0-234567890123"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""e5f6a7b8-c9d0-1234-ef01-345678901234"",
+                    ""path"": ""<Keyboard>/h"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Heal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""df62178c-c7f8-4611-b7c7-a6ea016c693e"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Heal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f6a7b8c9-d0e1-2345-f012-456789012345"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Save"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""18fa0acb-0438-40f4-9685-fe079076f7e6"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Save"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""k8l9m0n1-o2p3-4567-q890-567890123456"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Swap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a7b8c9d0-e1f2-3456-0123-567890123456"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Close"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -480,6 +656,12 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         m_SkillMenu_Skill1 = m_SkillMenu.FindAction("Skill1", throwIfNotFound: true);
         m_SkillMenu_Skill2 = m_SkillMenu.FindAction("Skill2", throwIfNotFound: true);
         m_SkillMenu_Cancel = m_SkillMenu.FindAction("Cancel", throwIfNotFound: true);
+        // SavePointMenu
+        m_SavePointMenu = asset.FindActionMap("SavePointMenu", throwIfNotFound: true);
+        m_SavePointMenu_Heal = m_SavePointMenu.FindAction("Heal", throwIfNotFound: true);
+        m_SavePointMenu_Save = m_SavePointMenu.FindAction("Save", throwIfNotFound: true);
+        m_SavePointMenu_Swap = m_SavePointMenu.FindAction("Swap", throwIfNotFound: true);
+        m_SavePointMenu_Close = m_SavePointMenu.FindAction("Close", throwIfNotFound: true);
     }
 
     ~@GameInput()
@@ -487,6 +669,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Map.enabled, "This will cause a leak and performance issues, GameInput.Map.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Battle.enabled, "This will cause a leak and performance issues, GameInput.Battle.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_SkillMenu.enabled, "This will cause a leak and performance issues, GameInput.SkillMenu.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_SavePointMenu.enabled, "This will cause a leak and performance issues, GameInput.SavePointMenu.Disable() has not been called.");
     }
 
     /// <summary>
@@ -978,6 +1161,135 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="SkillMenuActions" /> instance referencing this action map.
     /// </summary>
     public SkillMenuActions @SkillMenu => new SkillMenuActions(this);
+
+    // SavePointMenu
+    private readonly InputActionMap m_SavePointMenu;
+    private List<ISavePointMenuActions> m_SavePointMenuActionsCallbackInterfaces = new List<ISavePointMenuActions>();
+    private readonly InputAction m_SavePointMenu_Heal;
+    private readonly InputAction m_SavePointMenu_Save;
+    private readonly InputAction m_SavePointMenu_Swap;
+    private readonly InputAction m_SavePointMenu_Close;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "SavePointMenu".
+    /// </summary>
+    public struct SavePointMenuActions
+    {
+        private @GameInput m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public SavePointMenuActions(@GameInput wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "SavePointMenu/Heal".
+        /// </summary>
+        public InputAction @Heal => m_Wrapper.m_SavePointMenu_Heal;
+        /// <summary>
+        /// Provides access to the underlying input action "SavePointMenu/Save".
+        /// </summary>
+        public InputAction @Save => m_Wrapper.m_SavePointMenu_Save;
+        /// <summary>
+        /// Provides access to the underlying input action "SavePointMenu/Swap".
+        /// </summary>
+        public InputAction @Swap => m_Wrapper.m_SavePointMenu_Swap;
+        /// <summary>
+        /// Provides access to the underlying input action "SavePointMenu/Close".
+        /// </summary>
+        public InputAction @Close => m_Wrapper.m_SavePointMenu_Close;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_SavePointMenu; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="SavePointMenuActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(SavePointMenuActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="SavePointMenuActions" />
+        public void AddCallbacks(ISavePointMenuActions instance)
+        {
+            if (instance == null || m_Wrapper.m_SavePointMenuActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_SavePointMenuActionsCallbackInterfaces.Add(instance);
+            @Heal.started += instance.OnHeal;
+            @Heal.performed += instance.OnHeal;
+            @Heal.canceled += instance.OnHeal;
+            @Save.started += instance.OnSave;
+            @Save.performed += instance.OnSave;
+            @Save.canceled += instance.OnSave;
+            @Swap.started += instance.OnSwap;
+            @Swap.performed += instance.OnSwap;
+            @Swap.canceled += instance.OnSwap;
+            @Close.started += instance.OnClose;
+            @Close.performed += instance.OnClose;
+            @Close.canceled += instance.OnClose;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="SavePointMenuActions" />
+        private void UnregisterCallbacks(ISavePointMenuActions instance)
+        {
+            @Heal.started -= instance.OnHeal;
+            @Heal.performed -= instance.OnHeal;
+            @Heal.canceled -= instance.OnHeal;
+            @Save.started -= instance.OnSave;
+            @Save.performed -= instance.OnSave;
+            @Save.canceled -= instance.OnSave;
+            @Swap.started -= instance.OnSwap;
+            @Swap.performed -= instance.OnSwap;
+            @Swap.canceled -= instance.OnSwap;
+            @Close.started -= instance.OnClose;
+            @Close.performed -= instance.OnClose;
+            @Close.canceled -= instance.OnClose;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SavePointMenuActions.UnregisterCallbacks(ISavePointMenuActions)" />.
+        /// </summary>
+        /// <seealso cref="SavePointMenuActions.UnregisterCallbacks(ISavePointMenuActions)" />
+        public void RemoveCallbacks(ISavePointMenuActions instance)
+        {
+            if (m_Wrapper.m_SavePointMenuActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="SavePointMenuActions.AddCallbacks(ISavePointMenuActions)" />
+        /// <seealso cref="SavePointMenuActions.RemoveCallbacks(ISavePointMenuActions)" />
+        /// <seealso cref="SavePointMenuActions.UnregisterCallbacks(ISavePointMenuActions)" />
+        public void SetCallbacks(ISavePointMenuActions instance)
+        {
+            foreach (var item in m_Wrapper.m_SavePointMenuActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_SavePointMenuActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="SavePointMenuActions" /> instance referencing this action map.
+    /// </summary>
+    public SavePointMenuActions @SavePointMenu => new SavePointMenuActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Map" which allows adding and removing callbacks.
     /// </summary>
@@ -1106,5 +1418,41 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCancel(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "SavePointMenu" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="SavePointMenuActions.AddCallbacks(ISavePointMenuActions)" />
+    /// <seealso cref="SavePointMenuActions.RemoveCallbacks(ISavePointMenuActions)" />
+    public interface ISavePointMenuActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "Heal" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnHeal(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Save" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSave(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Swap" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSwap(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Close" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnClose(InputAction.CallbackContext context);
     }
 }

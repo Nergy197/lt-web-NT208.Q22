@@ -182,15 +182,22 @@ public class MapManager : MonoBehaviour
 
     // ================= END BATTLE =================
 
-    public void EndBattle()
+    public void EndBattle(bool playerWon = true)
     {
         isInBattle = false;
-
-
         currentEnemies.Clear();
 
-
-        SceneManager.LoadScene("MapScene");
+        if (!playerWon && GameManager.Instance != null)
+        {
+            // === THUA: Hồi máu + respawn về Save Point ===
+            Debug.Log("[MapManager] Thua trận → Respawn tại Save Point");
+            GameManager.Instance.RespawnAtSavePoint();
+        }
+        else
+        {
+            // === THẮNG hoặc BỎ CHẠY: về lại Map bình thường ===
+            SceneManager.LoadScene("MapScene");
+        }
     }
 
 

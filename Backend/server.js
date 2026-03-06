@@ -82,9 +82,17 @@ app.post("/player/save", async (req, res) => {
       return res.status(400).json({ error: "Missing _id" });
     }
 
+    console.log("[SAVE] data received:", req.body);
+
     await db.collection("players").updateOne(
       { _id: req.body._id },
-      { $set: { party: req.body.party } },
+      {
+        $set: {
+          party: req.body.party,
+          lastSavePointId: req.body.lastSavePointId,
+          lastSaveScene: req.body.lastSaveScene
+        }
+      },
       { upsert: true }
     );
 

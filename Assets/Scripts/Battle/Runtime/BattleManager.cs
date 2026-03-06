@@ -625,6 +625,6 @@ public class BattleManager : MonoBehaviour
 
         InputController.Instance.UnbindBattleManager();
 
-        MapManager.Instance.EndBattle();
+        MapManager.Instance.EndBattle(playerWon);
     }
 }

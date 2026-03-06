@@ -48,13 +48,32 @@ public class PlayerMovement : MonoBehaviour
             UpdateAnimation();
         };
 
-        // Khôi phục vị trí nhân vật sau khi quay từ BattleScene về
+        // 1. Khôi phục vị trí sau Battle
         if (GameManager.Instance != null &&
             GameManager.Instance.TryGetLastMapPosition(out Vector2 savedPos))
         {
             transform.position = savedPos;
             GameManager.Instance.ClearMapPosition();
             Debug.Log($"[PlayerMovement] Restored position: {savedPos}");
+        }
+        // 2. Khôi phục vị trí Save Point khi mới load game hoặc respawn sau khi chết
+        else if (GameManager.Instance != null &&
+                 !string.IsNullOrEmpty(GameManager.Instance.pendingSavePointId))
+        {
+            string targetId = GameManager.Instance.pendingSavePointId;
+            SavePoint[] allPoints = Object.FindObjectsByType<SavePoint>(FindObjectsSortMode.None);
+
+            foreach (var sp in allPoints)
+            {
+                if (sp.pointId == targetId)
+                {
+                    transform.position = sp.transform.position;
+                    Debug.Log($"[PlayerMovement] Teleported to save point: {targetId}");
+                    break;
+                }
+            }
+
+            // Không gọi ConsumeSavePoint() — giữ lại để nếu chết tiếp vẫn respawn đúng chỗ
         }
 
         Debug.Log("PLAYER READY");

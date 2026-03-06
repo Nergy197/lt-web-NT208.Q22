@@ -26,6 +26,10 @@ public class GameManager : MonoBehaviour
     private Vector2 lastMapPosition = Vector2.zero;
     private bool hasMapPosition = false;
 
+    // Save Point đã lưu: dùng khi load game để teleport player về đúng nơi
+    public string pendingSavePointId { get; private set; } = null;
+    private string pendingSaveScene = null;
+
     public void SetLastMapPosition(Vector2 pos)
     {
         lastMapPosition = pos;
@@ -152,6 +156,14 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("[LOAD] Party OK: " + playerParty.Members.Count + " member(s)");
+
+        // Tải Save Point nếu có
+        if (!string.IsNullOrEmpty(save.lastSavePointId))
+        {
+            pendingSavePointId = save.lastSavePointId;
+            pendingSaveScene = save.lastSaveScene;
+            Debug.Log($"[LOAD] Save Point: {pendingSaveScene} → {pendingSavePointId}");
+        }
     }
 
     PlayerData FindPlayerData(string name)
@@ -183,7 +195,69 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        SceneManager.LoadScene("MapScene");
+        // Nếu có save point đã lưu, load scene đó
+        if (!string.IsNullOrEmpty(pendingSaveScene))
+            SceneManager.LoadScene(pendingSaveScene);
+        else
+            SceneManager.LoadScene("MapScene");
+    }
+
+    // ================= SAVE AT POINT =================
+
+    /// <summary>Hồi máu + lưu vị trí save point rồi gửi lên server.</summary>
+    public void SaveAtPoint(string pointId, string sceneName)
+    {
+        // 1. Hồi máu toàn bộ party
+        if (playerParty != null)
+        {
+            foreach (var member in playerParty.Members)
+                member.HealFull();
+            Debug.Log("[SAVE POINT] Party healed.");
+        }
+
+        // 2. Cập nhật runtime
+        pendingSavePointId = pointId;
+        pendingSaveScene = sceneName;
+
+        // 3. Đẩy lên server
+        StartCoroutine(SaveRoutine(pointId, sceneName));
+    }
+
+    /// <summary>Xóa pending save point sau khi đã dùng (được gọi từ PlayerMovement sau khi teleport).</summary>
+    public void ConsumeSavePoint()
+    {
+        pendingSavePointId = null;
+        pendingSaveScene = null;
+    }
+
+    /// <summary>Khi party chết: hồi máu full, chuyển về map của save point cuối cùng.
+    /// PlayerMovement sẽ dò tìm SavePoint và teleport nhân vật về đó.</summary>
+    public void RespawnAtSavePoint()
+    {
+        Debug.Log("[GM] Respawning at save point...");
+
+        // Hồi máu toàn bộ party
+        if (playerParty != null)
+        {
+            foreach (var member in playerParty.Members)
+                member.HealFull();
+        }
+
+        // Xóa vị trí battle cũ
+        ClearMapPosition();
+
+        // Nếu có save point đã lưu, đặt lại pendingSavePointId để PlayerMovement dò tìm khi load scene
+        if (!string.IsNullOrEmpty(pendingSaveScene))
+        {
+            // pendingSavePointId và pendingSaveScene đã tồn tại sẵn từ lần save trước
+            Debug.Log($"[GM] Respawn → {pendingSaveScene} at {pendingSavePointId}");
+            SceneManager.LoadScene(pendingSaveScene);
+        }
+        else
+        {
+            Debug.Log("[GM] No save point found, respawn at MapScene default.");
+            SceneManager.LoadScene("MapScene");
+        }
     }
 
     // ================= SAVE =================
@@ -193,11 +267,13 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SaveRoutine());
     }
 
-    IEnumerator SaveRoutine()
+    IEnumerator SaveRoutine(string savePointId = null, string saveScene = null)
     {
         PlayerSave save = new PlayerSave();
         save._id = "player001";
         save.party = new List<UnitSave>();
+        save.lastSavePointId = savePointId;
+        save.lastSaveScene = saveScene;
 
         foreach (Status s in playerParty.Members)
         {
