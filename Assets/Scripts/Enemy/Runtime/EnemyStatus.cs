@@ -7,7 +7,7 @@ public class EnemyStatus : Status
     private readonly List<EnemyAttackData> attacks = new();
     private int baseExpReward = 20;
     private bool isAggressive = true;
-    public GameObject battlePrefab; // Set bởi EnemyData.CreateStatus()
+    public GameObject battlePrefab;
 
     public EnemyStatus(
         string name,
@@ -23,11 +23,9 @@ public class EnemyStatus : Status
         this.isAggressive = isAggressive;
     }
 
-    // ================= BATTLE LIFECYCLE =================
-
     /// <summary>
-    /// BUG FIX: Enemy luôn reset HP về Max khi vào battle.
-    /// Player KHÔNG override → giữ HP từ save data.
+    /// Enemy luôn reset HP về Max khi vào battle vì chúng không được lưu giữa các trận.
+    /// Player không override → giữ HP từ save data.
     /// </summary>
     public override void ResetForBattle(float baseDelay)
     {
@@ -35,7 +33,6 @@ public class EnemyStatus : Status
         currentHP = MaxHP;
     }
 
-    // ================= ATTACK =================
     public void AddAttack(EnemyAttackData attack)
     {
         if (attack == null) return;
@@ -51,21 +48,16 @@ public class EnemyStatus : Status
         return attacks[Random.Range(0, attacks.Count)];
     }
 
-    // ================= EXP =================
-
     /// <summary>
-    /// Tính EXP thưởng được cân bằng theo chênh lệch cấp.
-    /// <br/>- Quái cao hơn Player → thưởng EXP nhiều hơn (bonus)
-    /// <br/>- Quái quá yếu hơn Player → penalty (tối thiểu 10%)
+    /// EXP thưởng được cân bằng theo chênh lệch cấp giữa quái và player:
+    /// quái cao cấp hơn → EXP thưởng nhiều hơn (tối đa x2), quái quá yếu → tối thiểu 10%.
     /// </summary>
     public int GetExpReward(int playerAvgLevel = 1)
     {
         float baseExp = baseExpReward * (1f + level * 0.2f);
 
-        // Hệ số chênh lệch: mỗi cấp chênh = ±10%
         int diff = level - playerAvgLevel;
-        float scale = 1f + diff * 0.1f;
-        scale = Mathf.Clamp(scale, 0.1f, 2.0f);
+        float scale = Mathf.Clamp(1f + diff * 0.1f, 0.1f, 2.0f);
 
         return Mathf.Max(1, Mathf.RoundToInt(baseExp * scale));
     }

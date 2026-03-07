@@ -109,9 +109,13 @@ public class GameManager : MonoBehaviour
         isLoaded = true;
         Debug.Log("PLAYER READY");
 
-        // Khởi động quest đầu tiên của game
+        // Khởi động quest đầu tiên CHỈ KHI chưa có save data
+        // (nếu có save data, QuestManager.LoadProgress() trong Start() đã restore rồi)
         var qm = questManager != null ? questManager : QuestManager.Instance;
-        qm?.StartQuest("Q001");
+        if (qm != null && !UnityEngine.PlayerPrefs.HasKey(QuestManager.SaveKey))
+        {
+            qm.StartQuest("Q001");
+        }
     }
 
     void CreatePartyFromJson(string json)
@@ -152,6 +156,7 @@ public class GameManager : MonoBehaviour
 
             status.SetLevel(unit.level);
             status.currentHP = Mathf.Clamp(unit.currentHP, 1, status.MaxHP);
+            if (status is PlayerStatus ps2) ps2.currentExp = Mathf.Max(0, unit.currentExp);
 
             playerParty.AddMember(status);
 
@@ -289,6 +294,7 @@ public class GameManager : MonoBehaviour
             unit.entityName = s.entityName;
             unit.level = s.level;
             unit.currentHP = s.currentHP;
+            unit.currentExp = (s is PlayerStatus ps) ? ps.currentExp : 0;
             save.party.Add(unit);
         }
 

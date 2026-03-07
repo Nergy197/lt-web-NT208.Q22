@@ -1,15 +1,20 @@
 using System;
 
+/// <summary>
+/// Event bus riêng cho battle — tách khỏi EventManager để các subscriber ngoài
+/// scene (như BattleManager) có thể lắng nghe trực tiếp không qua payload boxing.
+/// </summary>
 public static class BattleEvents
 {
-    // Giữ nguyên để tương thích với BattleManager.waitingForAttackFinish
     public static event Action OnAttackFinished;
 
+    /// <summary>
+    /// Gọi khi một đòn tấn công hoàn thành toàn bộ phases (Prepare → Execute → Recovery).
+    /// Đồng thời phát qua EventManager để các module khác có thể phản응 nếu cần.
+    /// </summary>
     public static void RaiseAttackFinished()
     {
         OnAttackFinished?.Invoke();
-
-        // Đồng thời phát qua EventManager để các subscriber toàn game nhận được
         EventManager.Publish(GameEvent.AttackFinished);
     }
 }

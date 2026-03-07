@@ -47,8 +47,13 @@ public class QuestManagerTests
     [TearDown]
     public void TearDown()
     {
+        // Destroy tất cả QuestManager trong scene
         foreach (var go in Object.FindObjectsByType<QuestManager>(FindObjectsSortMode.None))
             Object.DestroyImmediate(go.gameObject);
+
+        // Dọn PlayerPrefs để test save/load không ảnh hưởng lẫn nhau
+        PlayerPrefs.DeleteKey(QuestManager.SaveKey);
+        PlayerPrefs.Save();
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -291,5 +296,75 @@ public class QuestManagerTests
 
         Assert.IsTrue(mgr.IsQuestCompleted("Q010"),
             "Q010 hoàn thành khi đủ 3 objectives.");
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  Save / Load Tests
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+    [Test]
+    public void SaveAndLoad_RestoresActiveQuestWithObjectives()
+    {
+        // ── Arrange ──────────────────────────────────────────────────────
+        var quest = MakeQuest("Q001", "Di nguyện của cha");
+        var mgr   = MakeManager(quest);
+
+        mgr.StartQuest("Q001");
+        mgr.CompleteObjective("Q001", "O1"); // O1 done, O2 còn lại
+
+        // ── Act: save, rồi tạo manager mới và load ────────────────────
+        mgr.SaveProgress();
+
+        var quest2 = MakeQuest("Q001", "Di nguyện của cha"); // SO mới (sạch)
+        var mgr2   = MakeManager(quest2);
+        mgr2.LoadProgress();
+
+        // ── Assert ───────────────────────────────────────────────────────
+        Assert.AreEqual(1, mgr2.ActiveQuests.Count,    "Q001 phải còn active sau khi load.");
+        Assert.IsTrue(quest2.Objectives[0].IsCompleted, "O1 phải được restore về complete.");
+        Assert.IsFalse(quest2.Objectives[1].IsCompleted,"O2 phải vẫn là chưa complete.");
+    }
+
+    [Test]
+    public void SaveAndLoad_RestoresCompletedQuest()
+    {
+        // ── Arrange ──────────────────────────────────────────────────────
+        var quest = MakeQuest("Q001", "Di nguyện của cha");
+        var mgr   = MakeManager(quest);
+
+        mgr.StartQuest("Q001");
+        mgr.CompleteObjective("Q001", "O1");
+        mgr.CompleteObjective("Q001", "O2"); // quest hoàn thành
+
+        // ── Act ───────────────────────────────────────────────────────────
+        mgr.SaveProgress();
+
+        var quest2 = MakeQuest("Q001", "Di nguyện của cha");
+        var mgr2   = MakeManager(quest2);
+        mgr2.LoadProgress();
+
+        // ── Assert ───────────────────────────────────────────────────────
+        Assert.AreEqual(0, mgr2.ActiveQuests.Count,     "Active phải rỗng sau load.");
+        Assert.AreEqual(1, mgr2.CompletedQuests.Count,  "Q001 phải nằm trong CompletedQuests.");
+        Assert.IsTrue(mgr2.IsQuestCompleted("Q001"),    "IsQuestCompleted phải trả về true.");
+    }
+
+    [Test]
+    public void ClearSave_RemovesPlayerPrefsKey()
+    {
+        // ── Arrange ──────────────────────────────────────────────────────
+        var quest = MakeQuest("Q001", "Di nguyện của cha");
+        var mgr   = MakeManager(quest);
+        mgr.StartQuest("Q001");
+        mgr.SaveProgress();
+
+        Assert.IsTrue(PlayerPrefs.HasKey(QuestManager.SaveKey), "Key phải tồn tại sau Save.");
+
+        // ── Act ───────────────────────────────────────────────────────────
+        mgr.ClearSave();
+
+        // ── Assert ───────────────────────────────────────────────────────
+        Assert.IsFalse(PlayerPrefs.HasKey(QuestManager.SaveKey), "Key phải bị xóa sau ClearSave.");
     }
 }

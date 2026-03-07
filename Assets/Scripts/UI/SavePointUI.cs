@@ -138,6 +138,7 @@ public class SavePointUI : MonoBehaviour
         string sceneName = SceneManager.GetActiveScene().name;
 
         GameManager.Instance.SaveAtPoint(currentPoint.pointId, sceneName);
+        QuestManager.Instance?.SaveProgress();   // lưu tiến độ quest cùng party
 
         SetStatus("Đang lưu...");
         Debug.Log($"[SavePointUI] Saving at {currentPoint.pointId} in {sceneName}");

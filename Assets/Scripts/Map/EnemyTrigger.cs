@@ -49,11 +49,26 @@ public class EnemyTrigger : MonoBehaviour
 
     private void StartBattle()
     {
-        Debug.Log("TRIGGER BATTLE WORKED - Đang tiến hành chuyển Scene nếu Implement...");
+        if (MapManager.Instance == null)
+        {
+            Debug.LogError("[EnemyTrigger] MapManager.Instance is null!");
+            return;
+        }
+
+        if (enemyData == null)
+        {
+            Debug.LogError("[EnemyTrigger] enemyData chưa được gán trong Inspector!");
+            return;
+        }
+
         triggered = true;
-        
-        // TODO: Chèn logic GameManager vào BattleScene với enemyData được truyền qua đây.
-        // Hiện tại MapManager đang quản lý random encounter, nếu EnemyTrigger được xài,
-        // Cần gọi MapManager.Instance.StartFixedEncounter(enemyData, mapLevel); => nếu mapManager có sẵn.
+
+        // Thiết lập enemy cố định cho trận này
+        MapManager.Instance.currentEnemies.Clear();
+        MapManager.Instance.currentEnemies.Add(enemyData);
+        MapManager.Instance.currentMapLevel = mapLevel;
+
+        Debug.Log($"[EnemyTrigger] Starting battle with {enemyData.entityName} (Lv {mapLevel})");
+        MapManager.Instance.StartBattle();
     }
 }

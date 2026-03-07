@@ -2,29 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 [System.Serializable]
 public class EnemyAttackHit
 {
     public bool canBeParried = true;
 
-    // thời gian chuẩn bị trước khi đòn đánh xảy ra (giây)
+    // Thời gian enemy chuẩn bị trước khi đòn đánh xảy ra (giây).
+    // Player dùng khoảng này để nhận biết animation và chuẩn bị parry.
     public float windUpTime = 0.5f;
 
-    // thời gian player có thểấn parry (giây)
+    // Thời gian player được phép bấm parry sau khi wind-up kết thúc.
     public float parryWindowDuration = 1.5f;
 
     public float damageMultiplier = 1f;
 
     public int repeat = 1;
 
-    // ⭐ THÊM LẠI 2 FIELD NÀY để fix error
     public float delayBetweenHits = 0f;
 
     public List<float> timingOffsets = new List<float>();
 }
-
-
 
 public class EnemyAttack : AttackBase
 {
@@ -34,16 +31,11 @@ public class EnemyAttack : AttackBase
 
     private PlayerStatus player;
 
-
-
     public EnemyAttack(string name, List<EnemyAttackHit> hits)
     {
         Name = name;
-
         this.hits = hits;
     }
-
-
 
     public override void Use(Status attacker, Status target)
     {
@@ -58,31 +50,21 @@ public class EnemyAttack : AttackBase
         StartAttack(attacker, target);
     }
 
-
-
     protected override IEnumerator Prepare()
     {
         enemy = attacker as EnemyStatus;
-
         player = target as PlayerStatus;
-
         yield return null;
     }
-
-
 
     protected override IEnumerator Execute()
     {
         foreach (var hit in hits)
         {
-            // ================= WIND-UP (animation chuẩn bị) =================
-            // Phải wait windUpTime TRƯỚC khi mở parry window
-            // để player nhìn thấy animation & biết khi nào bấm parry
+            // Wait cho animation wind-up của enemy trước khi mở cửa sổ parry,
+            // để player có thể nhìn thấy và phản응 đúng lúc.
             if (hit.windUpTime > 0f)
                 yield return new WaitForSeconds(hit.windUpTime);
-
-            // ================= OPEN PARRY WINDOW =================
-            // Chỉ mở sau wind-up hoàn tất
 
             bool parried = false;
 
@@ -103,15 +85,13 @@ public class EnemyAttack : AttackBase
                 Debug.Log("PARRY WINDOW CLOSED");
             }
 
-            // ================= IMPACT (with repeat) =================
-
             for (int i = 0; i < Mathf.Max(1, hit.repeat); i++)
             {
                 if (!player.IsAlive) yield break;
 
                 if (parried && i == 0)
                 {
-                    // Counter chỉ xảy ra ở repeat đầu tiên
+                    // Parry thành công ở đòn đầu → player phản công bằng nửa Atk.
                     int counter = player.Atk / 2;
                     enemy.TakeDamage(player, counter);
                     Debug.Log("PARRY SUCCESS → COUNTER DAMAGE: " + counter);
@@ -123,7 +103,6 @@ public class EnemyAttack : AttackBase
                     Debug.Log($"PLAYER HIT [{i + 1}/{hit.repeat}]: " + damage);
                 }
 
-                // Delay giữa các repeat (bỏ qua sau repeat cuối)
                 if (i < hit.repeat - 1)
                 {
                     float delay = hit.delayBetweenHits;
@@ -135,8 +114,6 @@ public class EnemyAttack : AttackBase
             }
         }
     }
-
-
 
     protected override IEnumerator Recovery()
     {

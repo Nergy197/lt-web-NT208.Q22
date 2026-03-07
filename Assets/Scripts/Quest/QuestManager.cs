@@ -7,8 +7,6 @@ using UnityEngine;
 /// </summary>
 public class QuestManager : MonoBehaviour
 {
-    // ─── Singleton ───────────────────────────────────────────────────────
-
     public static QuestManager Instance { get; private set; }
 
     void Awake()
@@ -24,8 +22,6 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    // ─── Inspector fields ────────────────────────────────────────────────
-
     [Header("Quest Database")]
     [Tooltip("Kéo tất cả QuestSO assets vào đây. Hoặc để trống và dùng chapter1Data.")]
     public List<QuestSO> allQuests = new();
@@ -34,15 +30,11 @@ public class QuestManager : MonoBehaviour
     [Tooltip("Kéo Chapter1QuestData.asset vào đây để tự động load dữ liệu Chapter 1.")]
     public Chapter1QuestData chapter1Data;
 
-    // ─── Runtime state ───────────────────────────────────────────────────
-
     /// <summary>Danh sách quest đang active (đã StartQuest, chưa completed).</summary>
     public List<QuestSO> ActiveQuests { get; private set; } = new();
 
     /// <summary>Danh sách quest đã hoàn thành.</summary>
     public List<QuestSO> CompletedQuests { get; private set; } = new();
-
-    // ─── Init ────────────────────────────────────────────────────────────
 
     void Start()
     {
@@ -59,6 +51,9 @@ public class QuestManager : MonoBehaviour
 
         // Subscribe auto-progression
         QuestEvents.OnQuestCompleted += HandleQuestCompleted;
+
+        // Load tiến độ đã lưu (sau khi allQuests đã được populate)
+        LoadProgress();
     }
 
     void OnDestroy()
@@ -66,7 +61,18 @@ public class QuestManager : MonoBehaviour
         QuestEvents.OnQuestCompleted -= HandleQuestCompleted;
     }
 
-    // ─── Auto-Progression ────────────────────────────────────────────────
+    /// <summary>Tự động lưu khi thoát game (PC / Editor).</summary>
+    void OnApplicationQuit()
+    {
+        SaveProgress();
+    }
+
+    /// <summary>Tự động lưu khi game bị minimize / chuyển app (mobile).</summary>
+    void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+            SaveProgress();
+    }
 
     /// <summary>
     /// Tự động kích hoạt quest tiếp theo khi một quest hoàn thành.
@@ -101,8 +107,6 @@ public class QuestManager : MonoBehaviour
             // Q010 (Side quest) không auto-chain, tự kết thúc
         }
     }
-
-    // ─── API ─────────────────────────────────────────────────────────────
 
     /// <summary>
     /// Bắt đầu quest theo Id. Nếu quest đã active hoặc completed → bỏ qua.
@@ -208,7 +212,97 @@ public class QuestManager : MonoBehaviour
         return false;
     }
 
-    // ─── Helpers ─────────────────────────────────────────────────────────
+    /// <summary>PlayerPrefs key lưu toàn bộ tiến độ quest.</summary>
+    public const string SaveKey = "QuestSave";
+
+    /// <summary>
+    /// Serialize tiến độ hiện tại (ActiveQuests + CompletedQuests) ra JSON
+    /// và lưu vào PlayerPrefs.
+    /// </summary>
+    public void SaveProgress()
+    {
+        var saveData = new AllQuestsSaveData();
+
+        foreach (var quest in ActiveQuests)
+            saveData.Quests.Add(BuildProgressData(quest, "Active"));
+
+        foreach (var quest in CompletedQuests)
+            saveData.Quests.Add(BuildProgressData(quest, "Completed"));
+
+        var json = JsonUtility.ToJson(saveData);
+        PlayerPrefs.SetString(SaveKey, json);
+        PlayerPrefs.Save();
+        Debug.Log($"[QUEST] Progress saved ({saveData.Quests.Count} quests).");
+    }
+
+    /// <summary>
+    /// Đọc JSON từ PlayerPrefs và restore ActiveQuests / CompletedQuests.
+    /// Phải gọi sau khi allQuests đã được populate.
+    /// </summary>
+    public void LoadProgress()
+    {
+        if (!PlayerPrefs.HasKey(SaveKey))
+        {
+            Debug.Log("[QUEST] Không có save data – bắt đầu mới.");
+            return;
+        }
+
+        var json     = PlayerPrefs.GetString(SaveKey);
+        var saveData = JsonUtility.FromJson<AllQuestsSaveData>(json);
+
+        if (saveData?.Quests == null)
+        {
+            Debug.LogWarning("[QUEST] Save data bị lỗi, bỏ qua.");
+            return;
+        }
+
+        // Xóa trạng thái cũ trước khi restore
+        ActiveQuests.Clear();
+        CompletedQuests.Clear();
+
+        foreach (var data in saveData.Quests)
+        {
+            var quest = FindQuest(data.QuestId);
+            if (quest == null)
+            {
+                Debug.LogWarning($"[QUEST] LoadProgress: quest «{data.QuestId}» không tìm thấy trong allQuests.");
+                continue;
+            }
+
+            quest.ResetObjectives();      // đặt lại về false trước
+            quest.ApplySaveData(data);    // restore đúng từng flag
+
+            if (data.Status == "Active")
+                ActiveQuests.Add(quest);
+            else if (data.Status == "Completed")
+                CompletedQuests.Add(quest);
+        }
+
+        Debug.Log($"[QUEST] Progress loaded: {ActiveQuests.Count} active, {CompletedQuests.Count} completed.");
+    }
+
+    /// <summary>Xóa save data (dùng cho New Game).</summary>
+    public void ClearSave()
+    {
+        PlayerPrefs.DeleteKey(SaveKey);
+        PlayerPrefs.Save();
+        Debug.Log("[QUEST] Save data đã được xóa.");
+    }
+
+    static QuestProgressData BuildProgressData(QuestSO quest, string status)
+    {
+        var data = new QuestProgressData
+        {
+            QuestId    = quest.Id,
+            Status     = status,
+            Objectives = new List<ObjectiveSaveData>(),
+        };
+
+        foreach (var obj in quest.Objectives)
+            data.Objectives.Add(new ObjectiveSaveData { Id = obj.Id, IsCompleted = obj.IsCompleted });
+
+        return data;
+    }
 
     QuestSO FindQuest(string questId)
     {

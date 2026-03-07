@@ -6,12 +6,9 @@ public class InputController : MonoBehaviour
     public static InputController Instance;
 
     public GameInput Input;
-
     public InputMode Mode;
 
     private BattleManager battle;
-
-    // ================= INIT =================
 
     void Awake()
     {
@@ -23,11 +20,9 @@ public class InputController : MonoBehaviour
         }
 
         Instance = this;
-
         DontDestroyOnLoad(gameObject);
 
         Input = new GameInput();
-
         Input.Enable();
 
         BindBattleInput();
@@ -35,21 +30,11 @@ public class InputController : MonoBehaviour
         BindSavePointMenuInput();
 
         SetMode(InputMode.Map);
-
         Debug.Log("[INPUT] Awake complete");
     }
 
-    // ================= MODE =================
-
-    void OnDisable()
-    {
-        Input?.Disable();
-    }
-
-    void OnDestroy()
-    {
-        Input?.Dispose();
-    }
+    void OnDisable()  => Input?.Disable();
+    void OnDestroy()  => Input?.Dispose();
 
     public void SetMode(InputMode mode)
     {
@@ -62,144 +47,50 @@ public class InputController : MonoBehaviour
 
         switch (mode)
         {
-            case InputMode.Map:
-                Input.Map.Enable();
-                break;
-
-            case InputMode.Battle:
-                Input.Battle.Enable();
-                break;
-
-            case InputMode.BattleSkillMenu:
-                Input.SkillMenu.Enable();
-                break;
-
-            case InputMode.UI:
-                // Chặn toàn bộ input Map/Battle/Skill đã Disable ở trên
-                // SavePointMenu action map được enable ở đây
-                Input.SavePointMenu.Enable();
-                break;
+            case InputMode.Map:            Input.Map.Enable();          break;
+            case InputMode.Battle:         Input.Battle.Enable();       break;
+            case InputMode.BattleSkillMenu: Input.SkillMenu.Enable();  break;
+            case InputMode.UI:             Input.SavePointMenu.Enable(); break;
         }
 
         Debug.Log("[INPUT MODE] " + mode);
     }
 
-    // ================= BIND =================
-
     public void BindBattleManager(BattleManager bm)
     {
         battle = bm;
-
         SetMode(InputMode.Battle);
-
         Debug.Log("[INPUT] Battle bound");
     }
 
     public void UnbindBattleManager()
     {
         battle = null;
-
         SetMode(InputMode.Map);
-
         Debug.Log("[INPUT] Battle unbound");
     }
 
-    // ================= BATTLE INPUT =================
-
     void BindBattleInput()
     {
-        Input.Battle.BasicAttack.performed += ctx =>
-        {
-            Debug.Log("[INPUT] BasicAttack");
-
-            battle?.SelectBasicAttack();
-        };
-
-        Input.Battle.NextTarget.performed += ctx =>
-        {
-            Debug.Log("[INPUT] NextTarget");
-
-            battle?.ChangeTargetInput(1);
-        };
-
-        Input.Battle.PrevTarget.performed += ctx =>
-        {
-            Debug.Log("[INPUT] PrevTarget");
-
-            battle?.ChangeTargetInput(-1);
-        };
-
-        Input.Battle.Parry.performed += ctx =>
-        {
-            Debug.Log("[INPUT] Parry");
-
-            battle?.RequestParry();
-        };
-
-        Input.Battle.OpenSkillMenu.performed += ctx =>
-        {
-            Debug.Log("[INPUT] OpenSkillMenu");
-
-            SetMode(InputMode.BattleSkillMenu);
-        };
-
-        Input.Battle.OpenItemMenu.performed += ctx =>
-        {
-            Debug.Log("[INPUT] OpenItemMenu (chưa implement)");
-        };
-
-        Input.Battle.Flee.performed += ctx =>
-        {
-            Debug.Log("[INPUT] Try Flee");
-            battle?.TryFlee();
-        };
+        Input.Battle.BasicAttack.performed  += _ => battle?.SelectBasicAttack();
+        Input.Battle.NextTarget.performed   += _ => battle?.ChangeTargetInput(1);
+        Input.Battle.PrevTarget.performed   += _ => battle?.ChangeTargetInput(-1);
+        Input.Battle.Parry.performed        += _ => battle?.RequestParry();
+        Input.Battle.OpenSkillMenu.performed += _ => SetMode(InputMode.BattleSkillMenu);
+        Input.Battle.OpenItemMenu.performed  += _ => Debug.Log("[INPUT] OpenItemMenu (chưa implement)");
+        Input.Battle.Flee.performed         += _ => battle?.TryFlee();
     }
-
-    // ================= SKILL INPUT =================
 
     void BindSkillMenuInput()
     {
-        Input.SkillMenu.Skill1.performed += ctx =>
-        {
-            Debug.Log("[INPUT] Skill1");
-
-            battle?.UseSkill(0);
-
-            SetMode(InputMode.Battle);
-        };
-
-        Input.SkillMenu.Skill2.performed += ctx =>
-        {
-            Debug.Log("[INPUT] Skill2");
-
-            battle?.UseSkill(1);
-
-            SetMode(InputMode.Battle);
-        };
-
-        Input.SkillMenu.Cancel.performed += ctx =>
-        {
-            Debug.Log("[INPUT] CancelSkillMenu");
-
-            SetMode(InputMode.Battle);
-        };
+        Input.SkillMenu.Skill1.performed += _ => { battle?.UseSkill(0); SetMode(InputMode.Battle); };
+        Input.SkillMenu.Skill2.performed += _ => { battle?.UseSkill(1); SetMode(InputMode.Battle); };
+        Input.SkillMenu.Cancel.performed += _ => SetMode(InputMode.Battle);
     }
-
-    // ================= SAVE POINT INPUT =================
 
     void BindSavePointMenuInput()
     {
-        Input.SavePointMenu.Swap.performed += ctx =>
-        {
-            Debug.Log("[INPUT] SavePoint Swap Party (F)");
-            SavePointUI.Instance?.OnSwapOrder();
-        };
-
-        Input.SavePointMenu.Close.performed += ctx =>
-        {
-            Debug.Log("[INPUT] SavePoint Close (Esc)");
-            SavePointUI.Instance?.OnClose();
-        };
+        Input.SavePointMenu.Swap.performed  += _ => SavePointUI.Instance?.OnSwapOrder();
+        Input.SavePointMenu.Close.performed += _ => SavePointUI.Instance?.OnClose();
     }
-
 }

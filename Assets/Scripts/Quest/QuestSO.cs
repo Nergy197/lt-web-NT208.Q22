@@ -68,10 +68,31 @@ public class QuestSO : ScriptableObject
         Debug.LogWarning($"[QUEST] Objective «{objectiveId}» not found or already done in quest «{Id}»");
     }
 
-    /// <summary>Reset trạng thái runtime (dùng khi load lại scene).</summary>
+    /// <summary>Reset trạng thái runtime (dùng khi bắt đầu quest mới).</summary>
     public void ResetObjectives()
     {
         foreach (var obj in Objectives)
             obj.IsCompleted = false;
+    }
+
+    /// <summary>
+    /// Restore trạng thái objectives từ save data.
+    /// Được QuestManager.LoadProgress() gọi khi load game.
+    /// </summary>
+    public void ApplySaveData(QuestProgressData data)
+    {
+        if (data?.Objectives == null) return;
+
+        foreach (var saved in data.Objectives)
+        {
+            foreach (var obj in Objectives)
+            {
+                if (obj.Id == saved.Id)
+                {
+                    obj.IsCompleted = saved.IsCompleted;
+                    break;
+                }
+            }
+        }
     }
 }

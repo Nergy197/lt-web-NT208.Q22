@@ -23,6 +23,9 @@ public class SavePoint : MonoBehaviour
             {
                 string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
                 GameManager.Instance.SaveAtPoint(pointId, sceneName);
+
+                // Lưu tiến độ quest cùng lúc với party
+                QuestManager.Instance?.SaveProgress();
             }
         }
     }
