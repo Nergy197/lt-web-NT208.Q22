@@ -1,5 +1,5 @@
 ####################################
-# UNITY GENERATED
+# UNITY - GENERATED FOLDERS
 ####################################
 [Ll]ibrary/
 [Tt]emp/
@@ -9,13 +9,18 @@
 [Ll]ogs/
 [Uu]serSettings/
 [Mm]emoryCaptures/
+[Rr]ecordings/
+[Ee]xports/
 
 ####################################
-# UNITY CACHE / ARTIFACTS
+# UNITY - IDE GENERATED FILES
+# Các file này được Unity tự tạo lại
+# => KHÔNG commit để tránh conflict
 ####################################
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.user
 *.userprefs
@@ -23,53 +28,84 @@
 *.booproj
 
 ####################################
-# VISUAL STUDIO / RIDER
-####################################
-.vs/
-.idea/
-.vscode/
-*.DotSettings
-*.DotSettings.user
-
-####################################
-# OS JUNK
-####################################
-.DS_Store
-Thumbs.db
-ehthumbs.db
-desktop.ini
-
-####################################
-# INPUT SYSTEM (GENERATED)
-####################################
-# Auto-generated C# from InputActions
-*InputActions.cs
-
-# Optional: ignore InputAction backups
-*.inputactions.backup
-
-####################################
-# UNITY ADDRESSABLE / CACHE
-####################################
-[Aa]ssets/AddressableAssetsData/*/Build
-[Aa]ssets/AddressableAssetsData/*/PlayerBuildData
-
-####################################
-# AUDIO / VIDEO CACHE
-####################################
-*.wav.meta
-*.mp3.meta
-*.mp4.meta
-
-####################################
-# CRASH / PROFILING
+# UNITY - CRASH / PROFILING
 ####################################
 sysinfo.txt
 *.stacktrace
+debug.log
+*.log
 
 ####################################
-# OPTIONAL – LOCAL CONFIG
+# UNITY - ADDRESSABLE BUILD CACHE
+####################################
+[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/[Bb]uild
+[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/[Pp]layer[Bb]uild[Dd]ata
+[Aa]ssets/StreamingAssets/aa.meta
+[Aa]ssets/StreamingAssets/aa/
+
+####################################
+# UNITY - INPUT SYSTEM (AUTO-GENERATED)
+# File .cs được generate từ .inputactions
+# => KHÔNG commit để tránh conflict khi
+#    mỗi người dùng Unity version khác nhau
+####################################
+*InputActions.cs
+*.inputactions.backup
+
+####################################
+# UNITY - AUDIO/VIDEO META (OPTIONAL)
+# Bỏ qua nếu cần giữ import settings
+####################################
+# *.wav.meta
+# *.mp3.meta
+# *.mp4.meta
+
+####################################
+# VISUAL STUDIO / RIDER / VS CODE
+####################################
+.vs/
+.idea/
+*.DotSettings.user
+
+# Giữ lại .vscode/settings.json nếu team dùng chung
+# Uncomment dòng dưới nếu muốn ignore hoàn toàn
+# .vscode/
+
+####################################
+# NODE.JS BACKEND (Backend/)
+####################################
+Backend/node_modules/
+Backend/.env
+Backend/.env.local
+Backend/.env.*.local
+Backend/npm-debug.log*
+Backend/yarn-debug.log*
+Backend/yarn-error.log*
+Backend/*.log
+
+####################################
+# OS - WINDOWS / MACOS / LINUX
+####################################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+####################################
+# SECRETS / ENVIRONMENT
 ####################################
 *.env
-node_modules/
-.meta
+.env
+.env.*
+!.env.example
+
+####################################
+# QUAN TRỌNG: KHÔNG IGNORE .meta
+# .meta files trong Unity LƯU GUID
+# => BẮT BUỘC phải commit!
+####################################
