@@ -220,7 +220,7 @@ public class GameManager : MonoBehaviour
     /// <summary>Hồi máu + lưu vị trí save point rồi gửi lên server.</summary>
     public void SaveAtPoint(string pointId, string sceneName)
     {
-        // 1. Hồi máu toàn bộ party
+        // Hồi máu toàn bộ party
         if (playerParty != null)
         {
             foreach (var member in playerParty.Members)
@@ -228,11 +228,11 @@ public class GameManager : MonoBehaviour
             Debug.Log("[SAVE POINT] Party healed.");
         }
 
-        // 2. Cập nhật runtime
+        // Cập nhật runtime
         pendingSavePointId = pointId;
         pendingSaveScene = sceneName;
 
-        // 3. Đẩy lên server
+        // Đẩy lên server
         StartCoroutine(SaveRoutine(pointId, sceneName));
     }
 

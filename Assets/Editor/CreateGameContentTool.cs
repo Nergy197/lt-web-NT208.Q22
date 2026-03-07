@@ -30,7 +30,7 @@ public class CreateGameContentTool
             // Nếu file đã có, bỏ qua đỡ đè dữ liệu cũ
             if (File.Exists(path))
             {
-                Debug.Log($"⚠️ Đã có sẵn: {classNames[i]}. Bỏ qua tạo mới.");
+                Debug.Log($"Đã có sẵn: {classNames[i]}. Bỏ qua tạo mới.");
                 continue;
             }
 
@@ -43,12 +43,12 @@ public class CreateGameContentTool
             newChar.maxAP = 100;
 
             AssetDatabase.CreateAsset(newChar, path);
-            Debug.Log($"✅ Đã tạo Asset Nhân vật: {classNames[i]} tại {path}");
+            Debug.Log($"Đã tạo Asset Nhân vật: {classNames[i]} tại {path}");
         }
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("🎉 Hoàn tất tạo 4 nhân vật! Hãy vào Assets/Data/Characters để kiểm tra (và gắn kỹ năng nếu muốn).");
+        Debug.Log("Hoàn tất tạo 4 nhân vật! Hãy vào Assets/Data/Characters để kiểm tra (và gắn kỹ năng nếu muốn).");
     }
 
     // ==========================================
@@ -57,7 +57,7 @@ public class CreateGameContentTool
     [MenuItem("Tools/2. Setup Map Căn Bản Nhanh (Player + Map)")]
     public static void SetupBasicMap()
     {
-        // 1. Tạo Player
+        // Tạo Player
         GameObject player = GameObject.FindWithTag("Player");
         if (player == null)
         {
@@ -90,11 +90,11 @@ public class CreateGameContentTool
             player.transform.localScale = new Vector3(1f, 1f, 1);
 
             Undo.RegisterCreatedObjectUndo(player, "Create Player");
-            Debug.Log("✅ Đã tạo Player trên Map thành công.");
+            Debug.Log("Đã tạo Player trên Map thành công.");
         }
         else
         {
-            Debug.Log("⚠️ Đã có sẵn Player, bỏ qua.");
+            Debug.Log("Đã có sẵn Player, bỏ qua.");
         }
 
         // Camera follow (Đơn giản - kéo camera làm con của Player)
@@ -105,7 +105,7 @@ public class CreateGameContentTool
             cam.transform.localPosition = new Vector3(0, 0, -10); // Lùi lại để nhìn 2D
         }
 
-        // 2. Tạo Grid & 1 tấm nền đất cho Map
+        // Tạo Grid & 1 tấm nền đất cho Map
         Grid grid = Object.FindFirstObjectByType<Grid>();
         if (grid == null)
         {
@@ -128,10 +128,10 @@ public class CreateGameContentTool
             groundObj.transform.localScale = new Vector3(15, 15, 1);
 
             Undo.RegisterCreatedObjectUndo(gridObj, "Create Environment Grid");
-            Debug.Log("✅ Đã tạo Grid và Ground thành công.");
+            Debug.Log("Đã tạo Grid và Ground thành công.");
         }
 
-        // 3. Tạo một con quái giả (Enemy Trigger mẫu)
+        // Tạo một con quái giả (Enemy Trigger mẫu)
         EnemyTrigger enemyTrigger = Object.FindFirstObjectByType<EnemyTrigger>();
         if (enemyTrigger == null)
         {
@@ -153,10 +153,10 @@ public class CreateGameContentTool
             et.requireInteract = false;
 
             Undo.RegisterCreatedObjectUndo(enemyObj, "Create Sample Enemy");
-            Debug.Log("✅ Đã tạo Enemy Trigger Mẫu thành công.");
+            Debug.Log("Đã tạo Enemy Trigger Mẫu thành công.");
         }
 
-        Debug.Log("🎉 Hoàn tất Setup Map cơ bản! Hãy kéo Map Manager, Input Controller vào Scene nếu chưa có.");
+        Debug.Log("Hoàn tất Setup Map cơ bản! Hãy kéo Map Manager, Input Controller vào Scene nếu chưa có.");
     }
 
     // ==========================================
@@ -175,7 +175,7 @@ public class CreateGameContentTool
 
         if (!File.Exists(sourcePath))
         {
-            Debug.LogError($"⚠️ Không tìm thấy file gốc tại {sourcePath}. Vui lòng đảm bảo bạn đang có một scene tên là MapScene.unity nằm trong thư mục Assets/Scenes.");
+            Debug.LogError($"Không tìm thấy file gốc tại {sourcePath}. Vui lòng đảm bảo bạn đang có một scene tên là MapScene.unity nằm trong thư mục Assets/Scenes.");
             return;
         }
 
@@ -187,6 +187,6 @@ public class CreateGameContentTool
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"✅ Đã tạo một Map mới y chang Map gốc tại: {newPath}");
+        Debug.Log($"Đã tạo một Map mới y chang Map gốc tại: {newPath}");
     }
 }

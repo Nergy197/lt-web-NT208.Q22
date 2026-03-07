@@ -6,6 +6,7 @@ public class EnemyAttackHitData
 {
     public bool canBeParried = true;
     public float windUpTime = 0.5f;
+    public float parryWindowDuration = 1.5f;
     public float damageMultiplier = 1f;
     public int repeat = 1;
     public float delayBetweenHits = 0f; // default delay if timingOffsets is empty
@@ -28,6 +29,7 @@ public class EnemyAttackData : ScriptableObject
             { 
                 canBeParried = h.canBeParried, 
                 windUpTime = h.windUpTime, 
+                parryWindowDuration = h.parryWindowDuration,
                 damageMultiplier = h.damageMultiplier, 
                 repeat = Mathf.Max(1, h.repeat), 
                 delayBetweenHits = h.delayBetweenHits,

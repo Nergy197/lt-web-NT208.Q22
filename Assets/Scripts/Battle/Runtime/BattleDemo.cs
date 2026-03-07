@@ -152,7 +152,7 @@ public class BattleDemo : MonoBehaviour
     {
         var skill = player.GetSkillByIndex(99);
         if (skill == null)
-            Log("[DEMO] Skill[99] correctly returned null ✓");
+            Log("[DEMO] Skill[99] correctly returned null");
         else
             Log("[DEMO] UNEXPECTED: Skill[99] found!");
     }

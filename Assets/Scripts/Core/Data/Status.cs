@@ -200,13 +200,15 @@ public abstract class Status
     {
         switch (effect.effectType)
         {
-            case StatusEffectType.BuffAtk:   baseAtk += effect.appliedValue; break;
-            case StatusEffectType.BuffDef:   baseDef += effect.appliedValue; break;
-            case StatusEffectType.BuffSpd:   baseSpd += effect.appliedValue; break;
-            case StatusEffectType.BuffHP:    baseHP  += effect.appliedValue; break;
-            case StatusEffectType.DebuffAtk: baseAtk -= effect.appliedValue; break;
-            case StatusEffectType.DebuffDef: baseDef -= effect.appliedValue; break;
-            case StatusEffectType.DebuffSpd: baseSpd -= effect.appliedValue; break;
+            // Buff đã cộng vào khi Apply → undo phải TRỪ đi.
+            case StatusEffectType.BuffAtk:   baseAtk -= effect.appliedValue; break;
+            case StatusEffectType.BuffDef:   baseDef -= effect.appliedValue; break;
+            case StatusEffectType.BuffSpd:   baseSpd -= effect.appliedValue; break;
+            case StatusEffectType.BuffHP:    baseHP  -= effect.appliedValue; break;
+            // Debuff đã trừ khi Apply → undo phải CỘNG lại.
+            case StatusEffectType.DebuffAtk: baseAtk += effect.appliedValue; break;
+            case StatusEffectType.DebuffDef: baseDef += effect.appliedValue; break;
+            case StatusEffectType.DebuffSpd: baseSpd += effect.appliedValue; break;
             case StatusEffectType.Poison:
             case StatusEffectType.Stun:
             case StatusEffectType.BuffHeal:

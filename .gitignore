@@ -11,11 +11,11 @@
 [Mm]emoryCaptures/
 [Rr]ecordings/
 [Ee]xports/
+[Ee]xportedObj/
+Asset[Ss]tore[Tt]ools/
 
 ####################################
 # UNITY - IDE GENERATED FILES
-# Các file này được Unity tự tạo lại
-# => KHÔNG commit để tránh conflict
 ####################################
 *.csproj
 *.unityproj
@@ -26,14 +26,21 @@
 *.userprefs
 *.pidb
 *.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
 
 ####################################
 # UNITY - CRASH / PROFILING
 ####################################
 sysinfo.txt
+*.stackdump
 *.stacktrace
 debug.log
 *.log
+crashlytics-build.properties
 
 ####################################
 # UNITY - ADDRESSABLE BUILD CACHE
@@ -45,20 +52,29 @@ debug.log
 
 ####################################
 # UNITY - INPUT SYSTEM (AUTO-GENERATED)
-# File .cs được generate từ .inputactions
-# => KHÔNG commit để tránh conflict khi
-#    mỗi người dùng Unity version khác nhau
 ####################################
 *InputActions.cs
 *.inputactions.backup
 
 ####################################
-# UNITY - AUDIO/VIDEO META (OPTIONAL)
-# Bỏ qua nếu cần giữ import settings
+# UNITY - OTHER
 ####################################
-# *.wav.meta
-# *.mp3.meta
-# *.mp4.meta
+# TextMesh Pro
+[Aa]ssets/TextMesh*Pro/
+
+# Plastic SCM
+*.private.0
+*.private
+
+# NuGet
+/[Nn]u[Gg]et/
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/manifest.json
+!**/[Pp]ackages/packages-lock.json
+
+# Code Coverage
+[Cc]ode[Cc]overage/
 
 ####################################
 # VISUAL STUDIO / RIDER / VS CODE
@@ -66,9 +82,10 @@ debug.log
 .vs/
 .idea/
 *.DotSettings.user
+*.rsuser
+*.DotSettings
 
-# Giữ lại .vscode/settings.json nếu team dùng chung
-# Uncomment dòng dưới nếu muốn ignore hoàn toàn
+# VS Code - keep settings.json if team shares config
 # .vscode/
 
 ####################################
@@ -93,8 +110,11 @@ Backend/*.log
 .Trashes
 Thumbs.db
 ehthumbs.db
+ehthumbs_vista.db
 desktop.ini
 $RECYCLE.BIN/
+*.lnk
+*~
 
 ####################################
 # SECRETS / ENVIRONMENT
@@ -105,7 +125,16 @@ $RECYCLE.BIN/
 !.env.example
 
 ####################################
-# QUAN TRỌNG: KHÔNG IGNORE .meta
-# .meta files trong Unity LƯU GUID
-# => BẮT BUỘC phải commit!
+# AI TOOLS
+####################################
+.gemini/
+.agent/
+.agents/
+_agent/
+_agents/
+
+####################################
+# NOTE: DO NOT IGNORE .meta FILES!
+# Unity .meta files store GUIDs and
+# import settings - MUST be committed!
 ####################################

@@ -72,11 +72,11 @@ public class CreateSavePointSystem
 
             // Nhớ TẮT panel mặc định đi
             panelObj.SetActive(false);
-            Debug.Log("✅ Đã tạo UI SavePointMenuSystem thành công.");
+            Debug.Log("Đã tạo UI SavePointMenuSystem thành công.");
         }
         else
         {
-            Debug.Log("⚠️ Phát hiện SavePointMenuSystem đã tồn tại, bỏ qua tạo UI.");
+            Debug.Log("Phát hiện SavePointMenuSystem đã tồn tại, bỏ qua tạo UI.");
         }
 
         // ----------------- PHẦN 2: TẠO OBJECT VÀNG TRÊN MAP -----------------
@@ -108,7 +108,7 @@ public class CreateSavePointSystem
 
         Selection.activeGameObject = saveObj;
 
-        Debug.Log("✅ Đã hoàn tất! Hệ thống Save Point sẵn sàng! Lưu Scene lại (Ctrl+S) nhé!");
+        Debug.Log("Đã hoàn tất! Hệ thống Save Point sẵn sàng! Lưu Scene lại (Ctrl+S) nhé!");
     }
 
     private static Button CreateButton(Transform parent, string name, string textStr, Vector2 pos)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class BattleManager : MonoBehaviour
@@ -270,7 +271,6 @@ public class BattleManager : MonoBehaviour
         if (enemy == null)
         {
             Log("[ERROR] No enemy target");
-            waitingForPlayerAction = false;
             return;
         }
 
@@ -437,10 +437,8 @@ public class BattleManager : MonoBehaviour
         foreach (var p in playerParty.Members)
             if (p.IsAlive) aliveAllies.Add(p as PlayerStatus);
 
-        // Hiện tại luôn cycle qua danh sách địch.
-        // Để target ally, set isTargetingAlly = true bằng input riêng.
-        isTargetingAlly = false;
-
+        // Nếu đang target ally (heal/buff), cycle qua danh sách ally.
+        // Mặc định cycle qua danh sách địch.
         if (!isTargetingAlly && aliveEnemies.Count > 0)
         {
             currentTargetIndex = (currentTargetIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
