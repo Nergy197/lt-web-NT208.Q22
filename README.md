@@ -218,13 +218,37 @@ curl -X POST http://localhost:3000/player/save \
 
 ## Thành viên nhóm
 
-| STT | Họ và tên       | MSSV       | Vai trò          |
-| --- | --------------- | ---------- | ---------------- |
-| 1   | *(Cập nhật)*    | *(MSSV)*   | *(Vai trò)*      |
-| 2   | *(Cập nhật)*    | *(MSSV)*   | *(Vai trò)*      |
-| 3   | *(Cập nhật)*    | *(MSSV)*   | *(Vai trò)*      |
+| Vai trò     | Họ và tên          | MSSV       | Phân chia    |
+| ----------- | ------------------ | ---------- | ------------ |
+| Thành viên  | Trầm Tính Ân       | 24520074   | Nhóm B       |
+| Thành viên  | Trần Đức Chuẩn     | 24520228   | Nhóm B       |
+| Nhóm trưởng | Nguyễn Mạnh Cường  | 24520238   | Nhóm A       |
+| Thành viên  | Nguyễn Tấn Danh    | 24520262   | Nhóm A       |
 
-> **Ghi chú**: Vui lòng cập nhật thông tin thành viên nhóm tại bảng trên.
+### 🅰️ Nhóm A — Gameplay & Logic
+
+| STT | Nội dung cần học       | Mục tiêu học                    | Công nghệ / Công cụ   |
+| --- | ---------------------- | ------------------------------- | ---------------------- |
+| 1   | Unity Editor cơ bản    | Biết tạo scene, prefab, script  | Unity Editor           |
+| 2   | C# cơ bản trong Unity  | Viết script, hiểu MonoBehaviour | C#                     |
+| 3   | ScriptableObject       | Quản lý dữ liệu nhân vật, skill| ScriptableObject       |
+| 4   | Turn-based logic       | Sắp xếp lượt theo SPD          | C# (List, Sort)        |
+| 5   | BattleManager          | Quản lý trạng thái trận         | C#                     |
+| 6   | Skill & damage         | Tính sát thương                 | C#                     |
+| 7   | AI cơ bản              | Chọn mục tiêu, hành động       | Rule-based AI          |
+
+### 🅱️ Nhóm B — UI, Audio & Deployment
+
+| STT | Nội dung cần học       | Mục tiêu học                    | Công nghệ / Công cụ   |
+| --- | ---------------------- | ------------------------------- | ---------------------- |
+| 1   | Unity UI cơ bản        | Hiểu Canvas, Panel, Button     | Unity UI               |
+| 2   | Slider & TextMeshPro   | Hiển thị HP, text               | Slider, TMP            |
+| 3   | UI Event               | Kết nối nút với logic           | Unity Event            |
+| 4   | UI feedback            | Damage popup, đổi lượt          | C#, TMP                |
+| 5   | Audio trong Unity      | Thêm SFX                       | AudioSource            |
+| 6   | Save/Load cơ bản       | Lưu & tải tiến trình            | PlayerPrefs / JSON     |
+| 7   | WebGL build            | Build game chạy web             | Unity WebGL            |
+| 8   | Deploy itch.io         | Upload & test                   | itch.io                |
 
 ---
 

@@ -22,6 +22,9 @@
                 "level": 1,
                 "currentHP": 90
             }
-        ]
+        ],
+        "questProgress": {
+            "Quests": []
+        }
     }
 ]

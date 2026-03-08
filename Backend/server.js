@@ -90,7 +90,8 @@ app.post("/player/save", async (req, res) => {
         $set: {
           party: req.body.party,
           lastSavePointId: req.body.lastSavePointId,
-          lastSaveScene: req.body.lastSaveScene
+          lastSaveScene: req.body.lastSaveScene,
+          questProgress: req.body.questProgress
         }
       },
       { upsert: true }

@@ -10,4 +10,7 @@ public class PlayerSave
     // Vị trí Save Point đã lưu gần nhất
     public string lastSaveScene;
     public string lastSavePointId;
+
+    // Tiến trình quest (lưu lên server)
+    public AllQuestsSaveData questProgress;
 }

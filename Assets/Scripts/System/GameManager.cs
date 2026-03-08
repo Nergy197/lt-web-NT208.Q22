@@ -109,12 +109,21 @@ public class GameManager : MonoBehaviour
         isLoaded = true;
         Debug.Log("PLAYER READY");
 
-        // Khởi động quest đầu tiên CHỈ KHI chưa có save data
-        // (nếu có save data, QuestManager.LoadProgress() trong Start() đã restore rồi)
+        // Khởi động quest đầu tiên CHỈ KHI chưa có save data (từ server hoặc PlayerPrefs)
         var qm = questManager != null ? questManager : QuestManager.Instance;
-        if (qm != null && !UnityEngine.PlayerPrefs.HasKey(QuestManager.SaveKey))
+        if (qm != null)
         {
-            qm.StartQuest("Q001");
+            // Nếu server không trả về quest data → thử load từ PlayerPrefs
+            if (qm.ActiveQuests.Count == 0 && qm.CompletedQuests.Count == 0)
+            {
+                qm.LoadProgress(); // PlayerPrefs fallback
+            }
+
+            // Nếu vẫn không có gì → bắt đầu quest đầu tiên
+            if (qm.ActiveQuests.Count == 0 && qm.CompletedQuests.Count == 0)
+            {
+                qm.StartQuest("Q001");
+            }
         }
     }
 
@@ -176,6 +185,13 @@ public class GameManager : MonoBehaviour
             pendingSavePointId = save.lastSavePointId;
             pendingSaveScene = save.lastSaveScene;
             Debug.Log($"[LOAD] Save Point: {pendingSaveScene} → {pendingSavePointId}");
+        }
+
+        // Tải tiến trình quest từ server
+        var qm = questManager != null ? questManager : QuestManager.Instance;
+        if (qm != null && save.questProgress != null)
+        {
+            qm.LoadProgressFromData(save.questProgress);
         }
     }
 
@@ -285,8 +301,10 @@ public class GameManager : MonoBehaviour
         PlayerSave save = new PlayerSave();
         save._id = "player001";
         save.party = new List<UnitSave>();
-        save.lastSavePointId = savePointId;
-        save.lastSaveScene = saveScene;
+
+        // Giữ lại save point hiện tại nếu không truyền tham số
+        save.lastSavePointId = savePointId ?? pendingSavePointId;
+        save.lastSaveScene   = saveScene   ?? pendingSaveScene;
 
         foreach (Status s in playerParty.Members)
         {
@@ -296,6 +314,14 @@ public class GameManager : MonoBehaviour
             unit.currentHP = s.currentHP;
             unit.currentExp = (s is PlayerStatus ps) ? ps.currentExp : 0;
             save.party.Add(unit);
+        }
+
+        // Gắn tiến trình quest vào payload
+        var qm = questManager != null ? questManager : QuestManager.Instance;
+        if (qm != null)
+        {
+            save.questProgress = qm.BuildSaveData();
+            qm.SaveProgress(); // Lưu PlayerPrefs làm fallback
         }
 
         string json = JsonUtility.ToJson(save);
