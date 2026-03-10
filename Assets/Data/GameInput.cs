@@ -547,7 +547,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""Swap"",
                     ""type"": ""Button"",
-                    ""id"": ""e6f7g8h9-i0j1-2345-k678-345678901234"",
+                    ""id"": ""e6f7a8b9-c0d1-2345-a678-345678901234"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -610,7 +610,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""k8l9m0n1-o2p3-4567-q890-567890123456"",
+                    ""id"": ""a8b9c0d1-e2f3-4567-a890-567890123456"",
                     ""path"": ""<Keyboard>/f"",
                     ""interactions"": """",
                     ""processors"": """",
