@@ -952,8 +952,10 @@ MonoBehaviour:
   isLoaded: 0
   currentSaveSlot: 0
   playerDatabase:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 854b795899a8d4ba5a0200da5eea44e1, type: 2}
+  - {fileID: 11400000, guid: 0de696b83dc114f60948825263b63344, type: 2}
+  - {fileID: 11400000, guid: 4f79f3e10b1ad4f9289225ddd8722052, type: 2}
+  - {fileID: 11400000, guid: c22be4c62b4884a0893f3a19a108e000, type: 2}
 --- !u!4 &620826082
 Transform:
   m_ObjectHideFlags: 0

@@ -86,7 +86,11 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(LoadPlayerParty());
+        // Tránh tự động Load Slot 0 khi đang ở Menu Chính (Menu sẽ tự gọi LoadAndStartGame sau)
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "StartScene")
+        {
+            StartCoroutine(LoadPlayerParty());
+        }
     }
 
     // ================= LOAD =================
@@ -95,19 +99,49 @@ public class GameManager : MonoBehaviour
     {
         string json = "";
 
-        // Kiểm tra xem User có chọn "New Game" không
-        if (!startAsNewGame && PlayerPrefs.HasKey("PlayerSave_" + currentSaveSlot))
+        if (startAsNewGame)
         {
-            // 1. Tải dữ liệu từ Slot tương ứng trong Trình duyệt
+            // 1. TẠO NEW GAME HOÀN TOÀN MỚI
+            Debug.Log($"[LOAD] Bắt đầu New Game ở Slot {currentSaveSlot}...");
+            PlayerSave newSave = new PlayerSave();
+            newSave._id = "player001_slot_" + currentSaveSlot; // Phân biệt ID theo slot trên Database
+            newSave.slotId = currentSaveSlot;
+            newSave.saveTime = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+            newSave.party = new List<UnitSave>();
+            
+            // Xóa điểm save cũ
+            pendingSavePointId = null;
+            pendingSaveScene = null;
+
+            if (playerDatabase.Count > 0 && playerDatabase[0] != null)
+            {
+                UnitSave starter = new UnitSave();
+                starter.entityName = playerDatabase[0].entityName;
+                starter.level = 1;
+                starter.currentHP = playerDatabase[0].baseHP;
+                starter.currentExp = 0;
+                newSave.party.Add(starter);
+            }
+            json = JsonUtility.ToJson(newSave);
+            
+            // Ép lưu ngay xuống PlayerPrefs để tạo file
+            PlayerPrefs.SetString("PlayerSave_" + currentSaveSlot, json);
+            PlayerPrefs.Save();
+        }
+        else if (PlayerPrefs.HasKey("PlayerSave_" + currentSaveSlot))
+        {
+            // 2. Tải dữ liệu từ Slot tương ứng trong Trình duyệt
             json = PlayerPrefs.GetString("PlayerSave_" + currentSaveSlot);
             Debug.Log($"[LOAD] Tải thành công Slot {currentSaveSlot} từ Local Storage: " + json);
             yield return null; // Cho qua frame
         }
         else
         {
-            // 2. Không có save cục bộ -> Thử gọi Server lấy file New Game
-            string url = FullURL(loadURL);
-            Debug.Log("[LOAD] Tải file mặc định từ Server: " + url);
+            // 3. Fallback: Cố tải từ Server nếu Local Storage mất (hoặc máy khác)
+            // Tải theo ID độc nhất của slot đó: /player/player001_slot_0
+            string slotIdOnServer = "player001_slot_" + currentSaveSlot;
+            string url = FullURL("player/" + slotIdOnServer);
+            Debug.Log("[LOAD] Tìm kiếm file từ Server: " + url);
 
             UnityWebRequest req = UnityWebRequest.Get(url);
             yield return req.SendWebRequest();
@@ -115,16 +149,14 @@ public class GameManager : MonoBehaviour
             if (req.result == UnityWebRequest.Result.Success)
             {
                 json = req.downloadHandler.text;
-                Debug.Log("[LOAD] Lấy Save mặc định từ Server: " + json);
+                Debug.Log("[LOAD] Lấy Save từ Server: " + json);
             }
             else
             {
-                Debug.LogWarning("[LOAD FAILED] Mất mạng hoặc Server sập! Tự động tạo New Game Offline...");
-                // 3. Fallback Offline: Rớt mạng + Mới chơi -> Tự tạo party cơ bản
+                Debug.LogWarning("[LOAD FAILED] Không tìm thấy! Tự động tạo New Game Offline...");
                 PlayerSave fallbackSave = new PlayerSave();
                 fallbackSave._id = "player001";
                 fallbackSave.party = new List<UnitSave>();
-
                 if (playerDatabase.Count > 0 && playerDatabase[0] != null)
                 {
                     UnitSave starter = new UnitSave();
@@ -253,19 +285,38 @@ public class GameManager : MonoBehaviour
 
     // ================= START GAME =================
 
+    public void LoadAndStartGame()
+    {
+        StartCoroutine(LoadAndStartGameRoutine());
+    }
+
+    private IEnumerator LoadAndStartGameRoutine()
+    {
+        Debug.Log($"[GameManager] Bắt đầu tiến trình tải data cho Slot {currentSaveSlot}");
+        isLoaded = false;
+        yield return StartCoroutine(LoadPlayerParty());
+        StartGame();
+    }
+
     public void StartGame()
     {
         if (!isLoaded)
         {
-            Debug.Log("Player not loaded yet");
+            Debug.LogWarning("Player not loaded yet. Vui lòng gọi LoadAndStartGame() thay vì StartGame().");
             return;
         }
 
         // Nếu có save point đã lưu, load scene đó
         if (!string.IsNullOrEmpty(pendingSaveScene))
+        {
+            Debug.Log($"[GameManager] Load Scene: {pendingSaveScene} (Điểm Save: {pendingSavePointId})");
             SceneManager.LoadScene(pendingSaveScene);
+        }
         else
+        {
+            Debug.Log("[GameManager] Load Scene mặc định: MapScene");
             SceneManager.LoadScene("MapScene");
+        }
     }
 
     // ================= SAVE AT POINT =================
@@ -336,7 +387,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SaveRoutine(string savePointId = null, string saveScene = null)
     {
         PlayerSave save = new PlayerSave();
-        save._id = "player001";
+        save._id = "player001_slot_" + currentSaveSlot; // Đảm bảo ID trên DB là độc nhất cho từng slot
         save.slotId = currentSaveSlot;
         save.saveTime = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
         save.party = new List<UnitSave>();
@@ -345,14 +396,21 @@ public class GameManager : MonoBehaviour
         save.lastSavePointId = savePointId ?? pendingSavePointId;
         save.lastSaveScene = saveScene ?? pendingSaveScene;
 
-        foreach (Status s in playerParty.Members)
+        if (playerParty != null && playerParty.Members != null)
         {
-            UnitSave unit = new UnitSave();
-            unit.entityName = s.entityName;
-            unit.level = s.level;
-            unit.currentHP = s.currentHP;
-            unit.currentExp = (s is PlayerStatus ps) ? ps.currentExp : 0;
-            save.party.Add(unit);
+            foreach (Status s in playerParty.Members)
+            {
+                UnitSave unit = new UnitSave();
+                unit.entityName = s.entityName;
+                unit.level = s.level;
+                unit.currentHP = s.currentHP;
+                unit.currentExp = (s is PlayerStatus ps) ? ps.currentExp : 0;
+                save.party.Add(unit);
+            }
+        }
+        else
+        {
+            Debug.LogError("[SAVE] LỖI: playerParty hoặc playerParty.Members bị NULL! Tiến trình Lưu Không Chứa Nhân Vật Nào.");
         }
 
         // Gắn tiến trình quest vào payload

@@ -92,5 +92,7 @@ public class InputController : MonoBehaviour
     {
         Input.SavePointMenu.Swap.performed  += _ => SavePointUI.Instance?.OnSwapOrder();
         Input.SavePointMenu.Close.performed += _ => SavePointUI.Instance?.OnClose();
+        Input.SavePointMenu.Heal.performed  += _ => SavePointUI.Instance?.OnHeal();
+        Input.SavePointMenu.Save.performed  += _ => SavePointUI.Instance?.OnSave();
     }
 }

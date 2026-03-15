@@ -16,17 +16,10 @@ public class SavePoint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = true;
-            Debug.Log($"[SavePoint] Player đẫm vào Save Point. Tự động Hồi máu & Lưu game...");
+            Debug.Log($"[SavePoint] Player dẫm vào {pointId}. Nhấn F để mở Menu Lưu/Hồi máu.");
             
-            // Tự động Hồi máu và Lưu khi chạm vào
-            if (GameManager.Instance != null)
-            {
-                string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-                GameManager.Instance.SaveAtPoint(pointId, sceneName);
-
-                // Lưu tiến độ quest cùng lúc với party
-                QuestManager.Instance?.SaveProgress();
-            }
+            // Xóa tính năng tự động Lưu và Hồi máu ở đây.
+            // Bắt buộc người chơi phải bấm Interact (F) để mở bảng UI.
         }
     }
 

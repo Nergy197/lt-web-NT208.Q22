@@ -16,6 +16,7 @@ public class SavePointUI : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button healButton;
     [SerializeField] private Button saveButton;
+    [SerializeField] private Button swapButton; // Nút thủ công đổi party
     [SerializeField] private Button closeButton;
 
     [Header("Status Text (optional)")]
@@ -38,11 +39,8 @@ public class SavePointUI : MonoBehaviour
         // Gắn sự kiện nút
         healButton?.onClick.AddListener(OnHeal);
         saveButton?.onClick.AddListener(OnSave);
+        swapButton?.onClick.AddListener(OnSwapOrder);
         closeButton?.onClick.AddListener(OnClose);
-
-        // Ẩn nội dung không cần thiết
-        if (healButton != null) healButton.gameObject.SetActive(false);
-        if (saveButton != null) saveButton.gameObject.SetActive(false);
 
         // Tắt panel khi khởi tạo
         panel?.SetActive(false);

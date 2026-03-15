@@ -128,6 +128,6 @@ public class StartMenuUI : MonoBehaviour
             Debug.Log($"[StartMenu] Load lại game cũ ở slot thứ {slotIndex}!");
         }
 
-        GameManager.Instance.StartGame();
+        GameManager.Instance.LoadAndStartGame();
     }
 }
