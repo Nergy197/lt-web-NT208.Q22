@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class GiaNoCutscene : MonoBehaviour
@@ -32,7 +32,8 @@ public class GiaNoCutscene : MonoBehaviour
         // --- NHỊP 1: MỚI VÀO GAME LÀ QUAY PHẢI NGẮM CẢNH ---
         if (playerScript != null)
         {
-            playerScript.canMove = false; // Khóa chân
+            playerScript.enabled = false;
+            playerScript.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero; // Khóa chân
 
             Animator playerAnim = playerScript.GetComponent<Animator>();
             if (playerAnim != null)
@@ -74,7 +75,7 @@ public class GiaNoCutscene : MonoBehaviour
         if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
 
         // 3. GIẢI HUYỆT: Chữ vừa tắt là mở khóa cho thiếu gia phi theo ngay!
-        if (playerScript != null) playerScript.canMove = true;
+        if (playerScript != null) playerScript.enabled = true;
 
         // 3. Gia nô quay đầu chạy vội vào nhà
         anim.Play("GiaNo_WalkUp");

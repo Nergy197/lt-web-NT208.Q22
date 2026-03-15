@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class QuanLyBaoTin : MonoBehaviour
@@ -15,7 +15,11 @@ public class QuanLyBaoTin : MonoBehaviour
     IEnumerator KichBanBaoTin()
     {
         // 1. KHÓA CHÂN: Gọi cái công tắc canMove bên PlayerMovement
-        if (playerScript != null) playerScript.canMove = false;
+        if (playerScript != null)
+        {
+            playerScript.enabled = false;
+            playerScript.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+        }
 
         // 2. CHỜ GIA NÔ CHẠY RA: Đợi khoảng 1 giây cho Gia nô chạy tới nơi
         yield return new WaitForSeconds(1.0f);

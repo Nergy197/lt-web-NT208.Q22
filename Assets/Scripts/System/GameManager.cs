@@ -51,6 +51,10 @@ public class GameManager : MonoBehaviour
         hasMapPosition = false;
     }
 
+    [Header("Save Slots")]
+    public int currentSaveSlot = 0;
+    private bool startAsNewGame = false; // Cờ báo hiệu bắt đầu New Game
+
     [Header("Database")]
     public List<PlayerData> playerDatabase = new();
 
@@ -89,20 +93,53 @@ public class GameManager : MonoBehaviour
 
     IEnumerator LoadPlayerParty()
     {
-        string url = FullURL(loadURL);
-        Debug.Log("[LOAD] Requesting: " + url);
+        string json = "";
 
-        UnityWebRequest req = UnityWebRequest.Get(url);
-        yield return req.SendWebRequest();
-
-        if (req.result != UnityWebRequest.Result.Success)
+        // Kiểm tra xem User có chọn "New Game" không
+        if (!startAsNewGame && PlayerPrefs.HasKey("PlayerSave_" + currentSaveSlot))
         {
-            Debug.LogError("[LOAD FAILED] " + req.error + " | URL: " + url);
-            yield break;
+            // 1. Tải dữ liệu từ Slot tương ứng trong Trình duyệt
+            json = PlayerPrefs.GetString("PlayerSave_" + currentSaveSlot);
+            Debug.Log($"[LOAD] Tải thành công Slot {currentSaveSlot} từ Local Storage: " + json);
+            yield return null; // Cho qua frame
+        }
+        else
+        {
+            // 2. Không có save cục bộ -> Thử gọi Server lấy file New Game
+            string url = FullURL(loadURL);
+            Debug.Log("[LOAD] Tải file mặc định từ Server: " + url);
+
+            UnityWebRequest req = UnityWebRequest.Get(url);
+            yield return req.SendWebRequest();
+
+            if (req.result == UnityWebRequest.Result.Success)
+            {
+                json = req.downloadHandler.text;
+                Debug.Log("[LOAD] Lấy Save mặc định từ Server: " + json);
+            }
+            else
+            {
+                Debug.LogWarning("[LOAD FAILED] Mất mạng hoặc Server sập! Tự động tạo New Game Offline...");
+                // 3. Fallback Offline: Rớt mạng + Mới chơi -> Tự tạo party cơ bản
+                PlayerSave fallbackSave = new PlayerSave();
+                fallbackSave._id = "player001";
+                fallbackSave.party = new List<UnitSave>();
+
+                if (playerDatabase.Count > 0 && playerDatabase[0] != null)
+                {
+                    UnitSave starter = new UnitSave();
+                    starter.entityName = playerDatabase[0].entityName;
+                    starter.level = 1;
+                    starter.currentHP = playerDatabase[0].baseHP;
+                    starter.currentExp = 0;
+                    fallbackSave.party.Add(starter);
+                }
+                json = JsonUtility.ToJson(fallbackSave);
+            }
         }
 
-        string json = req.downloadHandler.text;
-        Debug.Log("[LOAD] Raw JSON: " + json);
+        // Reset cờ New Game
+        startAsNewGame = false;
 
         CreatePartyFromJson(json);
 
@@ -300,11 +337,13 @@ public class GameManager : MonoBehaviour
     {
         PlayerSave save = new PlayerSave();
         save._id = "player001";
+        save.slotId = currentSaveSlot;
+        save.saveTime = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
         save.party = new List<UnitSave>();
 
         // Giữ lại save point hiện tại nếu không truyền tham số
         save.lastSavePointId = savePointId ?? pendingSavePointId;
-        save.lastSaveScene   = saveScene   ?? pendingSaveScene;
+        save.lastSaveScene = saveScene ?? pendingSaveScene;
 
         foreach (Status s in playerParty.Members)
         {
@@ -326,6 +365,14 @@ public class GameManager : MonoBehaviour
 
         string json = JsonUtility.ToJson(save);
 
+        // ==============================================================
+        // LƯU TRỰC TIẾP VÀO BỘ NHỚ TRÌNH DUYỆT THEO SLOT ID
+        // ==============================================================
+        PlayerPrefs.SetString("PlayerSave_" + currentSaveSlot, json);
+        PlayerPrefs.Save();
+        Debug.Log($"==== LƯU GAME THÀNH CÔNG VÀO TRÌNH DUYỆT (SLOT {currentSaveSlot}) ====");
+
+        // Đẩy lên server như một bản backup
         string url = FullURL(saveURL);
         UnityWebRequest req = new UnityWebRequest(url, "POST");
 
@@ -340,11 +387,46 @@ public class GameManager : MonoBehaviour
 
         if (req.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log("SAVE SUCCESS");
+            Debug.Log("==== BACKUP GAME LÊN MÁY CHỦ THÀNH CÔNG ====");
         }
         else
         {
-            Debug.LogError("SAVE FAILED: " + req.error);
+            Debug.LogWarning("Không thể chạm tới máy chủ. Game vẫn được lưu AN TOÀN TRÊN TRÌNH DUYỆT CỦA BẠN (Offline Mode). Lỗi: " + req.error);
+        }
+    }
+
+    // ================= START MENU HELPERS =================
+
+    /// <summary>Trả về danh sách 10 Slot Save để hiển thị lên UI Start Menu.</summary>
+    public PlayerSave[] GetAllSaveSlotsMetadata()
+    {
+        PlayerSave[] slots = new PlayerSave[10];
+        for (int i = 0; i < 10; i++)
+        {
+            if (PlayerPrefs.HasKey("PlayerSave_" + i))
+            {
+                string json = PlayerPrefs.GetString("PlayerSave_" + i);
+                slots[i] = JsonUtility.FromJson<PlayerSave>(json);
+            }
+            else
+            {
+                slots[i] = null; // Slot trống
+            }
+        }
+        return slots;
+    }
+
+    /// <summary>Thiết lập cờ để LoadGame bắt đầu Load lại từ đầu Party hoàn toàn mới.</summary>
+    public void PrepareNewGame()
+    {
+        startAsNewGame = true;
+        // Xóa tạm thời quest data nếu có trong session hiện tại để khởi tạo mới
+        var qm = questManager != null ? questManager : QuestManager.Instance;
+        if (qm != null)
+        {
+            qm.ActiveQuests.Clear();
+            qm.CompletedQuests.Clear();
+            PlayerPrefs.DeleteKey("QuestSaveData");
         }
     }
 }

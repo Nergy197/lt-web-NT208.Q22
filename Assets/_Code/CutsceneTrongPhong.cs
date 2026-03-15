@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class CutsceneTrongPhong : MonoBehaviour
@@ -23,8 +23,8 @@ public class CutsceneTrongPhong : MonoBehaviour
         // 1. RÚT ĐIỆN: Tắt hẳn Script di chuyển để nó không chèn ép Animator
         if (playerScript != null)
         {
-            playerScript.canMove = false;
             playerScript.enabled = false; // Dòng quyền lực nhất là đây!
+            playerScript.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
         }
 
         // ==========================================

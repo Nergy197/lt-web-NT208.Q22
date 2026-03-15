@@ -4,6 +4,8 @@ using System.Collections.Generic;
 public class PlayerSave
 {
     public string _id;
+    public int slotId = 0;
+    public string saveTime;
 
     public List<UnitSave> party;
 
