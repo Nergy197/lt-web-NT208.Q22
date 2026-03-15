@@ -208,8 +208,24 @@ public class GameManager : MonoBehaviour
 
         if (save.party == null || save.party.Count == 0)
         {
-            Debug.LogError("[LOAD] save.party rỗng hoặc null. JSON: " + json);
-            return;
+            Debug.LogWarning("[LOAD] save.party rỗng hoặc null. Tự động thêm nhân vật mặc định để cứu save. JSON: " + json);
+            save.party = new List<UnitSave>();
+            
+            // Tự động thêm nhân vật đầu tiên từ Database làm cứu cánh
+            if (playerDatabase != null && playerDatabase.Count > 0 && playerDatabase[0] != null)
+            {
+                UnitSave starter = new UnitSave();
+                starter.entityName = playerDatabase[0].entityName;
+                starter.level = 1;
+                starter.currentHP = playerDatabase[0].baseHP;
+                starter.currentExp = 0;
+                save.party.Add(starter);
+            }
+            else
+            {
+                Debug.LogError("[LOAD] Database rỗng! Không thể cứu được party.");
+                return;
+            }
         }
 
         playerParty = new Party(PartyType.Player);
@@ -396,7 +412,7 @@ public class GameManager : MonoBehaviour
         save.lastSavePointId = savePointId ?? pendingSavePointId;
         save.lastSaveScene = saveScene ?? pendingSaveScene;
 
-        if (playerParty != null && playerParty.Members != null)
+        if (playerParty != null && playerParty.Members != null && playerParty.Members.Count > 0)
         {
             foreach (Status s in playerParty.Members)
             {
@@ -410,7 +426,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[SAVE] LỖI: playerParty hoặc playerParty.Members bị NULL! Tiến trình Lưu Không Chứa Nhân Vật Nào.");
+            Debug.LogError("[SAVE] LỖI CỰC NGHIÊM TRỌNG: playerParty rỗng hoặc NULL! Hủy tiến trình lưu để tránh làm hỏng file save.");
+            yield break; // THOÁT NGAY, không lưu đè dữ liệu rỗng lên LocalStorage/Server
         }
 
         // Gắn tiến trình quest vào payload

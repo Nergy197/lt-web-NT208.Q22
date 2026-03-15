@@ -82,6 +82,12 @@ app.post("/player/save", async (req, res) => {
       return res.status(400).json({ error: "Missing _id" });
     }
 
+    // Safeguard: Không cho phép lưu party rỗng
+    if (!req.body.party || req.body.party.length === 0) {
+      console.warn("[SAVE] Rejected empty party for:", req.body._id);
+      return res.status(400).json({ error: "Cannot save empty party" });
+    }
+
     console.log("[SAVE] data received:", req.body);
 
     await db.collection("players").updateOne(
