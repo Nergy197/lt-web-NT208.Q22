@@ -53,13 +53,14 @@ public abstract class Status
     }
 
     /// <summary>
-    /// Gọi khi bắt đầu mỗi trận. Chỉ reset NextTurnTime phục vụ timeline speed-based.
+    /// Gọi khi bắt đầu mỗi trận. Reset timeline + clear tất cả buff/debuff cũ.
     /// HP của player KHÔNG được reset ở đây — đã được load từ save data trước đó.
     /// EnemyStatus override để tự reset HP về Max.
     /// </summary>
     public virtual void ResetForBattle(float baseDelay)
     {
         NextTurnTime = baseDelay / Mathf.Max(1, Spd);
+        ClearAllEffects();
     }
 
     public virtual void SetLevel(int targetLevel)
@@ -225,7 +226,19 @@ public abstract class Status
 
     public void HealFull()
     {
+        if (!IsAlive) return; // Không hồi sinh unit đã chết — dùng Revive() thay thế
         currentHP = MaxHP;
+    }
+
+    /// <summary>
+    /// Xóa toàn bộ status effects đang active và undo stat changes.
+    /// Gọi khi kết thúc trận hoặc reset state.
+    /// </summary>
+    public void ClearAllEffects()
+    {
+        foreach (var effect in activeEffects)
+            UndoStatusEffect(effect);
+        activeEffects.Clear();
     }
 
     public virtual void Revive(int hpAmount)

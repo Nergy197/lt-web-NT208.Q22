@@ -142,6 +142,15 @@ public class PlayerStatus : Status
         EventManager.Publish(GameEvent.UnitLevelUp, this);
     }
 
+    /// <summary>
+    /// Reset AP về max + gọi base.ResetForBattle (clear effects, reset timeline).
+    /// </summary>
+    public override void ResetForBattle(float baseDelay)
+    {
+        base.ResetForBattle(baseDelay);
+        RestoreFullAP();
+    }
+
     public PlayerStatus(
         string name,
         int baseHP,

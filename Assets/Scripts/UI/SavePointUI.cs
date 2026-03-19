@@ -107,6 +107,7 @@ public class SavePointUI : MonoBehaviour
         int healedCount = 0;
         foreach (var member in GameManager.Instance.playerParty.Members)
         {
+            if (!member.IsAlive) member.Revive(member.MaxHP);
             member.HealFull();
             healedCount++;
         }

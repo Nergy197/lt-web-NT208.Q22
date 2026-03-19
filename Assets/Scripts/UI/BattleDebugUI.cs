@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
 public class BattleDebugUI : MonoBehaviour
 {
@@ -7,7 +8,8 @@ public class BattleDebugUI : MonoBehaviour
 
     public TextMeshProUGUI debugText;
 
-    string log = "";
+    private const int MAX_LINES = 100;
+    private readonly List<string> logLines = new List<string>();
 
     void Awake()
     {
@@ -16,14 +18,18 @@ public class BattleDebugUI : MonoBehaviour
 
     public void Log(string message)
     {
-        log += message + "\n";
+        logLines.Add(message);
 
-        debugText.text = log;
+        // Giới hạn số dòng để tránh memory leak
+        while (logLines.Count > MAX_LINES)
+            logLines.RemoveAt(0);
+
+        debugText.text = string.Join("\n", logLines);
     }
 
     public void Clear()
     {
-        log = "";
+        logLines.Clear();
         debugText.text = "";
     }
 }

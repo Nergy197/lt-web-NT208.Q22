@@ -55,10 +55,16 @@ public class PlayerAttack : AttackBase
         enemy = target as EnemyStatus;
 
         if (player == null || enemy == null)
+        {
+            cancelled = true;
             yield break;
+        }
 
         if (!player.CanUseAP(apCost))
+        {
+            cancelled = true;
             yield break;
+        }
 
         player.UseAP(apCost);
         yield return null;

@@ -340,11 +340,14 @@ public class GameManager : MonoBehaviour
     /// <summary>Hồi máu + lưu vị trí save point rồi gửi lên server.</summary>
     public void SaveAtPoint(string pointId, string sceneName)
     {
-        // Hồi máu toàn bộ party
+        // Hồi máu toàn bộ party (bao gồm hồi sinh unit đã chết)
         if (playerParty != null)
         {
             foreach (var member in playerParty.Members)
+            {
+                if (!member.IsAlive) member.Revive(member.MaxHP);
                 member.HealFull();
+            }
             Debug.Log("[SAVE POINT] Party healed.");
         }
 
@@ -369,11 +372,14 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("[GM] Respawning at save point...");
 
-        // Hồi máu toàn bộ party
+        // Hồi máu toàn bộ party (bao gồm hồi sinh unit đã chết)
         if (playerParty != null)
         {
             foreach (var member in playerParty.Members)
+            {
+                if (!member.IsAlive) member.Revive(member.MaxHP);
                 member.HealFull();
+            }
         }
 
         // Xóa vị trí battle cũ
@@ -503,5 +509,22 @@ public class GameManager : MonoBehaviour
             qm.CompletedQuests.Clear();
             PlayerPrefs.DeleteKey("QuestSaveData");
         }
+    }
+}
+
+public class Reward
+{
+    public int expAmount = 0;
+    public List<string> itemRewards = new List<string>();
+
+    public Reward(int exp = 0)
+    {
+        expAmount = exp;
+    }
+
+    public void AddItem(string itemName)
+    {
+        if (!itemRewards.Contains(itemName))
+            itemRewards.Add(itemName);
     }
 }

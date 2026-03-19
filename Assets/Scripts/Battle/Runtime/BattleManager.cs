@@ -12,7 +12,7 @@ public class BattleManager : MonoBehaviour
     private Party playerParty;
     private Party enemyParty;
 
-    private List<Status> timeline = new();
+    private TurnManager turnManager;
     private Status currentUnit;
 
     private bool waitingForPlayerAction = false;
@@ -20,8 +20,6 @@ public class BattleManager : MonoBehaviour
 
     private bool playerWon = false;
     private bool playerFled = false;
-
-    private const float BASE_DELAY = 100f;
 
     private int currentTargetIndex = 0;
     private int currentAllyTargetIndex = 0;
@@ -99,19 +97,31 @@ public class BattleManager : MonoBehaviour
     void LoadEnemy()
     {
         enemyParty = new Party(PartyType.Enemy);
-        foreach (var data in MapManager.Instance.currentEnemies)
+        // Dùng CreateEnemyStatuses() để enemy được SetLevel + apply map effects đúng cách
+        foreach (var e in MapManager.Instance.CreateEnemyStatuses())
         {
-            var e = data.CreateStatus();
             enemyParty.AddMember(e);
-            Log("[BATTLE] Spawn enemy: " + e.entityName);
+            Log($"[BATTLE] Spawn enemy: {e.entityName} Lv{e.level}");
         }
     }
 
     void InitBattle()
     {
-        timeline.Clear();
-        AddParty(playerParty);
-        AddParty(enemyParty);
+        // Tạo TurnManager mới cho trận đấu này
+        turnManager = new TurnManager();
+        turnManager.AddParty(playerParty);
+        turnManager.AddParty(enemyParty);
+
+        // Apply map effects cho player khi vào trận
+        if (MapManager.Instance != null)
+        {
+            foreach (var p in playerParty.Members)
+            {
+                var ps = p as PlayerStatus;
+                if (ps != null) MapManager.Instance.ApplyPlayerEffects(ps);
+            }
+        }
+
         SpawnParty(playerParty, playerSpawnAnchor, spawnSpacing);
         SpawnParty(enemyParty, enemySpawnAnchor, spawnSpacing);
 
@@ -162,29 +172,19 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    void AddParty(Party party)
-    {
-        foreach (var s in party.Members)
-        {
-            s.ResetForBattle(BASE_DELAY);
-            timeline.Add(s);
-            Log("[BATTLE] Added: " + s.entityName);
-        }
-    }
-
     IEnumerator BattleLoop()
     {
         while (true)
         {
             if (CheckEndBattle()) break;
 
-            currentUnit = GetNextUnit();
-            if (!currentUnit.IsAlive) continue;
+            currentUnit = turnManager.GetNextUnit();
+            if (currentUnit == null || !currentUnit.IsAlive) continue;
 
             Log("[TURN] " + currentUnit.entityName);
 
-            // Xử lý Poison và Stun trước khi unit hành động.
-            bool isStunned = ProcessTurnEffects(currentUnit);
+            // Xử lý Poison và Stun trước khi unit hành động (delegate sang TurnManager).
+            bool isStunned = turnManager.ProcessTurnEffects(currentUnit);
 
             // Poison có thể kết thúc trận — kiểm tra ngay sau khi áp damage.
             if (CheckEndBattle()) break;
@@ -212,36 +212,6 @@ public class BattleManager : MonoBehaviour
         }
 
         EndBattle();
-    }
-
-    /// <summary>
-    /// Xử lý Poison và Stun ở đầu mỗi lượt.
-    /// Trả về true nếu unit bị Stun (mất lượt hành động).
-    /// </summary>
-    bool ProcessTurnEffects(Status unit)
-    {
-        bool stunned = false;
-        var effects = unit.GetActiveEffects();
-
-        foreach (var effect in effects)
-        {
-            switch (effect.effectType)
-            {
-                case StatusEffectType.Poison:
-                    if (unit.IsAlive && effect.value > 0)
-                    {
-                        unit.TakePoisonDamage(effect.value);
-                        Log($"[POISON] {unit.entityName} mất {effect.value} HP (còn {unit.currentHP})");
-                    }
-                    break;
-
-                case StatusEffectType.Stun:
-                    stunned = true;
-                    break;
-            }
-        }
-
-        return stunned;
     }
 
     IEnumerator PlayerTurn()
@@ -298,7 +268,7 @@ public class BattleManager : MonoBehaviour
         if (enemy == null)
         {
             Log("[ERROR] No enemy target");
-            waitingForPlayerAction = false;
+            // Giữ waitingForPlayerAction = true → player chọn lại
             return;
         }
 
@@ -306,14 +276,14 @@ public class BattleManager : MonoBehaviour
         if (skill == null)
         {
             Log($"[ERROR] Skill[{index}] not found (player has {player.SkillCount} skills)");
-            waitingForPlayerAction = false;
+            // Giữ waitingForPlayerAction = true → player chọn lại
             return;
         }
 
         if (!player.CanUseAP(skill.apCost))
         {
             Log($"[ERROR] Not enough AP: need {skill.apCost}, have {player.currentAP}");
-            waitingForPlayerAction = false;
+            // Giữ waitingForPlayerAction = true → player chọn lại
             return;
         }
 
@@ -449,15 +419,6 @@ public class BattleManager : MonoBehaviour
             currentAllyTargetIndex = (currentAllyTargetIndex + dir + aliveAllies.Count) % aliveAllies.Count;
             Log("[TARGET ALLY] → " + aliveAllies[currentAllyTargetIndex].entityName);
         }
-    }
-
-    Status GetNextUnit()
-    {
-        // Sắp xếp theo NextTurnTime tăng dần để unit nào "đến lượt sớm nhất" hành động trước.
-        timeline.Sort((a, b) => a.NextTurnTime.CompareTo(b.NextTurnTime));
-        var unit = timeline[0];
-        unit.NextTurnTime += BASE_DELAY / unit.Spd;
-        return unit;
     }
 
     bool CheckEndBattle()
