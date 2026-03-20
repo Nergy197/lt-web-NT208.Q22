@@ -22,6 +22,10 @@ public class QuanLyHoiThoai : MonoBehaviour
     public CauThoai[] kichBan; // Danh sách các câu thoại
     public float tocDoGo = 0.05f;
 
+    [Header("Chuyển Scene")]
+    [Tooltip("Tên Scene tiếp theo (ví dụ: MapScene). Rỗng = không chuyển.")]
+    public string tenSceneTiepTheo = "MapScene";
+
     private int cauHienTai = 0;
     private bool dangGoChu = false;
     private bool daXongCauHienTai = false;
@@ -102,6 +106,11 @@ public class QuanLyHoiThoai : MonoBehaviour
     {
         daKetThuc = true;
         Debug.Log("Đã diễn xong kịch bản!");
-        // Ở đây lát nữa mình sẽ gọi lệnh làm tối màn hình (Fade to Black)
+        
+        // Chuyển Scene nếu có tên Scene
+        if (!string.IsNullOrEmpty(tenSceneTiepTheo))
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(tenSceneTiepTheo);
+        }
     }
 }

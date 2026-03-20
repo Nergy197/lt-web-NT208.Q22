@@ -322,7 +322,6 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Nếu có save point đã lưu, load scene đó
         if (!string.IsNullOrEmpty(pendingSaveScene))
         {
             Debug.Log($"[GameManager] Load Scene: {pendingSaveScene} (Điểm Save: {pendingSavePointId})");
@@ -330,8 +329,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[GameManager] Load Scene mặc định: MapScene");
-            SceneManager.LoadScene("MapScene");
+            Debug.Log("[GameManager] Load Scene theo cốt truyện: Chapter1_CutScene");
+            SceneManager.LoadScene("Chapter1_CutScene");
         }
     }
 
@@ -473,6 +472,23 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Không thể chạm tới máy chủ. Game vẫn được lưu AN TOÀN TRÊN TRÌNH DUYỆT CỦA BẠN (Offline Mode). Lỗi: " + req.error);
+        }
+    }
+
+    // ================= DELETE SAVE =================
+
+    public void DeleteSaveSlot(int slotIndex)
+    {
+        string key = "PlayerSave_" + slotIndex;
+        if (PlayerPrefs.HasKey(key))
+        {
+            PlayerPrefs.DeleteKey(key);
+            PlayerPrefs.Save();
+            Debug.Log($"[GameManager] Đã xoá hoàn toàn save ở Slot {slotIndex} trên bộ nhớ máy.");
+        }
+        else
+        {
+            Debug.Log($"[GameManager] Slot {slotIndex} đang trống, không có gì để xoá.");
         }
     }
 

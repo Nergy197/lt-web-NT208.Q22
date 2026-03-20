@@ -104,12 +104,42 @@ public class StartMenuUI : MonoBehaviour
                 txt.text = $"<size=120%><b>SLOT {slotIndex + 1}</b></size>\n<color=#dddddd>{location} - {info}</color>\n<size=80%><color=#aaaaaa>{time}</color></size>";
                 
                 btn.onClick.AddListener(() => OnSlotSelected(slotIndex, false));
+
+                // Tìm nút xoá dù nó bị lồng sâu bên trong bằng GetComponentsInChildren
+                Button deleteBtn = null;
+                foreach (Button b in btnObj.GetComponentsInChildren<Button>(true))
+                {
+                    if (b.gameObject.name == "DeleteButton")
+                    {
+                        deleteBtn = b;
+                        break;
+                    }
+                }
+
+                if (deleteBtn != null)
+                {
+                    deleteBtn.gameObject.SetActive(true);
+                    
+                    // Xóa các event cũ (nếu có khi clone) và add tính năng xoá mới
+                    deleteBtn.onClick.RemoveAllListeners();
+                    deleteBtn.onClick.AddListener(() => OnDeleteSlotClicked(slotIndex));
+                }
             }
             else
             {
                 // Slot trống -> Ấn vô là Start New Game
                 txt.text = $"<size=120%><b>SLOT {slotIndex + 1}</b></size>\n<color=#bbbbbb>Bắt đầu hành trình mới</color>";
                 btn.onClick.AddListener(() => OnSlotSelected(slotIndex, true));
+
+                // Vì là slot trống nên ẩn nút xoá đi (tìm sâu bên trong)
+                foreach (Button b in btnObj.GetComponentsInChildren<Button>(true))
+                {
+                    if (b.gameObject.name == "DeleteButton")
+                    {
+                        b.gameObject.SetActive(false);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -129,5 +159,14 @@ public class StartMenuUI : MonoBehaviour
         }
 
         GameManager.Instance.LoadAndStartGame();
+    }
+
+    void OnDeleteSlotClicked(int slotIndex)
+    {
+        Debug.Log($"[StartMenu] Yêu cầu xoá save ở slot thứ {slotIndex}...");
+        GameManager.Instance.DeleteSaveSlot(slotIndex);
+        
+        // Ngay sau khi xoá, chúng ta vẽ lại danh sách Slot trên UI ngay lập tức
+        PopulateSaveSlots();
     }
 }
