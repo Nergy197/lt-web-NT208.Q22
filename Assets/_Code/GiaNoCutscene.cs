@@ -19,9 +19,20 @@ public class GiaNoCutscene : MonoBehaviour
     void Start()
     {
         anim = GetComponent<Animator>();
-        transform.position = diemCuaNha.position;
 
-        // Giấu bong bóng đi lúc mới vào game
+        // Tự động tìm Player nếu chưa gán trong Inspector
+        if (playerScript == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                playerScript = playerObj.GetComponent<PlayerMovement>();
+                Debug.Log("[GiaN\u00f4Cutscene] Tự tìm Player bằng Tag thành công!");
+            }
+        }
+
+        if (diemCuaNha != null) transform.position = diemCuaNha.position;
+
         if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
 
         StartCoroutine(DienCangBaoTin());
@@ -33,7 +44,8 @@ public class GiaNoCutscene : MonoBehaviour
         if (playerScript != null)
         {
             playerScript.enabled = false;
-            playerScript.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero; // Khóa chân
+            var rb = playerScript.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.linearVelocity = Vector2.zero;
 
             Animator playerAnim = playerScript.GetComponent<Animator>();
             if (playerAnim != null)

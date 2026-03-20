@@ -14,11 +14,20 @@ public class QuanLyBaoTin : MonoBehaviour
 
     IEnumerator KichBanBaoTin()
     {
-        // 1. KHÓA CHÂN: Gọi cái công tắc canMove bên PlayerMovement
+        // Tự động tìm Player nếu chưa gán trong Inspector
+        if (playerScript == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+                playerScript = playerObj.GetComponent<PlayerMovement>();
+        }
+
+        // 1. KHÓA CHÂN
         if (playerScript != null)
         {
             playerScript.enabled = false;
-            playerScript.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
+            var rb = playerScript.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.linearVelocity = Vector2.zero;
         }
 
         // 2. CHỜ GIA NÔ CHẠY RA: Đợi khoảng 1 giây cho Gia nô chạy tới nơi

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI; // Dùng thư viện UI để điều khiển chữ
 using System.Collections;
 
@@ -25,6 +25,7 @@ public class QuanLyHoiThoai : MonoBehaviour
     private int cauHienTai = 0;
     private bool dangGoChu = false;
     private bool daXongCauHienTai = false;
+    private bool daKetThuc = false; // Ngăn crash khi bấm sau khi hết kịch bản
 
     public void BatDauThoai()
     {
@@ -35,11 +36,14 @@ public class QuanLyHoiThoai : MonoBehaviour
         }
 
         cauHienTai = 0;
+        daKetThuc = false;
         HienThiCauTiepTheo();
     }
 
     void Update()
     {
+        if (daKetThuc) return; // Đã hết kịch bản, không xử lý nữa
+
         // Bấm phím Space hoặc Click chuột trái để tương tác
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
@@ -96,6 +100,7 @@ public class QuanLyHoiThoai : MonoBehaviour
 
     void KetThucThoai()
     {
+        daKetThuc = true;
         Debug.Log("Đã diễn xong kịch bản!");
         // Ở đây lát nữa mình sẽ gọi lệnh làm tối màn hình (Fade to Black)
     }
