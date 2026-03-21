@@ -62,28 +62,26 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            Destroy(gameObject);
+            return;
+        }
 
-            // Tự động chọn base URL:
-            // - WebGL build: URL tương đối, không cần base
-            // - Unity Editor / Standalone: dùng localhost
+        Instance = this;
+        transform.SetParent(null); // Fix error Destroy 
+        DontDestroyOnLoad(gameObject);
+
+        // Tự động chọn base URL:
+        // - WebGL build: URL tương đối, không cần base
+        // - Unity Editor / Standalone: dùng localhost
 #if UNITY_EDITOR || UNITY_STANDALONE
             backendBaseURL = "http://localhost:3000";
 #else
             backendBaseURL = ""; // WebGL: relative URL
 #endif
-            Debug.Log("[GM] backendBaseURL = " + backendBaseURL);
-        }
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        Debug.Log("[GM] backendBaseURL = " + backendBaseURL);
     }
-
     void Start()
     {
         // Tránh tự động Load Slot 0 khi đang ở Menu Chính (Menu sẽ tự gọi LoadAndStartGame sau)

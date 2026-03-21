@@ -103,6 +103,17 @@
                 },
                 {
                     "name": "",
+                    "id": "298b4175-a1fb-47e7-8aab-e059c84c65d3",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "8169bfe3-fe7b-4185-a6ea-f4830cc8409f",
                     "path": "<Keyboard>/escape",
                     "interactions": "",

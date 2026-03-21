@@ -12,7 +12,7 @@ public class InputController : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null)
+        if (Instance != null && Instance != this)
         {
             Debug.Log("[INPUT] Destroy duplicate");
             Destroy(gameObject);
@@ -20,6 +20,9 @@ public class InputController : MonoBehaviour
         }
 
         Instance = this;
+        
+        // Đảm bảo InputController nằm ở root, nếu không DontDestroyOnLoad sẽ không hoạt động!
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
 
         Input = new GameInput();
