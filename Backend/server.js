@@ -90,16 +90,12 @@ app.post("/player/save", async (req, res) => {
 
     console.log("[SAVE] data received:", req.body);
 
+    const updateData = { ...req.body };
+    delete updateData._id;
+
     await db.collection("players").updateOne(
       { _id: req.body._id },
-      {
-        $set: {
-          party: req.body.party,
-          lastSavePointId: req.body.lastSavePointId,
-          lastSaveScene: req.body.lastSaveScene,
-          questProgress: req.body.questProgress
-        }
-      },
+      { $set: updateData },
       { upsert: true }
     );
 

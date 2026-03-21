@@ -1,28 +1,36 @@
 [
     {
-        "_id": "player001",
+        "_id": "guest_default_slot_0",
+        "slotId": 0,
+        "saveTime": "",
         "party": [
             {
                 "entityName": "Hero",
                 "level": 1,
-                "currentHP": 100
+                "currentHP": 100,
+                "currentExp": 0
             },
             {
                 "entityName": "Mage",
                 "level": 1,
-                "currentHP": 80
+                "currentHP": 80,
+                "currentExp": 0
             },
             {
                 "entityName": "Warrior",
                 "level": 1,
-                "currentHP": 150
+                "currentHP": 150,
+                "currentExp": 0
             },
             {
                 "entityName": "Priest",
                 "level": 1,
-                "currentHP": 90
+                "currentHP": 90,
+                "currentExp": 0
             }
         ],
+        "lastSavePointId": "",
+        "lastSaveScene": "",
         "questProgress": {
             "Quests": []
         }

@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,7 +13,6 @@ public class GameManager : MonoBehaviour
     [Header("Backend")]
     // Editor: tự động dùng "http://localhost:3000" | WebGL build: dùng URL tương đối ""
     [HideInInspector] public string backendBaseURL = "";
-    public string loadURL = "/player/player001";
     public string saveURL = "/player/save";
 
     string FullURL(string path) => backendBaseURL + path;
@@ -58,6 +58,53 @@ public class GameManager : MonoBehaviour
     [Header("Database")]
     public List<PlayerData> playerDatabase = new();
 
+    // ================= GUEST ID =================
+
+    /// <summary>
+    /// Trả về ID duy nhất của máy/trình duyệt đang chơi.
+    /// Lần đầu tiên sẽ tự sinh GUID và lưu vào PlayerPrefs.
+    /// Những lần sau sẽ đọc lại ID cũ đã lưu.
+    /// </summary>
+    public string GetPlayerId()
+    {
+        if (!PlayerPrefs.HasKey("DevicePlayerId"))
+        {
+            string newId = "guest_" + System.Guid.NewGuid().ToString().Substring(0, 8);
+            PlayerPrefs.SetString("DevicePlayerId", newId);
+            PlayerPrefs.Save();
+            Debug.Log("[GM] Tạo Guest ID mới: " + newId);
+        }
+        return PlayerPrefs.GetString("DevicePlayerId");
+    }
+
+    /// <summary>
+    /// Ghi đè Guest ID bằng mã người chơi nhập vào (Transfer Code).
+    /// Dùng khi người chơi muốn lấy lại file save từ máy khác.
+    /// Trả về true nếu mã hợp lệ.
+    /// </summary>
+    public bool SetPlayerId(string transferCode)
+    {
+        if (string.IsNullOrWhiteSpace(transferCode))
+        {
+            Debug.LogWarning("[GM] Transfer Code không hợp lệ (rỗng).");
+            return false;
+        }
+
+        transferCode = transferCode.Trim().ToLower();
+
+        // Kiểm tra định dạng: phải bắt đầu bằng "guest_"
+        if (!transferCode.StartsWith("guest_"))
+        {
+            Debug.LogWarning("[GM] Transfer Code không hợp lệ (sai định dạng): " + transferCode);
+            return false;
+        }
+
+        PlayerPrefs.SetString("DevicePlayerId", transferCode);
+        PlayerPrefs.Save();
+        Debug.Log("[GM] Đã áp dụng Transfer Code: " + transferCode);
+        return true;
+    }
+
     // ================= INIT =================
 
     void Awake()
@@ -82,6 +129,69 @@ public class GameManager : MonoBehaviour
 #endif
         Debug.Log("[GM] backendBaseURL = " + backendBaseURL);
     }
+
+    // ================= WEBGL BROWSER WARNING =================
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")] private static extern void EnableBeforeUnloadWarning();
+    [DllImport("__Internal")] private static extern void DisableBeforeUnloadWarning();
+#else
+    static void EnableBeforeUnloadWarning() { } // No-op outside WebGL
+    static void DisableBeforeUnloadWarning() { }
+#endif
+
+    /// <summary>Bật cảnh báo trình duyệt khi đóng tab (gọi khi vào gameplay).</summary>
+    public void ActivateBrowserWarning()  => EnableBeforeUnloadWarning();
+
+    /// <summary>Tắt cảnh báo trình duyệt (gọi khi về menu chính).</summary>
+    public void DeactivateBrowserWarning() => DisableBeforeUnloadWarning();
+
+    // ================= AUTO-SAVE ON QUIT / PAUSE =================
+
+    void OnApplicationQuit()
+    {
+        if (isLoaded) QuickSaveToLocal();
+    }
+
+    void OnApplicationPause(bool paused)
+    {
+        if (paused && isLoaded) QuickSaveToLocal();
+    }
+
+    /// <summary>
+    /// Lưu nhanh vào PlayerPrefs (đồng bộ, không cần coroutine).
+    /// Dùng khi trình duyệt sắp đóng — không kịp gửi lên server.
+    /// </summary>
+    void QuickSaveToLocal()
+    {
+        if (playerParty == null || playerParty.Members == null || playerParty.Members.Count == 0) return;
+
+        PlayerSave save = new PlayerSave();
+        save._id = GetPlayerId() + "_slot_" + currentSaveSlot;
+        save.slotId = currentSaveSlot;
+        save.saveTime = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+        save.party = new List<UnitSave>();
+        save.lastSavePointId = pendingSavePointId;
+        save.lastSaveScene = pendingSaveScene;
+
+        foreach (Status s in playerParty.Members)
+        {
+            UnitSave unit = new UnitSave();
+            unit.entityName = s.entityName;
+            unit.level = s.level;
+            unit.currentHP = s.currentHP;
+            unit.currentExp = (s is PlayerStatus ps) ? ps.currentExp : 0;
+            save.party.Add(unit);
+        }
+
+        var qm = questManager != null ? questManager : QuestManager.Instance;
+        if (qm != null) save.questProgress = qm.BuildSaveData();
+
+        PlayerPrefs.SetString("PlayerSave_" + currentSaveSlot, JsonUtility.ToJson(save));
+        PlayerPrefs.Save();
+        Debug.Log($"[GM] QuickSave to Slot {currentSaveSlot} (on quit/pause)");
+    }
+
     void Start()
     {
         // Tránh tự động Load Slot 0 khi đang ở Menu Chính (Menu sẽ tự gọi LoadAndStartGame sau)
@@ -102,7 +212,7 @@ public class GameManager : MonoBehaviour
             // 1. TẠO NEW GAME HOÀN TOÀN MỚI
             Debug.Log($"[LOAD] Bắt đầu New Game ở Slot {currentSaveSlot}...");
             PlayerSave newSave = new PlayerSave();
-            newSave._id = "player001_slot_" + currentSaveSlot; // Phân biệt ID theo slot trên Database
+            newSave._id = GetPlayerId() + "_slot_" + currentSaveSlot; // Phân biệt ID theo slot trên Database
             newSave.slotId = currentSaveSlot;
             newSave.saveTime = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
             newSave.party = new List<UnitSave>();
@@ -136,9 +246,9 @@ public class GameManager : MonoBehaviour
         else
         {
             // 3. Fallback: Cố tải từ Server nếu Local Storage mất (hoặc máy khác)
-            // Tải theo ID độc nhất của slot đó: /player/player001_slot_0
-            string slotIdOnServer = "player001_slot_" + currentSaveSlot;
-            string url = FullURL("player/" + slotIdOnServer);
+            // Tải theo ID độc nhất của thiết bị + slot
+            string slotIdOnServer = GetPlayerId() + "_slot_" + currentSaveSlot;
+            string url = FullURL("/player/" + slotIdOnServer);
             Debug.Log("[LOAD] Tìm kiếm file từ Server: " + url);
 
             UnityWebRequest req = UnityWebRequest.Get(url);
@@ -153,7 +263,8 @@ public class GameManager : MonoBehaviour
             {
                 Debug.LogWarning("[LOAD FAILED] Không tìm thấy! Tự động tạo New Game Offline...");
                 PlayerSave fallbackSave = new PlayerSave();
-                fallbackSave._id = "player001";
+                fallbackSave._id = GetPlayerId() + "_slot_" + currentSaveSlot;
+                fallbackSave.slotId = currentSaveSlot;
                 fallbackSave.party = new List<UnitSave>();
                 if (playerDatabase.Count > 0 && playerDatabase[0] != null)
                 {
@@ -320,6 +431,9 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // Bật cảnh báo trình duyệt khi đang chơi game
+        ActivateBrowserWarning();
+
         if (!string.IsNullOrEmpty(pendingSaveScene))
         {
             Debug.Log($"[GameManager] Load Scene: {pendingSaveScene} (Điểm Save: {pendingSavePointId})");
@@ -412,7 +526,7 @@ public class GameManager : MonoBehaviour
     IEnumerator SaveRoutine(string savePointId = null, string saveScene = null, System.Action<bool> onComplete = null)
     {
         PlayerSave save = new PlayerSave();
-        save._id = "player001_slot_" + currentSaveSlot; // Đảm bảo ID trên DB là độc nhất cho từng slot
+        save._id = GetPlayerId() + "_slot_" + currentSaveSlot; // Đảm bảo ID trên DB là độc nhất cho từng slot
         save.slotId = currentSaveSlot;
         save.saveTime = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
         save.party = new List<UnitSave>();
