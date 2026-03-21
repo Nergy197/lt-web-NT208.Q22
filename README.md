@@ -49,9 +49,11 @@ Dự án xây dựng một **game nhập vai theo lượt** (Turn-based RPG) tri
 - Giao diện Quest UI hiển thị tiến độ nhiệm vụ.
 - Lưu trạng thái nhiệm vụ (QuestSaveData) đồng bộ với backend.
 
-### 💾 Hệ thống lưu trữ
-- Lưu tiến trình tại các **Save Point** trên bản đồ.
-- Gửi dữ liệu party & vị trí save point lên server qua REST API.
+### 💾 Hệ thống lưu trữ đa nền tảng
+- **Lưu cục bộ (Local Storage)**: Game lưu trữ tức thời vào trình duyệt bằng `PlayerPrefs`.
+- **Đồng bộ Đám mây (Cloud Save)**: Đồng thời gửi dữ liệu party, quest & vị trí lên server qua REST API.
+- **Auto-save**: Tự động lưu game khi người chơi đóng hoặc tải lại tab trình duyệt.
+- **Transfer Code (Mã chuyển máy)**: Hệ thống tự sinh Guest ID duy nhất cho mỗi thiết bị, cho phép bảo lưu và chuyển dữ liệu Save sang điện thoại/máy tính khác mà không cần hệ thống đăng nhập phức tạp.
 - Hồi sinh (respawn) tại save point cuối khi party bị đánh bại.
 
 ### 🤖 NPC & Tương tác
@@ -99,7 +101,7 @@ lt-web-NT208.Q22/
 │   │   ├── Quest/           # Hệ thống nhiệm vụ
 │   │   ├── Save/            # PlayerSave, UnitSave
 │   │   ├── System/          # GameManager, EventManager, InputController
-│   │   └── UI/              # Giao diện người dùng
+│   │   └── UI/              # Giao diện người dùng (StartMenuUI.cs includes Transfer Code & Welcome panels)
 │   └── Data/                # GameInput, ScriptableObjects, ...
 ├── Backend/
 │   ├── server.js            # Entry point server Node.js
@@ -191,13 +193,13 @@ Backend cung cấp các endpoint sau:
 ### Ví dụ request
 
 ```bash
-# Lấy thông tin player
-curl http://localhost:3000/player/player1
+# Lấy thông tin player bằng Guest ID
+curl http://localhost:3000/player/guest_a3f8b2c1_slot_0
 
-# Lưu dữ liệu
+# Lưu dữ liệu lên Cloud
 curl -X POST http://localhost:3000/player/save \
   -H "Content-Type: application/json" \
-  -d '{"_id": "player1", "party": [...], "lastSavePointId": "sp01", "lastSaveScene": "Map01"}'
+  -d '{"_id": "guest_a3f8b2c1_slot_0", "slotId": 0, "party": [...], "lastSavePointId": "sp01", "lastSaveScene": "Map01"}'
 ```
 
 ---
