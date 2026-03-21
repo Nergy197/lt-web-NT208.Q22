@@ -1,25 +1,26 @@
 using UnityEngine;
 
+/// <summary>
+/// Di chuyển nhân vật trên map (cutscene scene).
+/// Dùng InputController.Input.Map.Moves khi có InputController,
+/// fallback về Input.GetAxisRaw khi test trực tiếp scene.
+/// canMove = false để khoá chân trong khi cutscene chạy.
+/// </summary>
 public class PlayerMovement_Cutscene : MonoBehaviour
 {
     [Header("Cài đặt di chuyển")]
     public float moveSpeed = 12f;
-    public bool canMove = true; // Công tắc khóa chân
+    public bool canMove = true;
 
     private Rigidbody2D rb;
-    private Vector2 movement;
     private Animator anim;
-
-    // Lưu hướng đi cuối cùng để khi đứng im vẫn hiện sprite đúng hướng
     private Vector2 lastDirection = Vector2.down;
 
     void Start()
     {
-        // Lấy các thành phần cần thiết
-        rb = GetComponent<Rigidbody2D>();
+        rb   = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
 
-        // Khởi tạo hướng mặc định để Animator không bị trống frame
         if (anim != null)
         {
             anim.SetFloat("MoveX", lastDirection.x);
@@ -29,48 +30,50 @@ public class PlayerMovement_Cutscene : MonoBehaviour
 
     void Update()
     {
-        // BƯỚC 1: Kiểm tra xem có được phép di chuyển không
         if (!canMove)
         {
-            movement = Vector2.zero;
+            return;
+        }
+
+        if (anim != null && anim.speed < 1f) anim.speed = 1f;
+
+        var movement = DocInput();
+
+        if (movement != Vector2.zero)
+        {
+            lastDirection = movement;
             if (anim != null)
             {
-                // Giữ hướng nhìn cuối cùng + đông cứng tại frame hiện tại
+                anim.SetFloat("MoveX", movement.x);
+                anim.SetFloat("MoveY", movement.y);
+                anim.speed = 1f;
+            }
+        }
+        else
+        {
+            if (anim != null)
+            {
                 anim.SetFloat("MoveX", lastDirection.x);
                 anim.SetFloat("MoveY", lastDirection.y);
                 anim.speed = 0f;
             }
-            return;
-        }
-
-        // Đảm bảo Animator chạy bình thường khi được phép di chuyển
-        if (anim != null && anim.speed < 1f) anim.speed = 1f;
-
-        // BƯỚC 2: Nếu được đi, thì đọc phím bấm từ người chơi
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
-
-        // BƯỚC 3: Xử lý Animation dựa trên hướng đi
-        if (movement != Vector2.zero)
-        {
-            lastDirection = movement; // Nhớ hướng cuối cùng
-            anim.SetFloat("MoveX", movement.x);
-            anim.SetFloat("MoveY", movement.y);
-            anim.speed = 1f;
-        }
-        else
-        {
-            // Đứng im: giữ hướng nhìn cuối, đông cứng tại frame walk hiện tại
-            anim.SetFloat("MoveX", lastDirection.x);
-            anim.SetFloat("MoveY", lastDirection.y);
-            anim.speed = 0f;
         }
     }
 
     void FixedUpdate()
     {
-        // Di chuyển bằng vật lý (sẽ bị cản bởi Collider)
-        // Nếu canMove = false thì movement đã là zero, nên nhân vật sẽ đứng yên
+        if (!canMove) return;
+        var movement = DocInput();
         rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
+    }
+
+    Vector2 DocInput()
+    {
+        var ic = InputController.Instance;
+        if (ic != null)
+            return ic.Input.Map.Moves.ReadValue<Vector2>();
+
+        // Fallback khi test trực tiếp scene không qua StartScene
+        return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
     }
 }

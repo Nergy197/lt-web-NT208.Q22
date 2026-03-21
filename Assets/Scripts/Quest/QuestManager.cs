@@ -2,8 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Singleton quản lý toàn bộ vòng đời quest trong game.
-/// Gắn component này vào một GameObject trong scene (DontDestroyOnLoad).
+/// Singleton quản lý toàn bộ vòng đời quest.
+/// Gắn vào một GameObject trong scene đầu (DontDestroyOnLoad).
+///
+/// Setup:
+///   1. Kéo các quest SO muốn bắt đầu ngay vào StartingQuests
+///   2. Nhấn chuột phải component > "Collect All Quests From Chain" để tự điền AllQuests
 /// </summary>
 public class QuestManager : MonoBehaviour
 {
@@ -11,144 +15,76 @@ public class QuestManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
+        else Destroy(gameObject);
     }
 
     [Header("Quest Database")]
-    [Tooltip("Kéo tất cả QuestSO assets vào đây. Hoặc để trống và dùng chapter1Data.")]
-    public List<QuestSO> allQuests = new();
+    [Tooltip("Toàn bộ QuestSO cần biết để save/load. Nhấn chuột phải > Collect để tự điền.")]
+    public List<QuestSO> AllQuests = new();
 
-    [Header("Chapter 1")]
-    [Tooltip("Kéo Chapter1QuestData.asset vào đây để tự động load dữ liệu Chapter 1.")]
-    public Chapter1QuestData chapter1Data;
+    [Header("Starting Quests")]
+    [Tooltip("Các quest tự động bắt đầu khi vào game. Kéo SO asset vào đây.")]
+    public List<QuestSO> StartingQuests = new();
 
-    /// <summary>Danh sách quest đang active (đã StartQuest, chưa completed).</summary>
-    public List<QuestSO> ActiveQuests { get; private set; } = new();
-
-    /// <summary>Danh sách quest đã hoàn thành.</summary>
+    public List<QuestSO> ActiveQuests    { get; private set; } = new();
     public List<QuestSO> CompletedQuests { get; private set; } = new();
 
-    /// <summary>True nếu đã load tiến trình từ server (bỏ qua PlayerPrefs).</summary>
     private bool _loadedFromServer = false;
 
     void Start()
     {
-        // Nếu có Chapter1QuestData, tự động đăng ký tất cả quest Chapter 1
-        if (chapter1Data != null)
-        {
-            var ch1Quests = chapter1Data.BuildQuests();
-            foreach (var q in ch1Quests)
-                if (!allQuests.Exists(x => x.Id == q.Id))
-                    allQuests.Add(q);
-
-            Debug.Log($"[QUEST] Chapter 1 data loaded: {ch1Quests.Count} quests registered.");
-        }
-
-        // Subscribe auto-progression
         QuestEvents.OnQuestCompleted += HandleQuestCompleted;
 
-        // KHÔNG load PlayerPrefs ở đây — GameManager sẽ gọi
-        // LoadProgressFromData (server) hoặc LoadProgress (fallback) đúng lúc.
+        // Không start ở đây — GameManager gọi LoadProgress rồi gọi StartNewGame nếu cần
     }
 
-    void OnDestroy()
+    void OnDestroy() => QuestEvents.OnQuestCompleted -= HandleQuestCompleted;
+
+    void OnApplicationQuit()          => SaveProgress();
+    void OnApplicationPause(bool p)   { if (p) SaveProgress(); }
+
+    // ─── New Game ────────────────────────────────────────────────────────
+
+    /// <summary>Bắt đầu game mới: start tất cả StartingQuests.</summary>
+    public void StartNewGame()
     {
-        QuestEvents.OnQuestCompleted -= HandleQuestCompleted;
+        foreach (var q in StartingQuests)
+            if (q != null) StartQuest(q);
     }
 
-    /// <summary>Tự động lưu khi thoát game (PC / Editor).</summary>
-    void OnApplicationQuit()
+    // ─── Quest Lifecycle ─────────────────────────────────────────────────
+
+    /// <summary>Bắt đầu quest bằng SO reference trực tiếp.</summary>
+    public void StartQuest(QuestSO quest)
     {
-        SaveProgress();
-    }
-
-    /// <summary>Tự động lưu khi game bị minimize / chuyển app (mobile).</summary>
-    void OnApplicationPause(bool pauseStatus)
-    {
-        if (pauseStatus)
-            SaveProgress();
-    }
-
-    /// <summary>
-    /// Tự động kích hoạt quest tiếp theo khi một quest hoàn thành.
-    /// Đây là logic tuyến tính của Chapter 1.
-    /// </summary>
-    void HandleQuestCompleted(QuestSO quest)
-    {
-        switch (quest.Id)
-        {
-            case "Q001":
-                // Di nguyện → Bước vào chiến tranh
-                StartQuest("Q002");
-                break;
-
-            case "Q002":
-                // Bước vào chiến tranh → Thất bại đầu tiên
-                StartQuest("Q003");
-                break;
-
-            case "Q003":
-                // Thất bại đầu tiên → Đất nước trong tay + Side quest mở song song
-                StartQuest("Q004");
-                StartQuest("Q010"); // Side quest: Hậu quả chiến tranh
-                break;
-
-            case "Q004":
-                // Đất nước trong tay → Ngã ba số phận
-                StartQuest("Q005");
-                break;
-
-            // Q005 (Ngã ba) kết thúc khi người chơi ChooseBranch → Q006 hoặc Q007
-            // Q010 (Side quest) không auto-chain, tự kết thúc
-        }
-    }
-
-    /// <summary>
-    /// Bắt đầu quest theo Id. Nếu quest đã active hoặc completed → bỏ qua.
-    /// </summary>
-    public void StartQuest(string questId)
-    {
-        var quest = FindQuest(questId);
-
-        if (quest == null)
-        {
-            Debug.LogWarning($"[QUEST] StartQuest: không tìm thấy quest Id=«{questId}»");
-            return;
-        }
+        if (quest == null) return;
 
         if (ActiveQuests.Contains(quest) || CompletedQuests.Contains(quest))
         {
-            Debug.Log($"[QUEST] Quest «{questId}» đã active hoặc đã completed, bỏ qua.");
+            Debug.Log($"[QUEST] «{quest.Id}» đã active/completed, bỏ qua.");
             return;
         }
 
         quest.ResetObjectives();
         ActiveQuests.Add(quest);
-        Debug.Log($"[QUEST] Started: {quest.Title} (Id={quest.Id})");
+        Debug.Log($"[QUEST] Started: {quest.Title} ({quest.Id})");
         QuestEvents.RaiseQuestStarted(quest);
     }
 
-    /// <summary>
-    /// Đánh dấu một objective hoàn thành.
-    /// Nếu tất cả objectives của quest xong → chuyển quest sang CompletedQuests.
-    /// </summary>
+    /// <summary>Bắt đầu quest bằng Id (dùng cho save/load hoặc gọi từ code cũ).</summary>
+    public void StartQuest(string questId)
+    {
+        var quest = FindQuest(questId);
+        if (quest == null) { Debug.LogWarning($"[QUEST] StartQuest: không tìm thấy Id=«{questId}»"); return; }
+        StartQuest(quest);
+    }
+
+    /// <summary>Hoàn thành một objective. Nếu quest xong → auto-chain sang NextQuests.</summary>
     public void CompleteObjective(string questId, string objectiveId)
     {
         var quest = GetActiveQuest(questId);
-
-        if (quest == null)
-        {
-            Debug.LogWarning($"[QUEST] CompleteObjective: quest «{questId}» chưa active.");
-            return;
-        }
+        if (quest == null) { Debug.LogWarning($"[QUEST] CompleteObjective: «{questId}» chưa active."); return; }
 
         quest.CompleteObjective(objectiveId);
 
@@ -156,202 +92,164 @@ public class QuestManager : MonoBehaviour
             MoveToCompleted(quest);
     }
 
-    /// <summary>
-    /// Xử lý khi người chơi chọn một nhánh (branch).
-    /// Quest có LeadsToQuestId sẽ được StartQuest và quest hiện tại được đánh dấu completed.
-    /// </summary>
+    /// <summary>Người chơi chọn một nhánh trong quest có BranchChoices.</summary>
     public void ChooseBranch(string questId, string branchId)
     {
-        // Dùng GetActiveQuest thay vì FindQuest để đảm bảo quest đang active
         var quest = GetActiveQuest(questId);
-
-        if (quest == null)
-        {
-            Debug.LogWarning($"[QUEST] ChooseBranch: quest «{questId}» chưa active hoặc không tồn tại.");
-            return;
-        }
+        if (quest == null) { Debug.LogWarning($"[QUEST] ChooseBranch: «{questId}» chưa active."); return; }
 
         foreach (var branch in quest.BranchChoices)
         {
             if (branch.Id != branchId) continue;
 
-            Debug.Log($"[QUEST] Branch «{branchId}» chosen → next quest «{branch.LeadsToQuestId}»");
+            Debug.Log($"[QUEST] Branch «{branchId}» chosen → next: «{branch.LeadsToQuest?.Id}»");
 
-            // Đánh dấu tất cả objectives hoàn thành và move sang completed
-            // Chỉ gọi MoveToCompleted (không gọi CompleteObjective để tránh raise event 2 lần)
-            foreach (var obj in quest.Objectives)
-                obj.IsCompleted = true;
+            foreach (var obj in quest.Objectives) obj.IsCompleted = true;
             MoveToCompleted(quest);
             QuestEvents.RaiseQuestCompleted(quest);
 
-            StartQuest(branch.LeadsToQuestId);
+            if (branch.LeadsToQuest != null)
+                StartQuest(branch.LeadsToQuest);
             return;
         }
 
-        Debug.LogWarning($"[QUEST] ChooseBranch: branch «{branchId}» không tìm thấy trong quest «{questId}»");
+        Debug.LogWarning($"[QUEST] ChooseBranch: branch «{branchId}» không tìm thấy trong «{questId}»");
     }
 
-    /// <summary>Lấy quest đang active theo Id. Trả về null nếu không tìm thấy.</summary>
+    // ─── Auto-chain ──────────────────────────────────────────────────────
+
+    void HandleQuestCompleted(QuestSO quest)
+    {
+        foreach (var next in quest.NextQuests)
+            if (next != null) StartQuest(next);
+    }
+
+    // ─── Queries ─────────────────────────────────────────────────────────
+
     public QuestSO GetActiveQuest(string questId)
     {
-        foreach (var q in ActiveQuests)
-            if (q.Id == questId) return q;
+        foreach (var q in ActiveQuests) if (q.Id == questId) return q;
         return null;
     }
 
-    /// <summary>Kiểm tra quest đã hoàn thành chưa (dùng cho UI/dialogue).</summary>
     public bool IsQuestCompleted(string questId)
     {
-        foreach (var q in CompletedQuests)
-            if (q.Id == questId) return true;
+        foreach (var q in CompletedQuests) if (q.Id == questId) return true;
         return false;
     }
 
-    /// <summary>Kiểm tra một objective cụ thể đã done chưa (dùng cho dialogue branching).</summary>
     public bool IsObjectiveCompleted(string questId, string objectiveId)
     {
         var quest = FindQuest(questId);
         if (quest == null) return false;
-
-        foreach (var obj in quest.Objectives)
-            if (obj.Id == objectiveId) return obj.IsCompleted;
-
+        foreach (var obj in quest.Objectives) if (obj.Id == objectiveId) return obj.IsCompleted;
         return false;
     }
 
-    /// <summary>PlayerPrefs key lưu toàn bộ tiến độ quest.</summary>
+    // ─── Save / Load ─────────────────────────────────────────────────────
+
     public const string SaveKey = "QuestSave";
 
-    /// <summary>
-    /// Tạo AllQuestsSaveData từ trạng thái hiện tại.
-    /// GameManager gọi method này để gửi lên server.
-    /// </summary>
     public AllQuestsSaveData BuildSaveData()
     {
-        var saveData = new AllQuestsSaveData();
-
-        foreach (var quest in ActiveQuests)
-            saveData.Quests.Add(BuildProgressData(quest, "Active"));
-
-        foreach (var quest in CompletedQuests)
-            saveData.Quests.Add(BuildProgressData(quest, "Completed"));
-
-        return saveData;
+        var data = new AllQuestsSaveData();
+        foreach (var q in ActiveQuests)    data.Quests.Add(BuildProgressData(q, "Active"));
+        foreach (var q in CompletedQuests) data.Quests.Add(BuildProgressData(q, "Completed"));
+        return data;
     }
 
-    /// <summary>
-    /// Serialize tiến độ hiện tại ra JSON và lưu vào PlayerPrefs (fallback).
-    /// </summary>
     public void SaveProgress()
     {
-        var saveData = BuildSaveData();
-        var json = JsonUtility.ToJson(saveData);
-        PlayerPrefs.SetString(SaveKey, json);
+        var data = BuildSaveData();
+        PlayerPrefs.SetString(SaveKey, UnityEngine.JsonUtility.ToJson(data));
         PlayerPrefs.Save();
-        Debug.Log($"[QUEST] Progress saved to PlayerPrefs ({saveData.Quests.Count} quests).");
+        Debug.Log($"[QUEST] Saved {data.Quests.Count} quests.");
     }
 
-    /// <summary>
-    /// Load tiến trình quest từ dữ liệu server (AllQuestsSaveData).
-    /// GameManager gọi method này sau khi nhận response từ backend.
-    /// </summary>
     public void LoadProgressFromData(AllQuestsSaveData saveData)
     {
-        if (saveData?.Quests == null || saveData.Quests.Count == 0)
-        {
-            Debug.Log("[QUEST] Server quest data rỗng, sẽ dùng PlayerPrefs fallback.");
-            return;
-        }
-
+        if (saveData?.Quests == null || saveData.Quests.Count == 0) return;
         ApplySaveData(saveData);
         _loadedFromServer = true;
-        Debug.Log($"[QUEST] Progress loaded FROM SERVER: {ActiveQuests.Count} active, {CompletedQuests.Count} completed.");
     }
 
-    /// <summary>
-    /// Đọc JSON từ PlayerPrefs và restore ActiveQuests / CompletedQuests.
-    /// Phải gọi sau khi allQuests đã được populate.
-    /// </summary>
     public void LoadProgress()
     {
-        if (!PlayerPrefs.HasKey(SaveKey))
-        {
-            Debug.Log("[QUEST] Không có save data – bắt đầu mới.");
-            return;
-        }
+        if (!PlayerPrefs.HasKey(SaveKey)) { Debug.Log("[QUEST] Không có save – bắt đầu mới."); return; }
 
-        var json     = PlayerPrefs.GetString(SaveKey);
-        var saveData = JsonUtility.FromJson<AllQuestsSaveData>(json);
+        var data = UnityEngine.JsonUtility.FromJson<AllQuestsSaveData>(PlayerPrefs.GetString(SaveKey));
+        if (data?.Quests == null) { Debug.LogWarning("[QUEST] Save data lỗi."); return; }
 
-        if (saveData?.Quests == null)
-        {
-            Debug.LogWarning("[QUEST] Save data bị lỗi, bỏ qua.");
-            return;
-        }
-
-        ApplySaveData(saveData);
-        Debug.Log($"[QUEST] Progress loaded from PlayerPrefs: {ActiveQuests.Count} active, {CompletedQuests.Count} completed.");
+        ApplySaveData(data);
     }
 
-    /// <summary>Áp dụng AllQuestsSaveData vào ActiveQuests / CompletedQuests.</summary>
     void ApplySaveData(AllQuestsSaveData saveData)
     {
-        // Xóa trạng thái cũ trước khi restore
         ActiveQuests.Clear();
         CompletedQuests.Clear();
 
-        foreach (var data in saveData.Quests)
+        foreach (var d in saveData.Quests)
         {
-            var quest = FindQuest(data.QuestId);
-            if (quest == null)
-            {
-                Debug.LogWarning($"[QUEST] LoadProgress: quest «{data.QuestId}» không tìm thấy trong allQuests.");
-                continue;
-            }
+            var quest = FindQuest(d.QuestId);
+            if (quest == null) { Debug.LogWarning($"[QUEST] Load: không tìm thấy «{d.QuestId}»"); continue; }
 
-            quest.ResetObjectives();      // đặt lại về false trước
-            quest.ApplySaveData(data);    // restore đúng từng flag
+            quest.ResetObjectives();
+            quest.ApplySaveData(d);
 
-            if (data.Status == "Active")
-            {
-                ActiveQuests.Add(quest);
-                // Raise event để UI cập nhật quest panel
-                QuestEvents.RaiseQuestStarted(quest);
-            }
-            else if (data.Status == "Completed")
-            {
-                CompletedQuests.Add(quest);
-            }
+            if (d.Status == "Active")      { ActiveQuests.Add(quest);    QuestEvents.RaiseQuestStarted(quest); }
+            else if (d.Status == "Completed") CompletedQuests.Add(quest);
         }
     }
 
-    /// <summary>Xóa save data (dùng cho New Game).</summary>
     public void ClearSave()
     {
         PlayerPrefs.DeleteKey(SaveKey);
         PlayerPrefs.Save();
-        Debug.Log("[QUEST] Save data đã được xóa.");
     }
 
-    static QuestProgressData BuildProgressData(QuestSO quest, string status)
+    // ─── Editor Helper ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// Tự động duyệt toàn bộ chain (từ StartingQuests) và điền vào AllQuests.
+    /// Nhấn chuột phải vào component trong Inspector để chạy.
+    /// </summary>
+    [ContextMenu("Collect All Quests From Chain")]
+    void CollectAllQuests()
     {
-        var data = new QuestProgressData
+        var visited = new System.Collections.Generic.HashSet<string>();
+        var queue   = new System.Collections.Generic.Queue<QuestSO>();
+
+        foreach (var q in StartingQuests) if (q != null) queue.Enqueue(q);
+
+        AllQuests.Clear();
+
+        while (queue.Count > 0)
         {
-            QuestId    = quest.Id,
-            Status     = status,
-            Objectives = new List<ObjectiveSaveData>(),
-        };
+            var q = queue.Dequeue();
+            if (q == null || visited.Contains(q.Id)) continue;
 
-        foreach (var obj in quest.Objectives)
-            data.Objectives.Add(new ObjectiveSaveData { Id = obj.Id, IsCompleted = obj.IsCompleted });
+            visited.Add(q.Id);
+            AllQuests.Add(q);
 
-        return data;
+            foreach (var next in q.NextQuests)
+                if (next != null) queue.Enqueue(next);
+
+            foreach (var branch in q.BranchChoices)
+                if (branch.LeadsToQuest != null) queue.Enqueue(branch.LeadsToQuest);
+        }
+
+        Debug.Log($"[QUEST] Collected {AllQuests.Count} quests from chain.");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
     }
+
+    // ─── Internal ────────────────────────────────────────────────────────
 
     QuestSO FindQuest(string questId)
     {
-        foreach (var q in allQuests)
-            if (q != null && q.Id == questId) return q;
+        foreach (var q in AllQuests) if (q != null && q.Id == questId) return q;
         return null;
     }
 
@@ -359,8 +257,15 @@ public class QuestManager : MonoBehaviour
     {
         if (!ActiveQuests.Contains(quest)) return;
         ActiveQuests.Remove(quest);
-        if (!CompletedQuests.Contains(quest))
-            CompletedQuests.Add(quest);
-        Debug.Log($"[QUEST] Quest «{quest.Id}» moved to CompletedQuests.");
+        if (!CompletedQuests.Contains(quest)) CompletedQuests.Add(quest);
+        Debug.Log($"[QUEST] «{quest.Id}» → Completed.");
+    }
+
+    static QuestProgressData BuildProgressData(QuestSO quest, string status)
+    {
+        var data = new QuestProgressData { QuestId = quest.Id, Status = status };
+        foreach (var obj in quest.Objectives)
+            data.Objectives.Add(new ObjectiveSaveData { Id = obj.Id, IsCompleted = obj.IsCompleted });
+        return data;
     }
 }

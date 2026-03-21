@@ -2285,8 +2285,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b26f70b45f451e4698dbe46a0ef2447, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QuestManager
-  allQuests: []
-  chapter1Data: {fileID: 11400000, guid: b0c886d54067c4b5c889a49820b40e84, type: 2}
+  AllQuests:
+  - {fileID: 11400000, guid: 0d969dc8754694f07822aad20b193e68, type: 2}
+  StartingQuests: []
 --- !u!4 &1661835453
 Transform:
   m_ObjectHideFlags: 0

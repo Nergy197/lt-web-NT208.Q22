@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TeleportDoor : MonoBehaviour
 {
@@ -13,8 +13,12 @@ public class TeleportDoor : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // 1. Dịch chuyển nhân vật
-            other.transform.position = diemXuatHien.position;
+            // 1. Dịch chuyển nhân vật an toàn qua physics
+            var rb = other.GetComponent<Rigidbody2D>();
+            if (rb != null)
+                rb.position = diemXuatHien.position;
+            else
+                other.transform.position = diemXuatHien.position;
 
             // 2. Dịch chuyển Camera
             if (Camera.main != null)

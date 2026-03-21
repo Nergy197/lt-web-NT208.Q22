@@ -2,14 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ScriptableObject định nghĩa một quest (main hoặc side).
-/// Tạo asset mới: chuột phải trong Project > Create > Quests > ...
+/// ScriptableObject định nghĩa một quest.
+/// Tạo asset: chuột phải trong Project > Create > Quests > New Quest
 /// </summary>
 [CreateAssetMenu(menuName = "Quests/New Quest", fileName = "NewQuest")]
 public class QuestSO : ScriptableObject
 {
-    // ─── Data ────────────────────────────────────────────────────────────
-
     [Header("Identity")]
     public string Id;
     public string Title;
@@ -20,37 +18,33 @@ public class QuestSO : ScriptableObject
     public List<QuestObjective> Objectives = new();
 
     [Header("Branch Choices")]
+    [Tooltip("Nếu có, quest này sẽ hiển thị panel cho người chơi chọn nhánh.")]
     public List<QuestBranchChoice> BranchChoices = new();
+
+    [Header("Progression")]
+    [Tooltip("Các quest tự động mở sau khi hoàn thành quest này. Kéo SO asset vào đây.")]
+    public List<QuestSO> NextQuests = new();
 
     // ─── Runtime state ───────────────────────────────────────────────────
 
-    /// <summary>True khi mọi objective đã IsCompleted.</summary>
     public bool IsCompleted
     {
         get
         {
-            if (Objectives == null || Objectives.Count == 0)
-                return false;
-
+            if (Objectives == null || Objectives.Count == 0) return false;
             foreach (var obj in Objectives)
                 if (!obj.IsCompleted) return false;
-
             return true;
         }
     }
 
     // ─── API ─────────────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Đánh dấu một objective hoàn thành và phát event tương ứng.
-    /// Nếu tất cả objectives xong → phát OnQuestCompleted.
-    /// </summary>
     public void CompleteObjective(string objectiveId)
     {
         foreach (var obj in Objectives)
         {
-            if (obj.Id != objectiveId || obj.IsCompleted)
-                continue;
+            if (obj.Id != objectiveId || obj.IsCompleted) continue;
 
             obj.IsCompleted = true;
             Debug.Log($"[QUEST] Objective «{objectiveId}» completed in quest «{Id}»");
@@ -61,38 +55,24 @@ public class QuestSO : ScriptableObject
                 Debug.Log($"[QUEST] Quest «{Id}» ({Title}) COMPLETED");
                 QuestEvents.RaiseQuestCompleted(this);
             }
-
             return;
         }
 
         Debug.LogWarning($"[QUEST] Objective «{objectiveId}» not found or already done in quest «{Id}»");
     }
 
-    /// <summary>Reset trạng thái runtime (dùng khi bắt đầu quest mới).</summary>
     public void ResetObjectives()
     {
         foreach (var obj in Objectives)
             obj.IsCompleted = false;
     }
 
-    /// <summary>
-    /// Restore trạng thái objectives từ save data.
-    /// Được QuestManager.LoadProgress() gọi khi load game.
-    /// </summary>
     public void ApplySaveData(QuestProgressData data)
     {
         if (data?.Objectives == null) return;
 
         foreach (var saved in data.Objectives)
-        {
             foreach (var obj in Objectives)
-            {
-                if (obj.Id == saved.Id)
-                {
-                    obj.IsCompleted = saved.IsCompleted;
-                    break;
-                }
-            }
-        }
+                if (obj.Id == saved.Id) { obj.IsCompleted = saved.IsCompleted; break; }
     }
 }

@@ -1,113 +1,96 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Điều phối cutscene TranQuocTuan vào phòng gặp cha (Chapter 1).
+/// Gọi BatDauCutscene() từ trigger hoặc DaoDien_BaoTin để bắt đầu.
+/// </summary>
 public class CutsceneTrongPhong : MonoBehaviour
 {
-    public PlayerMovement playerScript;
-    public Transform diemRe_Waypoint;
-    public Transform diemCanhGiuong;
-    public float tocDoChay = 5f;
-    public GameObject khungThoaiUI;
+    [Header("References")]
+    [Tooltip("PlayerMovement_Cutscene của TranQuocTuan")]
+    public PlayerMovement_Cutscene playerScript;
 
-    private Animator playerAnim;
-    private Transform playerTransform; // Dùng riêng để di chuyển, tránh null
+    private bool inRange = false;
+    private bool isTalking = false;
+
+    private Animator     playerAnim;
+    private Transform    playerTransform;
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            inRange = true;
+            Debug.Log("[CutsceneTrongPhong] Đã vào vùng tương tác, bấm F để nói chuyện.");
+        }
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player")) inRange = false;
+    }
+
+    void Update()
+    {
+        if (!inRange || isTalking) return;
+        
+        bool pressed = false;
+        if (InputController.Instance != null)
+            pressed = InputController.Instance.Input.Map.Interact.WasPressedThisFrame();
+        else
+            pressed = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Return);
+
+        if (pressed)
+        {
+            isTalking = true;
+            BatDauGapChaNgay();
+        }
+    }
 
     public void BatDauCutscene()
     {
-        // Tự động tìm Player nếu chưa gán trong Inspector
+        // Phương thức này giờ không chạy tự động nữa, chờ người dùng qua Interact.
+        Debug.Log("[CutsceneTrongPhong] Cửa không tự ép người chơi chạy nữa. Hãy tự đi đến gần giường!");
+    }
+
+    void BatDauGapChaNgay()
+    {
         if (playerScript == null)
         {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null) playerScript = playerObj.GetComponent<PlayerMovement_Cutscene>();
+        }
+
+        if (playerScript != null)
+        {
+            playerScript.canMove = false;
+            var rb = playerScript.GetComponent<Rigidbody2D>();
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+
+            // Ép player quay mặt lên giường (Vector2.up)
+            playerAnim = playerScript.GetComponent<Animator>();
+            if (playerAnim != null)
             {
-                playerScript = playerObj.GetComponent<PlayerMovement>();
-                playerTransform = playerObj.transform;
-                playerAnim = playerObj.GetComponent<Animator>();
-                Debug.Log("[CutsceneTrongPhong] Tự tìm Player bằng Tag thành công!");
+                playerAnim.SetFloat("MoveX", 0f);
+                playerAnim.SetFloat("MoveY", 1f);
+                playerAnim.speed = 0f;
             }
-            else
-            {
-                Debug.LogError("[CutsceneTrongPhong] Không tìm thấy GameObject nào có Tag 'Player'!");
-                return;
-            }
+        }
+
+        var heThongThoai = GetComponent<QuanLyHoiThoai>();
+        if (heThongThoai != null)
+        {
+            // Đăng ký mở khóa player sau khi nói chuyện xong
+            heThongThoai.OnEnd += () => {
+                isTalking = false;
+                if (playerScript != null) playerScript.canMove = true;
+            };
+            heThongThoai.BatDauThoai();
         }
         else
         {
-            playerTransform = playerScript.transform;
-            playerAnim = playerScript.GetComponent<Animator>();
-        }
-
-        if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
-        StartCoroutine(KichBanGapCha());
-    }
-
-    IEnumerator KichBanGapCha()
-    {
-        // 1. RÚT ĐIỆN: Tắt Script di chuyển + dừng vật lý
-        if (playerScript != null)
-        {
-            playerScript.enabled = false;
-            var rb = playerScript.GetComponent<Rigidbody2D>();
-            if (rb != null) rb.linearVelocity = Vector2.zero;
-        }
-
-        // Kiểm tra waypoints
-        if (playerTransform == null || diemRe_Waypoint == null || diemCanhGiuong == null)
-        {
-            Debug.LogError("[CutsceneTrongPhong] Thiếu playerTransform hoặc Waypoint! Hãy gán trong Inspector.");
-            yield break;
-        }
-
-        // ==========================================
-        // NHỊP 1: Chạy Lên
-        // ==========================================
-        if (playerAnim != null)
-        {
-            playerAnim.SetFloat("MoveX", 0f);
-            playerAnim.SetFloat("MoveY", 1f);
-            playerAnim.speed = 1f;
-        }
-
-        while (Vector3.Distance(playerTransform.position, diemRe_Waypoint.position) > 0.1f)
-        {
-            playerTransform.position = Vector3.MoveTowards(playerTransform.position, diemRe_Waypoint.position, tocDoChay * Time.deltaTime);
-            yield return null;
-        }
-
-        // ==========================================
-        // NHỊP 2: Rẽ Trái đến giường
-        // ==========================================
-        if (playerAnim != null)
-        {
-            playerAnim.SetFloat("MoveX", -1f);
-            playerAnim.SetFloat("MoveY", 0f);
-        }
-
-        while (Vector3.Distance(playerTransform.position, diemCanhGiuong.position) > 0.1f)
-        {
-            playerTransform.position = Vector3.MoveTowards(playerTransform.position, diemCanhGiuong.position, tocDoChay * Time.deltaTime);
-            yield return null;
-        }
-
-        // ==========================================
-        // TỚI NƠI: Dừng chạy, đứng im nghiêm chỉnh
-        // ==========================================
-        if (playerAnim != null)
-        {
-            playerAnim.SetFloat("MoveX", -1f);
-            playerAnim.SetFloat("MoveY", 0f);
-            yield return null;
-            playerAnim.speed = 0f;
-        }
-
-        // Đợi nửa giây cho cảm xúc lắng đọng rồi bật hội thoại
-        yield return new WaitForSeconds(0.5f);
-
-        // Gọi QuanLyHoiThoai trên cùng Object này
-        QuanLyHoiThoai heThongThoai = GetComponent<QuanLyHoiThoai>();
-        if (heThongThoai != null)
-        {
-            heThongThoai.BatDauThoai();
+            Debug.LogWarning("[CutsceneTrongPhong] Không tìm thấy QuanLyHoiThoai!");
         }
     }
 }

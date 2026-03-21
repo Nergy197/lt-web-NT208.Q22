@@ -1,104 +1,150 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Điều phối cutscene Gia Nô báo tin tại Chapter 1.
+///
+/// Luồng:
+///   1. Gia Nô chạy từ cửa nhà → vị trí báo tin
+///   2. QuanLyHoiThoai bắt đầu dialogue (player nhấn Space để xem)
+///   3. Khi dialogue kết thúc → Gia Nô chạy về, player được mở khóa
+/// </summary>
 public class GiaNoCutscene : MonoBehaviour
 {
+    [Header("Waypoints")]
+    [Tooltip("Vị trí Gia Nô đứng để báo tin")]
     public Transform diemBaoTin;
+
+    [Tooltip("Vị trí cửa nhà (điểm xuất phát và trở về)")]
     public Transform diemCuaNha;
+
+    [Tooltip("Vị trí cạnh giường (đích cuối sau khi báo tin)")]
     public Transform diemCanhGiuong;
+
+    [Header("Config")]
     public float tocDo = 4f;
 
-    [Tooltip("Kéo Canvas_BongBong thả vào đây nè anh")]
-    public GameObject khungThoaiUI;
+    [Header("References")]
+    [Tooltip("PlayerMovement_Cutscene của TranQuocTuan")]
+    public PlayerMovement_Cutscene playerScript;
 
-    [Tooltip("Kéo TranQuocTuan thả vào đây nha anh")]
-    public PlayerMovement playerScript;
+    [Tooltip("QuanLyHoiThoai dùng để chạy dialogue Gia Nô báo tin")]
+    public QuanLyHoiThoai heThongThoai;
+
+    [Tooltip("Animator của GiaNo (kéo GameObject GiaNo vào đây)")]
+    public Animator giaNhAnim;
 
     private Animator anim;
 
     void Start()
     {
-        anim = GetComponent<Animator>();
+        anim = giaNhAnim != null ? giaNhAnim : GetComponent<Animator>();
 
-        // Tự động tìm Player nếu chưa gán trong Inspector
         if (playerScript == null)
         {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
-            {
-                playerScript = playerObj.GetComponent<PlayerMovement>();
-                Debug.Log("[GiaN\u00f4Cutscene] Tự tìm Player bằng Tag thành công!");
-            }
+                playerScript = playerObj.GetComponent<PlayerMovement_Cutscene>();
         }
 
-        if (diemCuaNha != null) transform.position = diemCuaNha.position;
+        if (heThongThoai == null)
+            heThongThoai = FindObjectOfType<QuanLyHoiThoai>();
 
-        if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
+        if (diemCuaNha != null)
+        {
+            Transform actorTransform = giaNhAnim != null ? giaNhAnim.transform : transform;
+            actorTransform.position = diemCuaNha.position;
+        }
 
-        StartCoroutine(DienCangBaoTin());
+        StartCoroutine(Pha1_GiaNoBaoTin());
     }
 
-    IEnumerator DienCangBaoTin()
+    // ─── Pha 1: Gia Nô chạy ra, dialogue bắt đầu ────────────────────────
+
+    IEnumerator Pha1_GiaNoBaoTin()
     {
-        // --- NHỊP 1: MỚI VÀO GAME LÀ QUAY PHẢI NGẮM CẢNH ---
-        if (playerScript != null)
-        {
-            playerScript.enabled = false;
-            var rb = playerScript.GetComponent<Rigidbody2D>();
-            if (rb != null) rb.linearVelocity = Vector2.zero;
+        KhoaPlayer(huongNhin: Vector2.right);
 
-            Animator playerAnim = playerScript.GetComponent<Animator>();
-            if (playerAnim != null)
-            {
-                playerAnim.SetFloat("MoveX", 1f); // Ép quay PHẢI
-                playerAnim.SetFloat("MoveY", 0f);
-            }
-        }
-
-        // 1. Gia nô bắt đầu chạy từ cửa ra giữa sân
         anim.Play("GiaNo_WalkDown");
-        while (Vector3.Distance(transform.position, diemBaoTin.position) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, diemBaoTin.position, (tocDo * 2f) * Time.deltaTime);
-            yield return null;
-        }
+        yield return ChayDen(diemBaoTin, tocDo * 2f);
 
-        // 2. Gia nô tới nơi, đứng im
         anim.Play("GiaNo_IdleDown");
 
-        // --- NHỊP 2: GIA NÔ TỚI NƠI -> QUỐC TUẤN QUAY PHẮT SANG TRÁI ĐỂ NGHE ---
-        if (playerScript != null)
+        QuayPlayer(huongNhin: Vector2.left);
+
+        // Bật dialogue — player nhấn Space để xem, không hardcode thời gian
+        if (heThongThoai != null)
         {
-            Animator playerAnim = playerScript.GetComponent<Animator>();
-            if (playerAnim != null)
-            {
-                playerAnim.SetFloat("MoveX", -1f); // Ép quay TRÁI
-                playerAnim.SetFloat("MoveY", 0f);
-            }
+            heThongThoai.tenSceneTiepTheo = ""; // không chuyển scene tự động
+            heThongThoai.OnEnd = () => StartCoroutine(Pha2_GiaNoChatLui());
+            heThongThoai.BatDauThoai();
         }
+        else
+        {
+            Debug.LogWarning("[GiaNoCutscene] Chưa gán heThongThoai — bỏ qua dialogue.");
+            StartCoroutine(Pha2_GiaNoChatLui());
+        }
+    }
 
-        // Bật bong bóng thoại lên
-        if (khungThoaiUI != null) khungThoaiUI.SetActive(true);
+    // ─── Pha 2: Sau dialogue → Gia Nô rút, mở khóa player ──────────────
 
-        // Chờ 5 giây để máy đánh chữ gõ hết 2 câu thoại
-        yield return new WaitForSeconds(5f);
+    IEnumerator Pha2_GiaNoChatLui()
+    {
+        MoKhoaPlayer();
 
-        // Đọc xong thì TẮT BONG BÓNG ĐI
-        if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
-
-        // 3. GIẢI HUYỆT: Chữ vừa tắt là mở khóa cho thiếu gia phi theo ngay!
-        if (playerScript != null) playerScript.enabled = true;
-
-        // 3. Gia nô quay đầu chạy vội vào nhà
         anim.Play("GiaNo_WalkUp");
-        while (Vector3.Distance(transform.position, diemCuaNha.position) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, diemCuaNha.position, (tocDo * 2f) * Time.deltaTime);
-            yield return null;
-        }
+        yield return ChayDen(diemCuaNha, tocDo * 2f);
 
-        // 4. Gia nô dịch chuyển vào cạnh giường
-        transform.position = diemCanhGiuong.position;
+        Transform actorTransform = giaNhAnim != null ? giaNhAnim.transform : transform;
+        actorTransform.position = diemCanhGiuong.position;
         anim.Play("GiaNo_IdleDown");
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────
+
+    void KhoaPlayer(Vector2 huongNhin)
+    {
+        if (playerScript == null) return;
+        playerScript.canMove = false;
+        var rb = playerScript.GetComponent<Rigidbody2D>();
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        QuayPlayer(huongNhin);
+    }
+
+    void QuayPlayer(Vector2 huongNhin)
+    {
+        if (playerScript == null) return;
+        var anim = playerScript.GetComponent<Animator>();
+        if (anim != null)
+        {
+            anim.SetFloat("MoveX", huongNhin.x);
+            anim.SetFloat("MoveY", huongNhin.y);
+            anim.speed = 0f;
+        }
+    }
+
+    void MoKhoaPlayer()
+    {
+        if (playerScript != null) playerScript.canMove = true;
+    }
+
+    IEnumerator ChayDen(Transform dich, float tocDoChay)
+    {
+        Transform actorTransform = giaNhAnim != null ? giaNhAnim.transform : transform;
+        var rb = actorTransform.GetComponent<Rigidbody2D>();
+        
+        while (Vector2.Distance(actorTransform.position, dich.position) > 0.1f)
+        {
+            Vector2 newPos = Vector2.MoveTowards(actorTransform.position, dich.position, tocDoChay * Time.fixedDeltaTime);
+            if (rb != null)
+            {
+                rb.MovePosition(newPos);
+            }
+            else
+            {
+                actorTransform.position = new Vector3(newPos.x, newPos.y, actorTransform.position.z);
+            }
+            yield return new WaitForFixedUpdate();
+        }
     }
 }
