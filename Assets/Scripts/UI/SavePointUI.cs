@@ -140,6 +140,16 @@ public class SavePointUI : MonoBehaviour
         QuestManager.Instance?.SaveProgress();   // lưu tiến độ quest cùng party
 
         SetStatus("Đang lưu...");
+
+        // Lưu thêm một lần với callback để cập nhật UI khi hoàn tất
+        GameManager.Instance.SavePlayerPartyWithCallback((serverOk) =>
+        {
+            if (serverOk)
+                SetStatus("Lưu thành công!");
+            else
+                SetStatus("Đã lưu offline!");
+        });
+
         Debug.Log($"[SavePointUI] Saving at {currentPoint.pointId} in {sceneName}");
     }
 

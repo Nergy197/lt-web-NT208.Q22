@@ -403,7 +403,13 @@ public class GameManager : MonoBehaviour
         StartCoroutine(SaveRoutine());
     }
 
-    IEnumerator SaveRoutine(string savePointId = null, string saveScene = null)
+    /// <summary>Save với callback khi hoàn tất. onComplete(true) nếu server backup thành công.</summary>
+    public void SavePlayerPartyWithCallback(System.Action<bool> onComplete)
+    {
+        StartCoroutine(SaveRoutine(onComplete: onComplete));
+    }
+
+    IEnumerator SaveRoutine(string savePointId = null, string saveScene = null, System.Action<bool> onComplete = null)
     {
         PlayerSave save = new PlayerSave();
         save._id = "player001_slot_" + currentSaveSlot; // Đảm bảo ID trên DB là độc nhất cho từng slot
@@ -430,6 +436,7 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogError("[SAVE] LỖI CỰC NGHIÊM TRỌNG: playerParty rỗng hoặc NULL! Hủy tiến trình lưu để tránh làm hỏng file save.");
+            onComplete?.Invoke(false);
             yield break; // THOÁT NGAY, không lưu đè dữ liệu rỗng lên LocalStorage/Server
         }
 
@@ -463,7 +470,9 @@ public class GameManager : MonoBehaviour
 
         yield return req.SendWebRequest();
 
-        if (req.result == UnityWebRequest.Result.Success)
+        bool serverOk = req.result == UnityWebRequest.Result.Success;
+
+        if (serverOk)
         {
             Debug.Log("==== BACKUP GAME LÊN MÁY CHỦ THÀNH CÔNG ====");
         }
@@ -471,6 +480,8 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogWarning("Không thể chạm tới máy chủ. Game vẫn được lưu AN TOÀN TRÊN TRÌNH DUYỆT CỦA BẠN (Offline Mode). Lỗi: " + req.error);
         }
+
+        onComplete?.Invoke(serverOk);
     }
 
     // ================= DELETE SAVE =================
@@ -521,7 +532,7 @@ public class GameManager : MonoBehaviour
         {
             qm.ActiveQuests.Clear();
             qm.CompletedQuests.Clear();
-            PlayerPrefs.DeleteKey("QuestSaveData");
+            PlayerPrefs.DeleteKey(QuestManager.SaveKey);
         }
     }
 }

@@ -155,7 +155,9 @@ public class QuestManager : MonoBehaviour
 
     // ─── Save / Load ─────────────────────────────────────────────────────
 
-    public const string SaveKey = "QuestSave";
+    /// <summary>PlayerPrefs key lưu toàn bộ tiến độ quest (theo slot).</summary>
+    public static string SaveKey =>
+        "QuestSave_" + (GameManager.Instance != null ? GameManager.Instance.currentSaveSlot : 0);
 
     public AllQuestsSaveData BuildSaveData()
     {
