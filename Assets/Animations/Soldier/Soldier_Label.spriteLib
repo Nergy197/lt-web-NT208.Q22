@@ -1,0 +1,239 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Soldier-Attack01_0
+      m_Hash: 969800505
+      m_Sprite: {fileID: -3291933047493928793, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3291933047493928793, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+    - m_Name: Soldier-Attack01_1
+      m_Hash: 248171439
+      m_Sprite: {fileID: -6387132180496740656, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6387132180496740656, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+    - m_Name: Soldier-Attack01_2
+      m_Hash: 398694933
+      m_Sprite: {fileID: 3584784805190714906, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3584784805190714906, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+    - m_Name: Soldier-Attack01_3
+      m_Hash: 549759619
+      m_Sprite: {fileID: -4079507207558419125, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4079507207558419125, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+    - m_Name: Soldier-Attack01_4
+      m_Hash: 1050689312
+      m_Sprite: {fileID: -868544849082176367, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -868544849082176367, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+    - m_Name: Soldier-Attack01_5
+      m_Hash: 161943478
+      m_Sprite: {fileID: -3853612353132079948, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3853612353132079948, guid: 475f41e85e2945e418ea84f821f9299b, type: 3}
+    - m_Name: Soldier-Attack02_0
+      m_Hash: 998983008
+      m_Sprite: {fileID: 4811190364059900513, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4811190364059900513, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+    - m_Name: Soldier-Attack02_1
+      m_Hash: 210531830
+      m_Sprite: {fileID: -3630134925126372854, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3630134925126372854, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+    - m_Name: Soldier-Attack02_2
+      m_Hash: 361047116
+      m_Sprite: {fileID: -3996107768381173192, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3996107768381173192, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+    - m_Name: Soldier-Attack02_3
+      m_Hash: 578950362
+      m_Sprite: {fileID: 8152592829446542042, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8152592829446542042, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+    - m_Name: Soldier-Attack02_4
+      m_Hash: 1021739385
+      m_Sprite: {fileID: 4949258004858939775, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4949258004858939775, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+    - m_Name: Soldier-Attack02_5
+      m_Hash: 199340527
+      m_Sprite: {fileID: -8030318945529727460, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8030318945529727460, guid: 8a41f76fbc407df4b9203aba54642689, type: 3}
+    - m_Name: Soldier-Attack03_0
+      m_Hash: 977874775
+      m_Sprite: {fileID: 2678340717539739597, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2678340717539739597, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_1
+      m_Hash: 223223745
+      m_Sprite: {fileID: 8264772736047417878, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8264772736047417878, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_2
+      m_Hash: 340217467
+      m_Sprite: {fileID: -8177698193463788761, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8177698193463788761, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_3
+      m_Hash: 591429357
+      m_Sprite: {fileID: 3077160686069078848, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3077160686069078848, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_4
+      m_Hash: 1025829710
+      m_Sprite: {fileID: 7626175841199979023, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7626175841199979023, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_5
+      m_Hash: 170122200
+      m_Sprite: {fileID: 8620046016495470792, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8620046016495470792, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_6
+      m_Hash: 321555042
+      m_Sprite: {fileID: -7091074453508830651, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7091074453508830651, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_7
+      m_Hash: 606976756
+      m_Sprite: {fileID: -4451581827623112804, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4451581827623112804, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Attack03_8
+      m_Hash: 882026341
+      m_Sprite: {fileID: 8521224890656062442, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8521224890656062442, guid: 8a1f971b9ce1a724bb92539e8f012951, type: 3}
+    - m_Name: Soldier-Death_0
+      m_Hash: 945698022
+      m_Sprite: {fileID: 6492841580993013340, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6492841580993013340, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+    - m_Name: Soldier-Death_1
+      m_Hash: 257492080
+      m_Sprite: {fileID: -914185199855827783, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -914185199855827783, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+    - m_Name: Soldier-Death_2
+      m_Hash: 374363594
+      m_Sprite: {fileID: -3005694953463571259, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3005694953463571259, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+    - m_Name: Soldier-Death_3
+      m_Hash: 559375708
+      m_Sprite: {fileID: -6014531536768240529, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6014531536768240529, guid: 889d341cff70ef14c858fdfb429abe1c, type: 3}
+    - m_Name: Soldier-Hurt_0
+      m_Hash: 236144427
+      m_Sprite: {fileID: 2394668732000811328, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2394668732000811328, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+    - m_Name: Soldier-Hurt_1
+      m_Hash: 957642685
+      m_Sprite: {fileID: 2011182554591317053, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2011182554591317053, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+    - m_Name: Soldier-Hurt_2
+      m_Hash: 538781191
+      m_Sprite: {fileID: 7915317491827125556, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7915317491827125556, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+    - m_Name: Soldier-Hurt_3
+      m_Hash: 387585681
+      m_Sprite: {fileID: -6471843385825578902, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6471843385825578902, guid: 3e63ad552def345428c6d739c1f8abe9, type: 3}
+    - m_Name: Soldier-Idle_0
+      m_Hash: 904774487
+      m_Sprite: {fileID: -7978735674136817684, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7978735674136817684, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+    - m_Name: Soldier-Idle_1
+      m_Hash: 48952257
+      m_Sprite: {fileID: 8849163925938299382, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8849163925938299382, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+    - m_Name: Soldier-Idle_2
+      m_Hash: 467903099
+      m_Sprite: {fileID: -3697785639171859907, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3697785639171859907, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+    - m_Name: Soldier-Idle_3
+      m_Hash: 753177325
+      m_Sprite: {fileID: -1830650023417107544, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1830650023417107544, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+    - m_Name: Soldier-Idle_4
+      m_Hash: 847251278
+      m_Sprite: {fileID: 5344081390441601760, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5344081390441601760, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+    - m_Name: Soldier-Idle_5
+      m_Hash: 92747736
+      m_Sprite: {fileID: 1830586431241935133, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1830586431241935133, guid: 0a90fa8aa6247fe4fbd695413b202fcd, type: 3}
+    - m_Name: Soldier-Walk_0
+      m_Hash: 240059078
+      m_Sprite: {fileID: -6369722787752497797, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6369722787752497797, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_1
+      m_Hash: 961032784
+      m_Sprite: {fileID: -4195647796165820189, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4195647796165820189, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_2
+      m_Hash: 541156330
+      m_Sprite: {fileID: -8464097173789389841, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8464097173789389841, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_3
+      m_Hash: 390484860
+      m_Sprite: {fileID: 4675039378008736925, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4675039378008736925, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_4
+      m_Hash: 153274079
+      m_Sprite: {fileID: 8618280867664089372, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8618280867664089372, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_5
+      m_Hash: 1042675273
+      m_Sprite: {fileID: 1914519734761289132, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1914519734761289132, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_6
+      m_Hash: 657238003
+      m_Sprite: {fileID: -7471997188321437821, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7471997188321437821, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    - m_Name: Soldier-Walk_7
+      m_Hash: 271292261
+      m_Sprite: {fileID: -1920940785554729860, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1920940785554729860, guid: c79ea2c46d11c58408d8fd46a779b68c, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 43
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639099447456283988
+  m_Version: 1
