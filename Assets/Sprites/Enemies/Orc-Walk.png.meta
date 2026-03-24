@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -124,10 +124,10 @@ TextureImporter:
       name: Orc-Walk_0
       rect:
         serializedVersion: 2
-        x: 44
-        y: 43
-        width: 22
-        height: 15
+        x: 43
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,10 +146,10 @@ TextureImporter:
       name: Orc-Walk_1
       rect:
         serializedVersion: 2
-        x: 144
-        y: 44
-        width: 22
-        height: 15
+        x: 143
+        y: 40
+        width: 23
+        height: 19
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +168,10 @@ TextureImporter:
       name: Orc-Walk_2
       rect:
         serializedVersion: 2
-        x: 244
-        y: 43
-        width: 22
-        height: 15
+        x: 243
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,10 +190,10 @@ TextureImporter:
       name: Orc-Walk_3
       rect:
         serializedVersion: 2
-        x: 344
-        y: 43
-        width: 22
-        height: 14
+        x: 343
+        y: 40
+        width: 23
+        height: 17
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +212,10 @@ TextureImporter:
       name: Orc-Walk_4
       rect:
         serializedVersion: 2
-        x: 444
-        y: 43
-        width: 22
-        height: 15
+        x: 443
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +234,10 @@ TextureImporter:
       name: Orc-Walk_5
       rect:
         serializedVersion: 2
-        x: 544
-        y: 44
-        width: 22
-        height: 15
+        x: 543
+        y: 40
+        width: 23
+        height: 19
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +256,10 @@ TextureImporter:
       name: Orc-Walk_6
       rect:
         serializedVersion: 2
-        x: 644
-        y: 43
-        width: 22
-        height: 15
+        x: 643
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,10 +278,10 @@ TextureImporter:
       name: Orc-Walk_7
       rect:
         serializedVersion: 2
-        x: 744
-        y: 43
-        width: 22
-        height: 14
+        x: 743
+        y: 40
+        width: 23
+        height: 17
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -300,7 +300,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 56eb45eabf51e074392aa7b759e56c30
+    spriteID: 9ceabef5580f99d4e84815984edd96e0
     internalID: 0
     vertices: []
     indices: 
@@ -310,7 +310,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Orc-Walk_0: 9081233426807069
       Orc-Walk_1: 4372957803809224375

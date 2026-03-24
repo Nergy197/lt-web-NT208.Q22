@@ -90,7 +90,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -118,10 +118,10 @@ TextureImporter:
       name: Orc-Attack01_0
       rect:
         serializedVersion: 2
-        x: 44
-        y: 43
-        width: 22
-        height: 15
+        x: 43
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,10 +140,10 @@ TextureImporter:
       name: Orc-Attack01_1
       rect:
         serializedVersion: 2
-        x: 144
-        y: 43
-        width: 19
-        height: 19
+        x: 143
+        y: 40
+        width: 20
+        height: 22
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -163,9 +163,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 236
-        y: 43
-        width: 19
-        height: 24
+        y: 40
+        width: 22
+        height: 27
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,9 +184,9 @@ TextureImporter:
       name: Orc-Attack01_3
       rect:
         serializedVersion: 2
-        x: 345
+        x: 343
         y: 38
-        width: 28
+        width: 30
         height: 26
       alignment: 7
       pivot: {x: 0.5, y: 0}
@@ -206,9 +206,9 @@ TextureImporter:
       name: Orc-Attack01_4
       rect:
         serializedVersion: 2
-        x: 445
+        x: 443
         y: 38
-        width: 28
+        width: 30
         height: 20
       alignment: 7
       pivot: {x: 0.5, y: 0}
@@ -228,9 +228,9 @@ TextureImporter:
       name: Orc-Attack01_5
       rect:
         serializedVersion: 2
-        x: 545
+        x: 543
         y: 38
-        width: 26
+        width: 28
         height: 19
       alignment: 7
       pivot: {x: 0.5, y: 0}
@@ -250,7 +250,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 0109a24d24d76c142ac7ef729f7356f2
+    spriteID: 9cc4b2417f078c4428b81108316dc377
     internalID: 0
     vertices: []
     indices: 
@@ -260,7 +260,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Orc-Attack01_0: -5747784035168019909
       Orc-Attack01_1: 8196637821053982142
