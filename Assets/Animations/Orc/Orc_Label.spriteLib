@@ -1,0 +1,194 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Orc-Idle_0
+      m_Hash: 43227746
+      m_Sprite: {fileID: 5120410236738981136, guid: c1130715ca4154344880ee64d357af28, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5120410236738981136, guid: c1130715ca4154344880ee64d357af28, type: 3}
+    - m_Name: Orc-Idle_1
+      m_Hash: 898935540
+      m_Sprite: {fileID: 1133040411461804861, guid: c1130715ca4154344880ee64d357af28, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1133040411461804861, guid: c1130715ca4154344880ee64d357af28, type: 3}
+    - m_Name: Orc-Idle_2
+      m_Hash: 748550990
+      m_Sprite: {fileID: -5096723200824463030, guid: c1130715ca4154344880ee64d357af28, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5096723200824463030, guid: c1130715ca4154344880ee64d357af28, type: 3}
+    - m_Name: Orc-Idle_3
+      m_Hash: 463129560
+      m_Sprite: {fileID: -2225174341924067898, guid: c1130715ca4154344880ee64d357af28, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2225174341924067898, guid: c1130715ca4154344880ee64d357af28, type: 3}
+    - m_Name: Orc-Idle_4
+      m_Hash: 100556411
+      m_Sprite: {fileID: -8233152129326895834, guid: c1130715ca4154344880ee64d357af28, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8233152129326895834, guid: c1130715ca4154344880ee64d357af28, type: 3}
+    - m_Name: Orc-Idle_5
+      m_Hash: 855207661
+      m_Sprite: {fileID: -4010699835880829198, guid: c1130715ca4154344880ee64d357af28, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4010699835880829198, guid: c1130715ca4154344880ee64d357af28, type: 3}
+    - m_Name: Orc-Walk_0
+      m_Hash: 959536115
+      m_Sprite: {fileID: 9081233426807069, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 9081233426807069, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_1
+      m_Hash: 238447461
+      m_Sprite: {fileID: 4372957803809224375, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4372957803809224375, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_2
+      m_Hash: 390019807
+      m_Sprite: {fileID: -1347736431781377632, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1347736431781377632, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_3
+      m_Hash: 540543561
+      m_Sprite: {fileID: -5659425469639183808, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5659425469639183808, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_4
+      m_Hash: 1046257642
+      m_Sprite: {fileID: -60962372088672916, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -60962372088672916, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_5
+      m_Hash: 157003644
+      m_Sprite: {fileID: 3404994825279768155, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3404994825279768155, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_6
+      m_Hash: 273874630
+      m_Sprite: {fileID: -8575848986319331806, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8575848986319331806, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Walk_7
+      m_Hash: 659934800
+      m_Sprite: {fileID: -4323655612262110637, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4323655612262110637, guid: 73f48937e1ed99d44be017e866059ecc, type: 3}
+    - m_Name: Orc-Attack01_0
+      m_Hash: 971805890
+      m_Sprite: {fileID: -5747784035168019909, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5747784035168019909, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+    - m_Name: Orc-Attack01_1
+      m_Hash: 250324052
+      m_Sprite: {fileID: 8196637821053982142, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8196637821053982142, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+    - m_Name: Orc-Attack01_2
+      m_Hash: 400750062
+      m_Sprite: {fileID: 6854456305891230957, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6854456305891230957, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+    - m_Name: Orc-Attack01_3
+      m_Hash: 551929208
+      m_Sprite: {fileID: -3441655991679628507, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3441655991679628507, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+    - m_Name: Orc-Attack01_4
+      m_Hash: 1048662235
+      m_Sprite: {fileID: 1149191044335307846, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1149191044335307846, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+    - m_Name: Orc-Attack01_5
+      m_Hash: 159801421
+      m_Sprite: {fileID: -4662628362427731083, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4662628362427731083, guid: 081cd0cb0aa96ac4fa61141e5e031c85, type: 3}
+    - m_Name: Orc-Attack02_0
+      m_Hash: 1001007771
+      m_Sprite: {fileID: -4382410341179087744, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4382410341179087744, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+    - m_Name: Orc-Attack02_1
+      m_Hash: 212670989
+      m_Sprite: {fileID: -310342334101882945, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -310342334101882945, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+    - m_Name: Orc-Attack02_2
+      m_Hash: 363088823
+      m_Sprite: {fileID: -4543947773319253168, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4543947773319253168, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+    - m_Name: Orc-Attack02_3
+      m_Hash: 581139233
+      m_Sprite: {fileID: 2843740054133409696, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2843740054133409696, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+    - m_Name: Orc-Attack02_4
+      m_Hash: 1019735682
+      m_Sprite: {fileID: -3675442374903467389, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3675442374903467389, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+    - m_Name: Orc-Attack02_5
+      m_Hash: 197189140
+      m_Sprite: {fileID: 7525977105156993497, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7525977105156993497, guid: 46d55fdd3d550994680c535b400fb755, type: 3}
+    - m_Name: Orc-Death_0
+      m_Hash: 777686684
+      m_Sprite: {fileID: 8544846919123988669, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8544846919123988669, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+    - m_Name: Orc-Death_1
+      m_Hash: 425573898
+      m_Sprite: {fileID: -401137139762225490, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -401137139762225490, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+    - m_Name: Orc-Death_2
+      m_Hash: 5566384
+      m_Sprite: {fileID: 1872452920086712164, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1872452920086712164, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+    - m_Name: Orc-Death_3
+      m_Hash: 928243494
+      m_Sprite: {fileID: -3050150630142680969, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3050150630142680969, guid: ecf11b509c375d043ae052f20f64d194, type: 3}
+    - m_Name: Orc-Hurt_0
+      m_Hash: 963452446
+      m_Sprite: {fileID: 8051351617050381877, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8051351617050381877, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+    - m_Name: Orc-Hurt_1
+      m_Hash: 241839752
+      m_Sprite: {fileID: -1185003378899358547, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1185003378899358547, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+    - m_Name: Orc-Hurt_2
+      m_Hash: 392396594
+      m_Sprite: {fileID: -2628998458732627980, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2628998458732627980, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+    - m_Name: Orc-Hurt_3
+      m_Hash: 543444900
+      m_Sprite: {fileID: 2377824496227862384, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2377824496227862384, guid: 6c03b4eb52993bd46895bdcbfe7e8ae6, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 34
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639099401562246733
+  m_Version: 1

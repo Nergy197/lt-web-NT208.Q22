@@ -90,7 +90,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -118,10 +118,10 @@ TextureImporter:
       name: Orc-Idle_0
       rect:
         serializedVersion: 2
-        x: 44
-        y: 43
-        width: 22
-        height: 15
+        x: 43
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,10 +140,10 @@ TextureImporter:
       name: Orc-Idle_1
       rect:
         serializedVersion: 2
-        x: 144
-        y: 43
-        width: 22
-        height: 15
+        x: 143
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,10 +162,10 @@ TextureImporter:
       name: Orc-Idle_2
       rect:
         serializedVersion: 2
-        x: 244
-        y: 43
-        width: 22
-        height: 16
+        x: 243
+        y: 40
+        width: 23
+        height: 19
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,10 +184,10 @@ TextureImporter:
       name: Orc-Idle_3
       rect:
         serializedVersion: 2
-        x: 344
-        y: 43
-        width: 22
-        height: 16
+        x: 343
+        y: 40
+        width: 23
+        height: 19
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -206,10 +206,10 @@ TextureImporter:
       name: Orc-Idle_4
       rect:
         serializedVersion: 2
-        x: 444
-        y: 43
-        width: 22
-        height: 15
+        x: 443
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -228,10 +228,10 @@ TextureImporter:
       name: Orc-Idle_5
       rect:
         serializedVersion: 2
-        x: 544
-        y: 43
-        width: 22
-        height: 15
+        x: 543
+        y: 40
+        width: 23
+        height: 18
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -250,7 +250,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 03dd665e04ee23f419bd0856b6cf514f
+    spriteID: a2036b9f998355b45a15181135b84a7d
     internalID: 0
     vertices: []
     indices: 
@@ -260,7 +260,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       Orc-Idle_0: 5120410236738981136
       Orc-Idle_1: 1133040411461804861
