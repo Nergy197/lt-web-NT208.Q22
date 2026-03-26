@@ -1,0 +1,239 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Werewolf-Attack01_0
+      m_Hash: 284274565
+      m_Sprite: {fileID: -6702294005266946484, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6702294005266946484, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_1
+      m_Hash: 670474003
+      m_Sprite: {fileID: 6550674813423456542, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6550674813423456542, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_2
+      m_Hash: 1056951977
+      m_Sprite: {fileID: -4754545450081411495, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4754545450081411495, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_3
+      m_Hash: 167312959
+      m_Sprite: {fileID: -6533295423077769211, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6533295423077769211, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_4
+      m_Hash: 396127132
+      m_Sprite: {fileID: 6849000971207801516, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6849000971207801516, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_5
+      m_Hash: 547052298
+      m_Sprite: {fileID: 3454463427483804521, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3454463427483804521, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_6
+      m_Hash: 965872304
+      m_Sprite: {fileID: -9025924221938161130, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -9025924221938161130, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_7
+      m_Hash: 244660774
+      m_Sprite: {fileID: 1469530935887702552, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1469530935887702552, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack01_8
+      m_Hash: 506079159
+      m_Sprite: {fileID: 4505565762704251265, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4505565762704251265, guid: c2a70a499d1a79645a981f4c28446559, type: 3}
+    - m_Name: Werewolf-Attack02_0
+      m_Hash: 313987548
+      m_Sprite: {fileID: 2690253717885054663, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2690253717885054663, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_1
+      m_Hash: 632299850
+      m_Sprite: {fileID: 2924794905738231760, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2924794905738231760, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_2
+      m_Hash: 1018786032
+      m_Sprite: {fileID: 5370983336735051837, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5370983336735051837, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_3
+      m_Hash: 197017702
+      m_Sprite: {fileID: 1693071357061835176, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1693071357061835176, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_4
+      m_Hash: 366663109
+      m_Sprite: {fileID: 9114445085233884029, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 9114445085233884029, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_5
+      m_Hash: 584967507
+      m_Sprite: {fileID: 316850838564518087, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 316850838564518087, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_6
+      m_Hash: 1003795689
+      m_Sprite: {fileID: 8488122073083714517, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8488122073083714517, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_7
+      m_Hash: 215188607
+      m_Sprite: {fileID: 5990893648162083703, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5990893648162083703, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_8
+      m_Hash: 476879342
+      m_Sprite: {fileID: 3716714184619309036, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3716714184619309036, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_9
+      m_Hash: 728476024
+      m_Sprite: {fileID: 3334470025854700738, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3334470025854700738, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_10
+      m_Hash: 582469518
+      m_Sprite: {fileID: -4594368018287875547, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4594368018287875547, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Attack02_11
+      m_Hash: 363919128
+      m_Sprite: {fileID: 504143092588132386, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 504143092588132386, guid: 62752bf3427eb0b449a4105a20dda5db, type: 3}
+    - m_Name: Werewolf-Death_0
+      m_Hash: 270316097
+      m_Sprite: {fileID: 2221069426256087011, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2221069426256087011, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+    - m_Name: Werewolf-Death_1
+      m_Hash: 656114391
+      m_Sprite: {fileID: -1686352667755371474, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1686352667755371474, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+    - m_Name: Werewolf-Death_2
+      m_Hash: 1041421165
+      m_Sprite: {fileID: -1652063477230099908, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1652063477230099908, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+    - m_Name: Werewolf-Death_3
+      m_Hash: 152429563
+      m_Sprite: {fileID: -1795155497308497831, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1795155497308497831, guid: bcdcb0c4ef7d9bc4aae80e66fdffbd23, type: 3}
+    - m_Name: Werewolf-Hurt_0
+      m_Hash: 237862419
+      m_Sprite: {fileID: -6768064800231839112, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6768064800231839112, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+    - m_Name: Werewolf-Hurt_1
+      m_Hash: 959073925
+      m_Sprite: {fileID: -4463229762502221854, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4463229762502221854, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+    - m_Name: Werewolf-Hurt_2
+      m_Hash: 539172671
+      m_Sprite: {fileID: 2161038538726658031, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2161038538726658031, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+    - m_Name: Werewolf-Hurt_3
+      m_Hash: 388247465
+      m_Sprite: {fileID: 1091462072994205310, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1091462072994205310, guid: 6e0f6c6b6f1f85d47b0b103da81791d4, type: 3}
+    - m_Name: Werewolf-Idle_0
+      m_Hash: 903084655
+      m_Sprite: {fileID: 4565372846758268570, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4565372846758268570, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+    - m_Name: Werewolf-Idle_1
+      m_Hash: 47500025
+      m_Sprite: {fileID: -5431055816626353104, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5431055816626353104, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+    - m_Name: Werewolf-Idle_2
+      m_Hash: 467508035
+      m_Sprite: {fileID: 4981596948431694777, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4981596948431694777, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+    - m_Name: Werewolf-Idle_3
+      m_Hash: 752528341
+      m_Sprite: {fileID: 7992208743141392169, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7992208743141392169, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+    - m_Name: Werewolf-Idle_4
+      m_Hash: 851328630
+      m_Sprite: {fileID: 9217762701747348682, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 9217762701747348682, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+    - m_Name: Werewolf-Idle_5
+      m_Hash: 96014048
+      m_Sprite: {fileID: -8424546917131734541, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8424546917131734541, guid: c01e097dda7eed643b5e83d59ff9cd36, type: 3}
+    - m_Name: Werewolf-Walk_0
+      m_Hash: 242301950
+      m_Sprite: {fileID: -3701199581462768929, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3701199581462768929, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_1
+      m_Hash: 964037480
+      m_Sprite: {fileID: -7547501532470485945, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7547501532470485945, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_2
+      m_Hash: 545217234
+      m_Sprite: {fileID: -4216219597229827858, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4216219597229827858, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_3
+      m_Hash: 393767492
+      m_Sprite: {fileID: 5448589304762213395, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5448589304762213395, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_4
+      m_Hash: 152895463
+      m_Sprite: {fileID: 1915964264584243621, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1915964264584243621, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_5
+      m_Hash: 1042009969
+      m_Sprite: {fileID: 5799248973064564117, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5799248973064564117, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_6
+      m_Hash: 655531723
+      m_Sprite: {fileID: -7661666850059498734, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7661666850059498734, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    - m_Name: Werewolf-Walk_7
+      m_Hash: 269856349
+      m_Sprite: {fileID: -6517846222131938427, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6517846222131938427, guid: 1ca921c31c71d6f45901bdfac4dfd200, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 43
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639101315220983435
+  m_Version: 1

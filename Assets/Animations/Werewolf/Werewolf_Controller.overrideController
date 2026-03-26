@@ -6,20 +6,18 @@ AnimatorOverrideController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Soldier_Controller
+  m_Name: Werewolf_Controller
   m_Controller: {fileID: 9100000, guid: 0eff32e0cebb638488f03377245a2a3c, type: 2}
   m_Clips:
   - m_OriginalClip: {fileID: 7400000, guid: e92e0c98a1bcaff438ae1a822071fda8, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: 704e305091ab81c4a93948c556519b3c, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: ff5183e5dc365b344910fb6aff703b94, type: 2}
   - m_OriginalClip: {fileID: 7400000, guid: 69d46126514647448807725ac936c615, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: ab52995a17d141b478d981340d2148f8, type: 2}
-  - m_OriginalClip: {fileID: 7400000, guid: 52def6bd4a124634b80719e397dbb078, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: 52def6bd4a124634b80719e397dbb078, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 39f11cd1a70795347a25264439109fac, type: 2}
   - m_OriginalClip: {fileID: 7400000, guid: 748a4f5001d58e047a76d7fceabf9c93, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: 98158bfad92d2194797514dbefc7583c, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: a4c71400f88d61348942797205957f93, type: 2}
   - m_OriginalClip: {fileID: 7400000, guid: 0938cebe193d1564fa2cba56e209283b, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: a671cd841041ed249abd6865de13da1c, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 8f95207eacbf53040937672d1d1c43fb, type: 2}
   - m_OriginalClip: {fileID: 7400000, guid: 33354eac69f56e047a9df3cb4ab32d8f, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: ccc45a5b4734a9249a87cde7a00ab485, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: a6dab6202c3eeed4b830556eae68dec3, type: 2}
   - m_OriginalClip: {fileID: 7400000, guid: 66c2d79482b22574da77c86cb278d738, type: 2}
-    m_OverrideClip: {fileID: 7400000, guid: b7efceb548211ea45bd369ec6f0aca40, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: ecb801cd590dafc48b0d65600ffef999, type: 2}
