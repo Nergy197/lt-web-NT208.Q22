@@ -1,0 +1,289 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: Werebear-Attack01_0
+      m_Hash: 1024582183
+      m_Sprite: {fileID: -195695515886222138, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -195695515886222138, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_1
+      m_Hash: 169267889
+      m_Sprite: {fileID: -4621144795108422938, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4621144795108422938, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_2
+      m_Hash: 320832267
+      m_Sprite: {fileID: -2721700955551875361, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2721700955551875361, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_3
+      m_Hash: 605598621
+      m_Sprite: {fileID: 305327335533768833, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 305327335533768833, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_4
+      m_Hash: 981214782
+      m_Sprite: {fileID: -294299188037475152, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -294299188037475152, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_5
+      m_Hash: 226170536
+      m_Sprite: {fileID: -719308823353989335, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -719308823353989335, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_6
+      m_Hash: 343033618
+      m_Sprite: {fileID: -6517162931334268921, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6517162931334268921, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_7
+      m_Hash: 594900868
+      m_Sprite: {fileID: 872660006913041742, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 872660006913041742, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack01_8
+      m_Hash: 868903445
+      m_Sprite: {fileID: 8871454891053564761, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8871454891053564761, guid: 0f720f40556a1d34d87c7c0e39c950b2, type: 3}
+    - m_Name: Werebear-Attack02_0
+      m_Hash: 1062689918
+      m_Sprite: {fileID: -7764543302589567303, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7764543302589567303, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_1
+      m_Hash: 139488488
+      m_Sprite: {fileID: 6615189886518209812, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6615189886518209812, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_2
+      m_Hash: 291061074
+      m_Sprite: {fileID: -717056855885318534, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -717056855885318534, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_3
+      m_Hash: 643698116
+      m_Sprite: {fileID: -6403454309857681382, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6403454309857681382, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_4
+      m_Hash: 943364199
+      m_Sprite: {fileID: -7700665541728941658, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7700665541728941658, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_5
+      m_Hash: 255699185
+      m_Sprite: {fileID: -514884274419843581, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -514884274419843581, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_6
+      m_Hash: 372570443
+      m_Sprite: {fileID: 6772524254636194099, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6772524254636194099, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_7
+      m_Hash: 557042141
+      m_Sprite: {fileID: 8349295859296516536, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8349295859296516536, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_8
+      m_Hash: 831312972
+      m_Sprite: {fileID: -6702099871805834509, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6702099871805834509, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_9
+      m_Hash: 109831386
+      m_Sprite: {fileID: 3270206373958072057, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3270206373958072057, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_10
+      m_Hash: 444785927
+      m_Sprite: {fileID: 6305596292903161031, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6305596292903161031, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_11
+      m_Hash: 763745681
+      m_Sprite: {fileID: -972218317596142787, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -972218317596142787, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack02_12
+      m_Hash: 881624107
+      m_Sprite: {fileID: 7597110346066124636, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7597110346066124636, guid: 811f8825083748241a9a3ba432ffa736, type: 3}
+    - m_Name: Werebear-Attack03_0
+      m_Hash: 1049966153
+      m_Sprite: {fileID: 6353673333787211752, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6353673333787211752, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_1
+      m_Hash: 160564959
+      m_Sprite: {fileID: -1889263424893382321, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1889263424893382321, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_2
+      m_Hash: 278615909
+      m_Sprite: {fileID: 8513044110120892325, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8513044110120892325, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_3
+      m_Hash: 664561651
+      m_Sprite: {fileID: -4954300554207446309, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4954300554207446309, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_4
+      m_Hash: 972616272
+      m_Sprite: {fileID: 7439776703322888219, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7439776703322888219, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_5
+      m_Hash: 251642566
+      m_Sprite: {fileID: -3156154963638319836, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3156154963638319836, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_6
+      m_Hash: 402035580
+      m_Sprite: {fileID: 7142114829653999447, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7142114829653999447, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_7
+      m_Hash: 552707050
+      m_Sprite: {fileID: -4504311631201150412, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4504311631201150412, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Attack03_8
+      m_Hash: 810466939
+      m_Sprite: {fileID: -3735522125938319784, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3735522125938319784, guid: 07c3b0c6106150047a0b8dada4b85604, type: 3}
+    - m_Name: Werebear-Death_0
+      m_Hash: 584771812
+      m_Sprite: {fileID: 8797442844104381538, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8797442844104381538, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+    - m_Name: Werebear-Death_1
+      m_Hash: 366860402
+      m_Sprite: {fileID: 5838295516507310939, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5838295516507310939, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+    - m_Name: Werebear-Death_2
+      m_Hash: 215255496
+      m_Sprite: {fileID: 4753422918887629668, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4753422918887629668, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+    - m_Name: Werebear-Death_3
+      m_Hash: 1003731294
+      m_Sprite: {fileID: -8469408634937088824, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8469408634937088824, guid: 2b3c6c4eb9d7d5d44b2739b4939c2f63, type: 3}
+    - m_Name: Werebear-Hurt_0
+      m_Hash: 252731093
+      m_Sprite: {fileID: -1468992467970853836, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1468992467970853836, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+    - m_Name: Werebear-Hurt_1
+      m_Hash: 941059651
+      m_Sprite: {fileID: 2866616238435076535, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2866616238435076535, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+    - m_Name: Werebear-Hurt_2
+      m_Hash: 555630585
+      m_Sprite: {fileID: -2766649211370415354, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2766649211370415354, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+    - m_Name: Werebear-Hurt_3
+      m_Hash: 370741103
+      m_Sprite: {fileID: -2035263668343403277, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2035263668343403277, guid: 7186a101a7566394bbb1da04eeba9b1c, type: 3}
+    - m_Name: Werebear-Idle_0
+      m_Hash: 888068777
+      m_Sprite: {fileID: -5004526510767300680, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5004526510767300680, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+    - m_Name: Werebear-Idle_1
+      m_Hash: 65661503
+      m_Sprite: {fileID: 3609393883403515724, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3609393883403515724, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+    - m_Name: Werebear-Idle_2
+      m_Hash: 450935685
+      m_Sprite: {fileID: 1387893624940018059, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1387893624940018059, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+    - m_Name: Werebear-Idle_3
+      m_Hash: 770149139
+      m_Sprite: {fileID: 5336546409777294913, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5336546409777294913, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+    - m_Name: Werebear-Idle_4
+      m_Hash: 864231088
+      m_Sprite: {fileID: -1768686267006753101, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1768686267006753101, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+    - m_Name: Werebear-Idle_5
+      m_Hash: 75771430
+      m_Sprite: {fileID: -2699804691739733528, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2699804691739733528, guid: b3a0bbe6aaafc264ab4d18a48f82cb33, type: 3}
+    - m_Name: Werebear-Walk_0
+      m_Hash: 256645944
+      m_Sprite: {fileID: 1174558886763162764, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1174558886763162764, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_1
+      m_Hash: 944450478
+      m_Sprite: {fileID: -2315910674107863661, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2315910674107863661, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_2
+      m_Hash: 558004756
+      m_Sprite: {fileID: 7851576139567609997, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7851576139567609997, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_3
+      m_Hash: 373639810
+      m_Sprite: {fileID: 3573424864928659217, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3573424864928659217, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_4
+      m_Hash: 136437537
+      m_Sprite: {fileID: 9144904747891988722, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 9144904747891988722, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_5
+      m_Hash: 1059516343
+      m_Sprite: {fileID: 162461327072422033, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 162461327072422033, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_6
+      m_Hash: 640663053
+      m_Sprite: {fileID: 4995179990573881708, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4995179990573881708, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    - m_Name: Werebear-Walk_7
+      m_Hash: 287870619
+      m_Sprite: {fileID: 9052491454244285660, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 9052491454244285660, guid: 7bb12d7912c40b14f9957cf975fd548b, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 53
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639102967094481837
+  m_Version: 1
