@@ -947,9 +947,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   backendBaseURL: 
-  loadURL: /player/player001
   saveURL: /player/save
-  questManager: {fileID: 0}
+  questManager: {fileID: 1661835452}
   isLoaded: 0
   currentSaveSlot: 0
   playerDatabase:
@@ -1440,6 +1439,18 @@ MonoBehaviour:
   closeSlotsPanelButton: {fileID: 294063233}
   slotsContainer: {fileID: 275740674}
   slotButtonPrefab: {fileID: 433264451}
+  transferCodeButton: {fileID: 0}
+  transferCodePanel: {fileID: 0}
+  currentIdLabel: {fileID: 0}
+  transferCodeInput: {fileID: 0}
+  confirmTransferButton: {fileID: 0}
+  closeTransferButton: {fileID: 0}
+  copyIdButton: {fileID: 0}
+  transferStatusText: {fileID: 0}
+  welcomePanel: {fileID: 0}
+  welcomeIdLabel: {fileID: 0}
+  closeWelcomeButton: {fileID: 0}
+  copyWelcomeIdButton: {fileID: 0}
 --- !u!114 &1093377025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2287,7 +2298,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::QuestManager
   AllQuests:
   - {fileID: 11400000, guid: 0d969dc8754694f07822aad20b193e68, type: 2}
-  StartingQuests: []
+  StartingQuests:
+  - {fileID: 11400000, guid: 0d969dc8754694f07822aad20b193e68, type: 2}
 --- !u!4 &1661835453
 Transform:
   m_ObjectHideFlags: 0
@@ -2296,8 +2308,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1661835451}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.96099, y: 1.29308, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.9609985, y: 1.2930756, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

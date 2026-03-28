@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e797ba1db8ba4401caef36d3e9b2a536, type: 3}
   m_Name: Mapdata
   m_EditorClassIdentifier: Assembly-CSharp::Mapdata
-  mapName: "\u0111\u1EA7m l\u1EA7y \u01B0\u1EDBt \xE1t"
-  mapId: 0
+  mapName: "\u0110\u1ED3ng c\u1ECF"
+  mapId: 1
   enemyLevel: 1
   possibleEnemies:
   - {fileID: 11400000, guid: 1c9b81a5094f54c36a1ed220c1757eba, type: 2}
