@@ -8,4 +8,14 @@ AnimatorOverrideController:
   m_PrefabAsset: {fileID: 0}
   m_Name: SkeletonArcher_Controller
   m_Controller: {fileID: 9100000, guid: 0eff32e0cebb638488f03377245a2a3c, type: 2}
-  m_Clips: []
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: e92e0c98a1bcaff438ae1a822071fda8, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 1b251aa26ab29a44799c4964bac7969b, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 748a4f5001d58e047a76d7fceabf9c93, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d4177501d3027724187c605bf023660c, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 0938cebe193d1564fa2cba56e209283b, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 45aec86c40da93e48964401de8a6cf01, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 33354eac69f56e047a9df3cb4ab32d8f, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 01bec4c80e79eda43871009a82172b12, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 66c2d79482b22574da77c86cb278d738, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 4303efa8acb145242981eb512d019135, type: 2}
