@@ -1,0 +1,179 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: SkeletonArcher-Attack_0
+      m_Hash: 296782542
+      m_Sprite: {fileID: 5831249578833918177, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5831249578833918177, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_1
+      m_Hash: 649575000
+      m_Sprite: {fileID: -5115799158601542271, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5115799158601542271, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_2
+      m_Hash: 1069476834
+      m_Sprite: {fileID: 8367284235869872797, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8367284235869872797, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_3
+      m_Hash: 146398068
+      m_Sprite: {fileID: -5136505023480181264, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5136505023480181264, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_4
+      m_Hash: 383602391
+      m_Sprite: {fileID: -680714922076083305, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -680714922076083305, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_5
+      m_Hash: 567967297
+      m_Sprite: {fileID: -2658758925605049528, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2658758925605049528, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_6
+      m_Hash: 953364475
+      m_Sprite: {fileID: -2031123962511942785, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2031123962511942785, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_7
+      m_Hash: 265559917
+      m_Sprite: {fileID: -3705935541706527765, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3705935541706527765, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Attack_8
+      m_Hash: 527106812
+      m_Sprite: {fileID: 4538006817009380375, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4538006817009380375, guid: 5e9767ecacf2e3d4ab2eec5d9dfa6f5b, type: 3}
+    - m_Name: SkeletonArcher-Death_0
+      m_Hash: 32293844
+      m_Sprite: {fileID: -2263011768922231748, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2263011768922231748, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+    - m_Name: SkeletonArcher-Death_1
+      m_Hash: 921432898
+      m_Sprite: {fileID: 8919087530369398104, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8919087530369398104, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+    - m_Name: SkeletonArcher-Death_2
+      m_Hash: 803382008
+      m_Sprite: {fileID: 6498645642301441340, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6498645642301441340, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+    - m_Name: SkeletonArcher-Death_3
+      m_Hash: 417698414
+      m_Sprite: {fileID: 1611609137251078727, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1611609137251078727, guid: 370f86b83235287408e0d5c917478e51, type: 3}
+    - m_Name: SkeletonArcher-Hurt_0
+      m_Hash: 87759543
+      m_Sprite: {fileID: 4915499258703585561, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4915499258703585561, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+    - m_Name: SkeletonArcher-Hurt_1
+      m_Hash: 842803745
+      m_Sprite: {fileID: -8093550418751175530, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8093550418751175530, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+    - m_Name: SkeletonArcher-Hurt_2
+      m_Hash: 724925339
+      m_Sprite: {fileID: 7452212708572026131, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7452212708572026131, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+    - m_Name: SkeletonArcher-Hurt_3
+      m_Hash: 473058061
+      m_Sprite: {fileID: 3182055909973457954, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3182055909973457954, guid: 883be0b59074d514f8d307ccf8fa408b, type: 3}
+    - m_Name: SkeletonArcher-Idle_0
+      m_Hash: 1053138635
+      m_Sprite: {fileID: -6351682907161248583, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6351682907161248583, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+    - m_Name: SkeletonArcher-Idle_1
+      m_Hash: 163753565
+      m_Sprite: {fileID: -4127314927421442097, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4127314927421442097, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+    - m_Name: SkeletonArcher-Idle_2
+      m_Hash: 281804775
+      m_Sprite: {fileID: -1263314696073233438, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1263314696073233438, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+    - m_Name: SkeletonArcher-Idle_3
+      m_Hash: 667733873
+      m_Sprite: {fileID: 8246794367857864967, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8246794367857864967, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+    - m_Name: SkeletonArcher-Idle_4
+      m_Hash: 967334610
+      m_Sprite: {fileID: 8991973509969698036, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8991973509969698036, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+    - m_Name: SkeletonArcher-Idle_5
+      m_Hash: 246377028
+      m_Sprite: {fileID: -3371768663152145846, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3371768663152145846, guid: 91f26d69cf8862c459b62a39771c6c7b, type: 3}
+    - m_Name: SkeletonArcher-Walk_0
+      m_Hash: 90660698
+      m_Sprite: {fileID: 3529585072740049112, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3529585072740049112, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_1
+      m_Hash: 845180876
+      m_Sprite: {fileID: 1552569696712542236, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1552569696712542236, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_2
+      m_Hash: 728317558
+      m_Sprite: {fileID: 4004280702128150363, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4004280702128150363, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_3
+      m_Hash: 476974816
+      m_Sprite: {fileID: -2672155573072289348, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2672155573072289348, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_4
+      m_Hash: 34249539
+      m_Sprite: {fileID: -5095432870617726702, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5095432870617726702, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_5
+      m_Hash: 890088405
+      m_Sprite: {fileID: 487595970675031006, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 487595970675031006, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_6
+      m_Hash: 738523759
+      m_Sprite: {fileID: -6304041728307141930, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6304041728307141930, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    - m_Name: SkeletonArcher-Walk_7
+      m_Hash: 453233401
+      m_Sprite: {fileID: -3530639821347134945, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3530639821347134945, guid: 4e6887e4bbe2856478eb0281ece1b490, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 31
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639103975974980742
+  m_Version: 1
