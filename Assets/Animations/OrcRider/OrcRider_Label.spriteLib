@@ -1,0 +1,294 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: OrcRider_Attack01_0
+      m_Hash: 291879760
+      m_Sprite: {fileID: -7304371395691662354, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7304371395691662354, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_1
+      m_Hash: 643992518
+      m_Sprite: {fileID: -5502613770763856643, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5502613770763856643, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_2
+      m_Hash: 1064032892
+      m_Sprite: {fileID: -5171600912216366864, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5171600912216366864, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_3
+      m_Hash: 141355754
+      m_Sprite: {fileID: 4071341206943624054, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4071341206943624054, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_4
+      m_Hash: 369655625
+      m_Sprite: {fileID: 1562773691389614494, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1562773691389614494, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_5
+      m_Hash: 554651615
+      m_Sprite: {fileID: -3231506305399026275, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3231506305399026275, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_6
+      m_Hash: 939925093
+      m_Sprite: {fileID: 3518738520941088448, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3518738520941088448, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack01_7
+      m_Hash: 251735795
+      m_Sprite: {fileID: 3990685421678634285, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3990685421678634285, guid: 9e4245e3457d63240a01d85349a40479, type: 3}
+    - m_Name: OrcRider_Attack02_0
+      m_Hash: 321062153
+      m_Sprite: {fileID: -4805291195941671494, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4805291195941671494, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_1
+      m_Hash: 606352799
+      m_Sprite: {fileID: -898491107783281163, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -898491107783281163, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_2
+      m_Hash: 1026384933
+      m_Sprite: {fileID: 2851206345125205499, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2851206345125205499, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_3
+      m_Hash: 170546355
+      m_Sprite: {fileID: 5773026405177017699, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5773026405177017699, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_4
+      m_Hash: 340705552
+      m_Sprite: {fileID: -3239606791055260546, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3239606791055260546, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_5
+      m_Hash: 592048518
+      m_Sprite: {fileID: 7414343374642175032, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7414343374642175032, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_6
+      m_Hash: 977313852
+      m_Sprite: {fileID: -2948846752720918047, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2948846752720918047, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_7
+      m_Hash: 222793898
+      m_Sprite: {fileID: -8545410276645888226, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8545410276645888226, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack02_8
+      m_Hash: 502828347
+      m_Sprite: {fileID: 6831388209841190207, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6831388209841190207, guid: a1fdf54557c7da748a03fa3334edbff5, type: 3}
+    - m_Name: OrcRider_Attack03_0
+      m_Hash: 316763966
+      m_Sprite: {fileID: 6549746726921669976, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6549746726921669976, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_1
+      m_Hash: 635854760
+      m_Sprite: {fileID: -2429595495566164877, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2429595495566164877, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_2
+      m_Hash: 1022299666
+      m_Sprite: {fileID: -2054752136767863809, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2054752136767863809, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_3
+      m_Hash: 199769732
+      m_Sprite: {fileID: 3623559604838057650, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3623559604838057650, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_4
+      m_Hash: 361540391
+      m_Sprite: {fileID: -7626613711287710157, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7626613711287710157, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_5
+      m_Hash: 579574705
+      m_Sprite: {fileID: -4809687614703928280, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4809687614703928280, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_6
+      m_Hash: 998427147
+      m_Sprite: {fileID: -8455166663617238693, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8455166663617238693, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_7
+      m_Hash: 210107037
+      m_Sprite: {fileID: 6086544248654583641, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6086544248654583641, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_8
+      m_Hash: 473622284
+      m_Sprite: {fileID: -5714832754859823296, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5714832754859823296, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_9
+      m_Hash: 725473178
+      m_Sprite: {fileID: -2144791821532700930, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2144791821532700930, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Attack03_10
+      m_Hash: 741544612
+      m_Sprite: {fileID: 2999843205620421482, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2999843205620421482, guid: 0f1813023c3678443a6aac324a5502ca, type: 3}
+    - m_Name: OrcRider_Block_0
+      m_Hash: 182430136
+      m_Sprite: {fileID: -4010436053776415738, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4010436053776415738, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+    - m_Name: OrcRider_Block_1
+      m_Hash: 1037605166
+      m_Sprite: {fileID: 4747101767086277178, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4747101767086277178, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+    - m_Name: OrcRider_Block_2
+      m_Hash: 617728148
+      m_Sprite: {fileID: 3669265480885726123, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3669265480885726123, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+    - m_Name: OrcRider_Block_3
+      m_Hash: 332855298
+      m_Sprite: {fileID: -515730540190657606, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -515730540190657606, guid: 0b28583303c3fa84dafa4a7d05065646, type: 3}
+    - m_Name: OrcRider_Death_0
+      m_Hash: 1052287572
+      m_Sprite: {fileID: -4798500707249557292, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4798500707249557292, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+    - m_Name: OrcRider_Death_1
+      m_Hash: 163549890
+      m_Sprite: {fileID: 4440660150491647533, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4440660150491647533, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+    - m_Name: OrcRider_Death_2
+      m_Hash: 280413048
+      m_Sprite: {fileID: 2567984541362652948, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2567984541362652948, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+    - m_Name: OrcRider_Death_3
+      m_Hash: 665973742
+      m_Sprite: {fileID: -8247396052803133754, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8247396052803133754, guid: 6a08d0328d6d36849a95e192e366a2c0, type: 3}
+    - m_Name: OrcRider_Hurt_0
+      m_Hash: 610027281
+      m_Sprite: {fileID: -7968779640083838834, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7968779640083838834, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+    - m_Name: OrcRider_Hurt_1
+      m_Hash: 324761479
+      m_Sprite: {fileID: -486091560615662378, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -486091560615662378, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+    - m_Name: OrcRider_Hurt_2
+      m_Hash: 173155901
+      m_Sprite: {fileID: -895491228106729965, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -895491228106729965, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+    - m_Name: OrcRider_Hurt_3
+      m_Hash: 1028986539
+      m_Sprite: {fileID: -1731499667720825828, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1731499667720825828, guid: 4972d7ff56299d44c99ca1e7cd1f8fdc, type: 3}
+    - m_Name: OrcRider_Idle_0
+      m_Hash: 530760557
+      m_Sprite: {fileID: -6967218827304948987, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6967218827304948987, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+    - m_Name: OrcRider_Idle_1
+      m_Hash: 681964539
+      m_Sprite: {fileID: -2582689681796817123, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2582689681796817123, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+    - m_Name: OrcRider_Idle_2
+      m_Hash: 833397313
+      m_Sprite: {fileID: 5239070887845672902, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5239070887845672902, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+    - m_Name: OrcRider_Idle_3
+      m_Hash: 111907543
+      m_Sprite: {fileID: 8711236559198195290, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8711236559198195290, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+    - m_Name: OrcRider_Idle_4
+      m_Hash: 416221044
+      m_Sprite: {fileID: -5612623993386223237, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5612623993386223237, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+    - m_Name: OrcRider_Idle_5
+      m_Hash: 801650658
+      m_Sprite: {fileID: -600239269196264424, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -600239269196264424, guid: a389e7cff2236cb4f953c8f4eadfb207, type: 3}
+    - m_Name: OrcRider_Walk_0
+      m_Hash: 603980540
+      m_Sprite: {fileID: 4762972965759509545, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4762972965759509545, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_1
+      m_Hash: 319238762
+      m_Sprite: {fileID: -467496773326053826, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -467496773326053826, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_2
+      m_Hash: 168715216
+      m_Sprite: {fileID: -4277353276443176154, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4277353276443176154, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_3
+      m_Hash: 1024021318
+      m_Sprite: {fileID: 3971616282867014591, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3971616282867014591, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_4
+      m_Hash: 594396901
+      m_Sprite: {fileID: 1127462252342030170, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 1127462252342030170, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_5
+      m_Hash: 342554227
+      m_Sprite: {fileID: 5749074350868987293, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5749074350868987293, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_6
+      m_Hash: 224634825
+      m_Sprite: {fileID: -63334707547655146, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -63334707547655146, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    - m_Name: OrcRider_Walk_7
+      m_Hash: 979670879
+      m_Sprite: {fileID: 3572186884227599840, guid: ff92088ec2fe50f48837803435626653, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 3572186884227599840, guid: ff92088ec2fe50f48837803435626653, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 54
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639106337677897153
+  m_Version: 1
