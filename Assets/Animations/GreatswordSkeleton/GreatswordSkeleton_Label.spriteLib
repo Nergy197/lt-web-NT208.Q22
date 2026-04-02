@@ -1,0 +1,239 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e6fedc2472449cead18ef23b5cb30d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibrarySourceAsset
+  m_Library:
+  - m_Name: Body
+    m_Hash: 999990412
+    m_CategoryList: []
+    m_OverrideEntries:
+    - m_Name: GreatswordSkeleton-Attack01_0
+      m_Hash: 198690918
+      m_Sprite: {fileID: 7881636254453835088, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7881636254453835088, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_1
+      m_Hash: 1020328176
+      m_Sprite: {fileID: -1631881828347064051, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1631881828347064051, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_2
+      m_Hash: 635021642
+      m_Sprite: {fileID: -4611766818821873706, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4611766818821873706, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_3
+      m_Hash: 316578268
+      m_Sprite: {fileID: 855817368589333103, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 855817368589333103, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_4
+      m_Hash: 213519487
+      m_Sprite: {fileID: 2897670997321020363, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2897670997321020363, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_5
+      m_Hash: 1002257641
+      m_Sprite: {fileID: 5526180451339060890, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5526180451339060890, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_6
+      m_Hash: 582249811
+      m_Sprite: {fileID: -8537884622452727334, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8537884622452727334, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_7
+      m_Hash: 364076485
+      m_Sprite: {fileID: -3190358235929026143, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3190358235929026143, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack01_8
+      m_Hash: 84688980
+      m_Sprite: {fileID: -5726752351180808526, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5726752351180808526, guid: 7596d5497106b9f42b8a1937a728501d, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_0
+      m_Hash: 160527935
+      m_Sprite: {fileID: 927360332485938838, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 927360332485938838, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_1
+      m_Hash: 1050035881
+      m_Sprite: {fileID: -7277744865043229210, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -7277744865043229210, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_2
+      m_Hash: 664737555
+      m_Sprite: {fileID: 8936567366031344445, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8936567366031344445, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_3
+      m_Hash: 278407045
+      m_Sprite: {fileID: 5039528978129295877, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5039528978129295877, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_4
+      m_Hash: 251441702
+      m_Sprite: {fileID: 8800460226854289968, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8800460226854289968, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_5
+      m_Hash: 972784304
+      m_Sprite: {fileID: 8628112074573656460, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8628112074573656460, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_6
+      m_Hash: 552784650
+      m_Sprite: {fileID: 6475226690905467476, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6475226690905467476, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_7
+      m_Hash: 401990556
+      m_Sprite: {fileID: 85067558378926377, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 85067558378926377, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_8
+      m_Hash: 122355213
+      m_Sprite: {fileID: 6272818144793376373, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6272818144793376373, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_9
+      m_Hash: 810405531
+      m_Sprite: {fileID: -2541496089976469969, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2541496089976469969, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_10
+      m_Hash: 460280363
+      m_Sprite: {fileID: -2261044636303580947, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -2261044636303580947, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack02_11
+      m_Hash: 745038525
+      m_Sprite: {fileID: 7469913578203003452, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7469913578203003452, guid: 6fb753e5aec3d1b43931bd3b3e6fc096, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_0
+      m_Hash: 139664392
+      m_Sprite: {fileID: 8014701459705787143, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 8014701459705787143, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_1
+      m_Hash: 1062481054
+      m_Sprite: {fileID: 775838429216132997, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 775838429216132997, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_2
+      m_Hash: 643661092
+      m_Sprite: {fileID: -3179914350392281310, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3179914350392281310, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_3
+      m_Hash: 291130802
+      m_Sprite: {fileID: -8582042154761806605, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8582042154761806605, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_4
+      m_Hash: 255776785
+      m_Sprite: {fileID: 9099005510151784878, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 9099005510151784878, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_5
+      m_Hash: 943319175
+      m_Sprite: {fileID: -1547533069828490059, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1547533069828490059, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_6
+      m_Hash: 556841277
+      m_Sprite: {fileID: 6080823252975782047, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 6080823252975782047, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Attack03_7
+      m_Hash: 372738475
+      m_Sprite: {fileID: -3433601177890256822, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -3433601177890256822, guid: 297ad3b39a0892e4a93c023ab4c2e21a, type: 3}
+    - m_Name: GreatswordSkeleton-Death_0
+      m_Hash: 242647183
+      m_Sprite: {fileID: -4222526896889955097, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4222526896889955097, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+    - m_Name: GreatswordSkeleton-Death_1
+      m_Hash: 963751961
+      m_Sprite: {fileID: 4393376024448038942, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 4393376024448038942, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+    - m_Name: GreatswordSkeleton-Death_2
+      m_Hash: 544792995
+      m_Sprite: {fileID: 920515366748413151, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 920515366748413151, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+    - m_Name: GreatswordSkeleton-Death_3
+      m_Hash: 394252597
+      m_Sprite: {fileID: -8539569735243652497, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -8539569735243652497, guid: 1d3bc96359b5a1840a5c54018ad53611, type: 3}
+    - m_Name: GreatswordSkeleton-Hurt_0
+      m_Hash: 9048852
+      m_Sprite: {fileID: -5434886915366224955, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5434886915366224955, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+    - m_Name: GreatswordSkeleton-Hurt_1
+      m_Hash: 931996546
+      m_Sprite: {fileID: -792997478938449193, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -792997478938449193, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+    - m_Name: GreatswordSkeleton-Hurt_2
+      m_Hash: 780431928
+      m_Sprite: {fileID: -4230229324995577902, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -4230229324995577902, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+    - m_Name: GreatswordSkeleton-Hurt_3
+      m_Hash: 428032686
+      m_Sprite: {fileID: 5564234373426952547, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5564234373426952547, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+    - m_Name: GreatswordSkeleton-Idle_0
+      m_Hash: 997496680
+      m_Sprite: {fileID: -6428129625516625643, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -6428129625516625643, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+    - m_Name: GreatswordSkeleton-Idle_1
+      m_Hash: 208906238
+      m_Sprite: {fileID: -1739141679505282389, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -1739141679505282389, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+    - m_Name: GreatswordSkeleton-Idle_2
+      m_Hash: 360379972
+      m_Sprite: {fileID: 2722183116147132835, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 2722183116147132835, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+    - m_Name: GreatswordSkeleton-Idle_3
+      m_Hash: 578668242
+      m_Sprite: {fileID: 7081699247851482007, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 7081699247851482007, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+    - m_Name: GreatswordSkeleton-Idle_4
+      m_Hash: 1008292721
+      m_Sprite: {fileID: -5806632230471907031, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: -5806632230471907031, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+    - m_Name: GreatswordSkeleton-Idle_5
+      m_Hash: 186541031
+      m_Sprite: {fileID: 5725300520622105212, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+      m_FromMain: 0
+      m_SpriteOverride: {fileID: 5725300520622105212, guid: 47b271bd460d4754d9dadc790a83ae1f, type: 3}
+    m_FromMain: 0
+    m_EntryOverrideCount: 43
+  m_PrimaryLibraryGUID: 
+  m_ModificationHash: 639107196627065096
+  m_Version: 1

@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &7153701220952358494
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5029495889962463403, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -5434886915366224955, guid: 49b27cfb8953e644aaaba9c1e79a5fb6, type: 3}
+    - target: {fileID: 5029495889962463403, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_SpriteSortPoint
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.28805
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.80833
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5355759408880799820, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5794414869063199907, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_SpriteLibraryAsset
+      value: 
+      objectReference: {fileID: 7108339969198208228, guid: 4dfac714e2f41f24193aad01690ee7e5, type: 3}
+    - target: {fileID: 5890413670102944955, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_labelHash
+      value: 0.003732169
+      objectReference: {fileID: 0}
+    - target: {fileID: 5890413670102944955, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_SpriteHash
+      value: 669981824
+      objectReference: {fileID: 0}
+    - target: {fileID: 6230784923395475019, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_Name
+      value: GreatswordSkeleton_Enemy Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 7576597899041550549, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 22100000, guid: 3c6c9fe98335c2a488387aefc7b770e1, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3e24bca56d2ea524b9de7ba47a8d533c, type: 3}
