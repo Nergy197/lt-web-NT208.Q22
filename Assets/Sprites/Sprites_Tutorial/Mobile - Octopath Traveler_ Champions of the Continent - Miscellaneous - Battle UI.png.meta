@@ -5295,7 +5295,7 @@ TextureImporter:
         width: 955
         height: 179
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -11040,13 +11040,13 @@ TextureImporter:
         - Battle UI_279
       rect:
         serializedVersion: 2
-        x: 987
-        y: 1538
-        width: 374
-        height: 261
+        x: 1017
+        y: 1551
+        width: 346
+        height: 235
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 0, y: 1, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -11063,9 +11063,9 @@ TextureImporter:
         - Battle UI_280
       rect:
         serializedVersion: 2
-        x: 1361
+        x: 1375
         y: 1489
-        width: 579
+        width: 571
         height: 297
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -27715,10 +27715,10 @@ TextureImporter:
         - Battle UI_1004
       rect:
         serializedVersion: 2
-        x: 1483
-        y: 848
-        width: 419
-        height: 24
+        x: 1494
+        y: 825
+        width: 362
+        height: 23
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -28405,10 +28405,10 @@ TextureImporter:
         - Battle UI_1034
       rect:
         serializedVersion: 2
-        x: 38
-        y: 564
-        width: 318
-        height: 80
+        x: 41
+        y: 572
+        width: 310
+        height: 68
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -30687,7 +30687,7 @@ TextureImporter:
         width: 485
         height: 271
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

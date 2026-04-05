@@ -85,9 +85,9 @@ public class PlayerStatus : Status
 
         if (!parryWindowOpen)
         {
-            // Bấm parry khi cửa sổ chưa mở → bị phạt không được parry trong 1 giây.
+            // Bấm khi cửa sổ chưa mở → bị phạt không được trong 1 giây.
             parryCooldownEndTime = Time.time + 1.0f;
-            Debug.Log($"[PARRY PENALTY] {entityName} bấm hụt! Bị khóa parry 1 giây.");
+            Debug.Log($"[PENALTY] {entityName} bấm hụt! Bị khóa 1 giây.");
             return;
         }
 
@@ -95,8 +95,8 @@ public class PlayerStatus : Status
     }
 
     /// <summary>
-    /// Tiêu thụ yêu cầu parry nếu hợp lệ. Trả về true nếu parry thành công.
-    /// Tự đóng parry window và set WasParried để trigger animation.
+    /// Tiêu thụ yêu cầu nếu hợp lệ. Trả về true nếu thành công.
+    /// Tự đóng window và set WasParried để trigger animation.
     /// </summary>
     public bool ConsumeParry()
     {

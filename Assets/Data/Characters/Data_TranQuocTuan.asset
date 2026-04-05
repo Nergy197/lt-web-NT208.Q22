@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 177d1af869d55ee43a9784d24786a902, type: 3}
-  m_Name: Hero
+  m_Name: Data_TranQuocTuan
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   entityName: Hero
   battlePrefab: {fileID: 0}
@@ -19,4 +19,8 @@ MonoBehaviour:
   baseDef: 10
   baseSpd: 5
   maxAP: 100
-  attacks: []
+  attacks:
+  - {fileID: 11400000, guid: 7247a06987e22f648b0b10d8fa3579b0, type: 2}
+  - {fileID: 11400000, guid: 4c7877b76ac2ea448a542626748bbd90, type: 2}
+  - {fileID: 11400000, guid: 823b610a9d073c744a2827947f2e7b42, type: 2}
+  - {fileID: 11400000, guid: 2d199c659b0d0f043bf6a17040d5411d, type: 2}
