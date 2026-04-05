@@ -20,6 +20,10 @@ public class EnemyAttackData : ScriptableObject
     public string attackName = "New Enemy Attack";
     public List<EnemyAttackHitData> hits = new List<EnemyAttackHitData>();
 
+    [Header("Skill Effects (Buff / Debuff)")]
+    [Tooltip("Effects applied after damage hits. Self = enemy, Enemy = player.")]
+    public List<SkillEffectEntry> effects = new List<SkillEffectEntry>();
+
     public EnemyAttack CreateInstance()
     {
         var hitObjs = new List<EnemyAttackHit>();
@@ -37,6 +41,11 @@ public class EnemyAttackData : ScriptableObject
             };
             hitObjs.Add(hit);
         }
-        return new EnemyAttack(attackName, hitObjs);
+
+        // Clone effects list
+        var effectObjs = new List<SkillEffectEntry>(effects);
+
+        return new EnemyAttack(attackName, hitObjs, effectObjs);
     }
 }
+

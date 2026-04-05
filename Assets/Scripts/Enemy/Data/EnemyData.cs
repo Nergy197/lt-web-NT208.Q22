@@ -8,8 +8,7 @@ public class EnemyData : ScriptableObject
     public string entityName = "New Enemy";
 
     [Header("Battle Visual")]
-    public GameObject battlePrefab; // Model/Sprite được spawn khi vào battle
-
+    public GameObject battlePrefab; // Model/Sprite duoc spawn khi vao battle
 
     [Header("Base Stats")]
     public int baseHP = 20;
@@ -17,11 +16,12 @@ public class EnemyData : ScriptableObject
     public int baseDef = 1;
     public int baseSpd = 2;
 
-
     [Header("Attack List")]
     public List<EnemyAttackData> attacks = new();
 
-
+    [Header("AI")]
+    [Tooltip("Enemy AI strategy. If null, fallback to random attack.")]
+    public EnemyAI ai;
 
     public EnemyStatus CreateStatus()
     {
@@ -30,7 +30,7 @@ public class EnemyData : ScriptableObject
         );
 
         e.battlePrefab = battlePrefab;
-
+        e.ai = ai;
 
         // ADD ATTACK
         foreach (var atk in attacks)
@@ -41,10 +41,8 @@ public class EnemyData : ScriptableObject
             e.AddAttack(atk);
         }
 
-
         Debug.Log(
-        $"{entityName} loaded | Attacks: {attacks.Count}");
-
+        $"{entityName} loaded | Attacks: {attacks.Count} | AI: {(ai != null ? ai.name : "Random")}");
 
         return e;
     }

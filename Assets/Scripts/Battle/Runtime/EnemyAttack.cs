@@ -7,11 +7,11 @@ public class EnemyAttackHit
 {
     public bool canBeParried = true;
 
-    // Thời gian enemy chuẩn bị trước khi đòn đánh xảy ra (giây).
-    // Player dùng khoảng này để nhận biết animation và chuẩn bị parry.
+    // Thoi gian enemy chuan bi truoc khi don danh xay ra (giay).
+    // Player dung khoang nay de nhan biet animation va chuan bi parry.
     public float windUpTime = 0.5f;
 
-    // Thời gian player được phép bấm parry sau khi wind-up kết thúc.
+    // Thoi gian player duoc phep bam parry sau khi wind-up ket thuc.
     public float parryWindowDuration = 1.5f;
 
     public float damageMultiplier = 1f;
@@ -26,15 +26,16 @@ public class EnemyAttackHit
 public class EnemyAttack : AttackBase
 {
     private List<EnemyAttackHit> hits;
+    private List<SkillEffectEntry> effects;
 
     private EnemyStatus enemy;
-
     private PlayerStatus player;
 
-    public EnemyAttack(string name, List<EnemyAttackHit> hits)
+    public EnemyAttack(string name, List<EnemyAttackHit> hits, List<SkillEffectEntry> effects = null)
     {
         Name = name;
         this.hits = hits;
+        this.effects = effects ?? new List<SkillEffectEntry>();
     }
 
     public override void Use(Status attacker, Status target)
@@ -59,10 +60,9 @@ public class EnemyAttack : AttackBase
 
     protected override IEnumerator Execute()
     {
+        // --- DAMAGE HITS ---
         foreach (var hit in hits)
         {
-            // Wait cho animation wind-up của enemy trước khi mở cửa sổ parry,
-            // để player có thể nhìn thấy và phản응 đúng lúc.
             if (hit.windUpTime > 0f)
                 yield return new WaitForSeconds(hit.windUpTime);
 
@@ -91,13 +91,14 @@ public class EnemyAttack : AttackBase
 
                 if (parried && i == 0)
                 {
-                    // Parry thành công ở đòn đầu → player phản công bằng nửa Atk.
+                    // Parry thanh cong o don dau -> player phan cong bang nua Atk.
                     int counter = player.Atk / 2;
                     enemy.TakeDamage(player, counter);
-                    Debug.Log("PARRY SUCCESS → COUNTER DAMAGE: " + counter);
+                    Debug.Log("PARRY SUCCESS -> COUNTER DAMAGE: " + counter);
                 }
-                else if (!parried)
+                else
                 {
+                    // Don binh thuong HOAC cac don repeat sau parry van gay damage.
                     int damage = Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier);
                     player.TakeDamage(enemy, damage);
                     Debug.Log($"PLAYER HIT [{i + 1}/{hit.repeat}]: " + damage);
@@ -113,10 +114,44 @@ public class EnemyAttack : AttackBase
                 }
             }
         }
+
+        // --- SKILL EFFECTS (Buff / Debuff) ---
+        if (effects != null && effects.Count > 0)
+        {
+            foreach (var entry in effects)
+            {
+                if (entry?.effect == null) continue;
+
+                Status targetStatus = ResolveEffectTarget(entry.target);
+                if (targetStatus == null) continue;
+
+                targetStatus.ApplyStatusEffect(entry.effect);
+                Debug.Log($"[ENEMY EFFECT] {entry.effect.effectName} -> {targetStatus.entityName} " +
+                          $"({entry.target}) dur:{entry.effect.duration}");
+            }
+        }
     }
 
     protected override IEnumerator Recovery()
     {
         yield return new WaitForSeconds(0.5f);
+    }
+
+    // ================= HELPERS =================
+
+    /// <summary>
+    /// Doi voi enemy: Self = enemy, Enemy = player (nguoc lai voi PlayerAttack).
+    /// </summary>
+    Status ResolveEffectTarget(SkillEffectTarget targetType)
+    {
+        switch (targetType)
+        {
+            case SkillEffectTarget.Self:
+                return enemy;
+            case SkillEffectTarget.Enemy:
+                return player;
+            default:
+                return player;
+        }
     }
 }

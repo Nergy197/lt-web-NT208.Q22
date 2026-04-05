@@ -27,10 +27,10 @@ public abstract class Status
     protected int defGrowth;
     protected int spdGrowth;
 
-    public int MaxHP => baseHP + (hpGrowth * (level - 1));
-    public int Atk   => baseAtk + (atkGrowth * (level - 1));
-    public int Def   => baseDef + (defGrowth * (level - 1));
-    public int Spd   => baseSpd + (spdGrowth * (level - 1));
+    public int MaxHP => Mathf.Max(1, baseHP + (hpGrowth * (level - 1)));
+    public int Atk   => Mathf.Max(0, baseAtk + (atkGrowth * (level - 1)));
+    public int Def   => Mathf.Max(0, baseDef + (defGrowth * (level - 1)));
+    public int Spd   => Mathf.Max(1, baseSpd + (spdGrowth * (level - 1)));
 
     public int currentHP;
     public bool IsAlive => currentHP > 0;
@@ -155,15 +155,15 @@ public abstract class Status
                 baseHP += clone.appliedValue;
                 break;
             case StatusEffectType.DebuffAtk:
-                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseAtk * (clone.value / 100f)));
+                clone.appliedValue = Mathf.Clamp(Mathf.RoundToInt(baseAtk * (clone.value / 100f)), 1, baseAtk);
                 baseAtk -= clone.appliedValue;
                 break;
             case StatusEffectType.DebuffDef:
-                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseDef * (clone.value / 100f)));
+                clone.appliedValue = Mathf.Clamp(Mathf.RoundToInt(baseDef * (clone.value / 100f)), 1, baseDef);
                 baseDef -= clone.appliedValue;
                 break;
             case StatusEffectType.DebuffSpd:
-                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseSpd * (clone.value / 100f)));
+                clone.appliedValue = Mathf.Clamp(Mathf.RoundToInt(baseSpd * (clone.value / 100f)), 1, Mathf.Max(1, baseSpd - 1));
                 baseSpd -= clone.appliedValue;
                 break;
             case StatusEffectType.Poison:

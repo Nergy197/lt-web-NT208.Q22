@@ -220,10 +220,19 @@ public class BattleManager : MonoBehaviour
         waitingForAttackFinish = false;
         Log("[TURN] Waiting Player Action");
 
-        // Bước 1: Đợi player chọn hành động (attack, skill, flee…).
+        // Hien thi action menu cho player hien tai
+        var playerUnit = currentUnit as PlayerStatus;
+        if (BattleUI.Instance != null && playerUnit != null)
+            BattleUI.Instance.ShowActionMenu(playerUnit);
+
+        // Buoc 1: Doi player chon hanh dong (attack, skill, flee...).
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
-        // Bước 2: Đợi coroutine attack chạy đến phase Finished.
+        // An action menu sau khi chon
+        if (BattleUI.Instance != null)
+            BattleUI.Instance.HideActionMenu();
+
+        // Buoc 2: Doi coroutine attack chay den phase Finished.
         if (waitingForAttackFinish)
         {
             Log("[TURN] Waiting for attack to finish...");
@@ -321,7 +330,7 @@ public class BattleManager : MonoBehaviour
         foreach (var e in enemyParty.Members)
             if (e.IsAlive && e.Spd > maxEnemySpd) maxEnemySpd = e.Spd;
 
-        // Tỉ lệ bỏ chạy cơ bản 50%, điều chỉnh ±5% cho mỗi điểm chênh lệch Speed.
+        // Ti le bo chay co ban 50%, dieu chinh +-5% cho moi diem chenh lech Speed.
         float chance = Mathf.Clamp(0.5f + (player.Spd - maxEnemySpd) * 0.05f, 0.1f, 0.95f);
 
         if (Random.value <= chance)
@@ -337,9 +346,42 @@ public class BattleManager : MonoBehaviour
         waitingForPlayerAction = false;
     }
 
+    /// <summary>
+    /// Duoc goi boi EnemyAI de chi dinh target cu the thay vi random.
+    /// </summary>
+    public void SetEnemyTarget(PlayerStatus target)
+    {
+        if (target == null) return;
+        // Tim index cua target trong danh sach alive players
+        var alive = new List<PlayerStatus>();
+        foreach (var p in playerParty.Members)
+            if (p.IsAlive) alive.Add(p as PlayerStatus);
+        
+        for (int i = 0; i < alive.Count; i++)
+        {
+            if (alive[i] == target)
+            {
+                currentAllyTargetIndex = i;
+                break;
+            }
+        }
+    }
+
     IEnumerator EnemyTurn()
     {
         var enemy = currentUnit as EnemyStatus;
+
+        // Neu enemy co AI, de AI quyet dinh hanh dong
+        if (enemy.HasAI)
+        {
+            Log($"[AI] {enemy.entityName} thinking...");
+            waitingForAttackFinish = true;
+            enemy.ai.CalculateAction(this, enemy, playerParty, enemyParty);
+            yield return new WaitUntil(() => !waitingForAttackFinish);
+            yield break;
+        }
+
+        // Fallback: random attack vao player dau tien con song
         var player = GetAlivePlayer();
 
         if (player == null)
@@ -351,17 +393,17 @@ public class BattleManager : MonoBehaviour
         var attackData = enemy.GetRandomAttack();
         if (attackData == null)
         {
-            Log($"[ENEMY] {enemy.entityName} has no attacks configured – skipping turn.");
+            Log($"[ENEMY] {enemy.entityName} has no attacks configured -- skipping turn.");
             yield break;
         }
 
-        Log("[ENEMY] Attack → " + player.entityName);
+        Log("[ENEMY] Attack -> " + player.entityName);
 
-        // Set cờ trước khi Use() vì parry window chạy bên trong EnemyAttack.Execute().
+        // Set co truoc khi Use() vi parry window chay ben trong EnemyAttack.Execute().
         waitingForAttackFinish = true;
         attackData.CreateInstance().Use(enemy, player);
 
-        // Đợi toàn bộ attack (wind-up + parry window + impact + recovery) hoàn thành.
+        // Doi toan bo attack (wind-up + parry window + impact + recovery) hoan thanh.
         yield return new WaitUntil(() => !waitingForAttackFinish);
     }
 

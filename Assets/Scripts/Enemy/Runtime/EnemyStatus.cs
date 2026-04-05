@@ -8,6 +8,7 @@ public class EnemyStatus : Status
     private int baseExpReward = 20;
     private bool isAggressive = true;
     public GameObject battlePrefab;
+    public EnemyAI ai;
 
     public EnemyStatus(
         string name,
@@ -24,8 +25,8 @@ public class EnemyStatus : Status
     }
 
     /// <summary>
-    /// Enemy luôn reset HP về Max khi vào battle vì chúng không được lưu giữa các trận.
-    /// Player không override → giữ HP từ save data.
+    /// Enemy luon reset HP ve Max khi vao battle vi chung khong duoc luu giua cac tran.
+    /// Player khong override -> giu HP tu save data.
     /// </summary>
     public override void ResetForBattle(float baseDelay)
     {
@@ -49,8 +50,18 @@ public class EnemyStatus : Status
     }
 
     /// <summary>
-    /// EXP thưởng được cân bằng theo chênh lệch cấp giữa quái và player:
-    /// quái cao cấp hơn → EXP thưởng nhiều hơn (tối đa x2), quái quá yếu → tối thiểu 10%.
+    /// Tra ve toan bo danh sach attack de AI co the danh gia va lua chon.
+    /// </summary>
+    public IReadOnlyList<EnemyAttackData> GetAllAttacks() => attacks;
+
+    /// <summary>
+    /// Kiem tra enemy co AI va co the goi CalculateAction().
+    /// </summary>
+    public bool HasAI => ai != null;
+
+    /// <summary>
+    /// EXP thuong duoc can bang theo chenh lech cap giua quai va player:
+    /// quai cao cap hon -> EXP thuong nhieu hon (toi da x2), quai qua yeu -> toi thieu 10%.
     /// </summary>
     public int GetExpReward(int playerAvgLevel = 1)
     {
@@ -62,3 +73,4 @@ public class EnemyStatus : Status
         return Mathf.Max(1, Mathf.RoundToInt(baseExp * scale));
     }
 }
+
