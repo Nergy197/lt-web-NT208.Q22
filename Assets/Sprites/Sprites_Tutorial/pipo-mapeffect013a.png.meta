@@ -1,31 +1,37 @@
 fileFormatVersion: 2
-guid: 73f48937e1ed99d44be017e866059ecc
+guid: 75f3de97a60506040986c0fbfc89a80f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9081233426807069
-    second: Orc-Walk_0
+      213: -6587077219528821055
+    second: pipo-mapeffect013a_0
   - first:
-      213: 4372957803809224375
-    second: Orc-Walk_1
+      213: -6878361876266741364
+    second: pipo-mapeffect013a_1
   - first:
-      213: -1347736431781377632
-    second: Orc-Walk_2
+      213: -2533796753500628234
+    second: pipo-mapeffect013a_2
   - first:
-      213: -5659425469639183808
-    second: Orc-Walk_3
+      213: -3778535502811285642
+    second: pipo-mapeffect013a_3
   - first:
-      213: -60962372088672916
-    second: Orc-Walk_4
+      213: 9202653211679302946
+    second: pipo-mapeffect013a_4
   - first:
-      213: 3404994825279768155
-    second: Orc-Walk_5
+      213: 3168046334537482554
+    second: pipo-mapeffect013a_5
   - first:
-      213: -8575848986319331806
-    second: Orc-Walk_6
+      213: 2526960684135265214
+    second: pipo-mapeffect013a_6
   - first:
-      213: -4323655612262110637
-    second: Orc-Walk_7
+      213: 4345644133668689077
+    second: pipo-mapeffect013a_7
+  - first:
+      213: -5482817786885114417
+    second: pipo-mapeffect013a_8
+  - first:
+      213: -340964428835883783
+    second: pipo-mapeffect013a_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -69,10 +75,10 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -122,7 +128,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,177 +140,221 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Orc-Walk_0
+      name: pipo-mapeffect013a_0
       rect:
         serializedVersion: 2
-        x: 43
-        y: 40
-        width: 23
-        height: 18
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 0
+        y: 400
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d19f68c6553402000800000000000000
-      internalID: 9081233426807069
+      spriteID: 1c6baed2b200694a0800000000000000
+      internalID: -6587077219528821055
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_1
+      name: pipo-mapeffect013a_1
       rect:
         serializedVersion: 2
-        x: 143
-        y: 40
-        width: 23
-        height: 19
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 400
+        y: 400
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7b632d124fddfac30800000000000000
-      internalID: 4372957803809224375
+      spriteID: c81188011562b80a0800000000000000
+      internalID: -6878361876266741364
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_2
+      name: pipo-mapeffect013a_2
       rect:
         serializedVersion: 2
-        x: 243
-        y: 40
-        width: 23
-        height: 18
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 800
+        y: 400
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0a981dc1bd0eb4de0800000000000000
-      internalID: -1347736431781377632
+      spriteID: 6fa9e8ef64526dcd0800000000000000
+      internalID: -2533796753500628234
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_3
+      name: pipo-mapeffect013a_3
       rect:
         serializedVersion: 2
-        x: 343
-        y: 40
-        width: 23
-        height: 17
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 1200
+        y: 400
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 042bb51358ea571b0800000000000000
-      internalID: -5659425469639183808
+      spriteID: 6773bbfcaf1ff8bc0800000000000000
+      internalID: -3778535502811285642
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_4
+      name: pipo-mapeffect013a_4
       rect:
         serializedVersion: 2
-        x: 443
-        y: 40
-        width: 23
-        height: 18
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 1600
+        y: 400
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c6d4dfaab0b672ff0800000000000000
-      internalID: -60962372088672916
+      spriteID: 225a049965466bf70800000000000000
+      internalID: 9202653211679302946
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_5
+      name: pipo-mapeffect013a_5
       rect:
         serializedVersion: 2
-        x: 543
-        y: 40
-        width: 23
-        height: 19
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 0
+        y: 0
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b5608dec0c8f04f20800000000000000
-      internalID: 3404994825279768155
+      spriteID: a31c5123b5927fb20800000000000000
+      internalID: 3168046334537482554
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_6
+      name: pipo-mapeffect013a_6
       rect:
         serializedVersion: 2
-        x: 643
-        y: 40
-        width: 23
-        height: 18
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 400
+        y: 0
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 22eda03a8c67cf880800000000000000
-      internalID: -8575848986319331806
+      spriteID: eb3b2439a51911320800000000000000
+      internalID: 2526960684135265214
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Orc-Walk_7
+      name: pipo-mapeffect013a_7
       rect:
         serializedVersion: 2
-        x: 743
-        y: 40
-        width: 23
-        height: 17
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 800
+        y: 0
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35a2efbd02a4ff3c0800000000000000
-      internalID: -4323655612262110637
+      spriteID: 5b4159bb054de4c30800000000000000
+      internalID: 4345644133668689077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipo-mapeffect013a_8
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 0
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc5f484a54e19e3b0800000000000000
+      internalID: -5482817786885114417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pipo-mapeffect013a_9
+      rect:
+        serializedVersion: 2
+        x: 1600
+        y: 0
+        width: 400
+        height: 400
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f4713298a6a44bf0800000000000000
+      internalID: -340964428835883783
       vertices: []
       indices: 
       edges: []
@@ -313,7 +363,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 9ceabef5580f99d4e84815984edd96e0
+    spriteID: a0879a176b45a1445a9f6a8c2adbc77c
     internalID: 0
     vertices: []
     indices: 
@@ -323,16 +373,18 @@ TextureImporter:
     spriteCustomMetadata:
       entries:
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":400.0,"y":400.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Orc-Walk_0: 9081233426807069
-      Orc-Walk_1: 4372957803809224375
-      Orc-Walk_2: -1347736431781377632
-      Orc-Walk_3: -5659425469639183808
-      Orc-Walk_4: -60962372088672916
-      Orc-Walk_5: 3404994825279768155
-      Orc-Walk_6: -8575848986319331806
-      Orc-Walk_7: -4323655612262110637
+      pipo-mapeffect013a_0: -6587077219528821055
+      pipo-mapeffect013a_1: -6878361876266741364
+      pipo-mapeffect013a_2: -2533796753500628234
+      pipo-mapeffect013a_3: -3778535502811285642
+      pipo-mapeffect013a_4: 9202653211679302946
+      pipo-mapeffect013a_5: 3168046334537482554
+      pipo-mapeffect013a_6: 2526960684135265214
+      pipo-mapeffect013a_7: 4345644133668689077
+      pipo-mapeffect013a_8: -5482817786885114417
+      pipo-mapeffect013a_9: -340964428835883783
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

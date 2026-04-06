@@ -30,6 +30,22 @@ public class SimpleTutorialManager : MonoBehaviour
     public float returnSpeed = 20f;
     public float attackOffset = 1.3f;
 
+    [Header("Visual Effects (VFX)")]
+    public GameObject longTramVFXPrefab;
+    public GameObject congKichVFXPrefab;
+    public GameObject debuffIconPrefab;
+
+    [Space(10)]
+    [Header("Hộ Thể VFX (Sprite Sheet)")]
+    public GameObject hoTheVFXPrefab;      // Prefab Cột Sáng Vàng
+    public GameObject buffHoTheIconPrefab;   // Icon kiếm xanh dưới chân
+    public float debuffYOffset = -1.2f;      // Offset icon dưới chân
+
+    private GameObject activeDebuffIcon;
+    private int debuffTurnsLeft = 0;
+    private GameObject activeBuffIcon;
+    private int buffTurnsLeft = 0;
+
     private @GameInput inputActions;
     private PlayerStatus tuanStatus;
     private EnemyStatus linhStatus;
@@ -50,14 +66,13 @@ public class SimpleTutorialManager : MonoBehaviour
     {
         if (heroData == null || enemyData == null)
         {
-            Debug.LogError("Anh Chuẩn ơi! Quên kéo Hero/Enemy Data vào Controller rồi!");
+            Debug.LogError("Lỗi: Quên kéo Hero/Enemy Data rồi anh Chuẩn ơi!");
             return;
         }
 
-        // 1. Khởi tạo Status từ Data
         tuanStatus = new PlayerStatus(heroData.entityName, heroData.baseHP, heroData.baseAtk, heroData.baseDef, heroData.baseSpd, heroData.maxAP);
         tuanStatus.InitializeSkills(heroData.attacks);
-        tuanStatus.currentAP = 20; // Bắt đầu với 1 cục mana
+        tuanStatus.currentAP = 20;
 
         linhStatus = new EnemyStatus(enemyData.entityName, enemyData.baseHP, enemyData.baseAtk, enemyData.baseDef, enemyData.baseSpd);
 
@@ -75,49 +90,32 @@ public class SimpleTutorialManager : MonoBehaviour
 
     void SetupInputs()
     {
-        // LOGIC PHÍM BÀN PHÍM (Sửa lỗi bấm Q trôi menu)
-
-        // Phím E (Tương ứng Basic Attack / Skill 1 / Item 1)
         inputActions.Battle.BasicAttack.performed += ctx => {
             if (!canInput || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
-
             if (currentState == MenuState.Main) ExecuteBasicAttack();
             else if (currentState == MenuState.Skill) ExecuteSkillByIndex(0);
             else if (currentState == MenuState.Item) ExecuteItemByIndex(0);
         };
 
-        // Phím W (Tương ứng Open Skill / Skill 2 / Item 2)
         inputActions.Battle.OpenSkillMenu.performed += ctx => {
             if (!canInput || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
-
             if (currentState == MenuState.Main) OpenSkillMenu();
             else if (currentState == MenuState.Skill) ExecuteSkillByIndex(1);
             else if (currentState == MenuState.Item) ExecuteItemByIndex(1);
         };
 
-        // Phím Q (Tương ứng Open Item / Skill 3 / Item 3)
         inputActions.Battle.OpenItemMenu.performed += ctx => {
             if (!canInput || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
-
             if (currentState == MenuState.Main) OpenItemMenu();
             else if (currentState == MenuState.Skill) ExecuteSkillByIndex(2);
             else if (currentState == MenuState.Item) ExecuteItemByIndex(2);
         };
 
-        inputActions.Battle.Parry.performed += _ => { tuanStatus.RequestParry(); };
-        inputActions.SkillMenu.Cancel.performed += _ => { if (canInput && currentState != MenuState.Main) BackToMainMenu(); };
-    }
+        inputActions.Battle.Parry.performed += _ => {
+            if (!canInput) tuanStatus.RequestParry();
+        };
 
-    // --- LƯỢT NGƯỜI CHƠI ---
-    public void ExecuteBasicAttack()
-    {
-        var basicAtk = tuanStatus.BasicAttack;
-        if (basicAtk != null)
-        {
-            tuanStatus.RestoreAP(20);
-            int dmg = (basicAtk.hits.Count > 0) ? Mathf.RoundToInt(tuanStatus.Atk * basicAtk.hits[0].damageMultiplier) : tuanStatus.Atk;
-            StartCoroutine(CombatSequence(dmg, 0));
-        }
+        inputActions.SkillMenu.Cancel.performed += _ => { if (canInput && currentState != MenuState.Main) BackToMainMenu(); };
     }
 
     public void ExecuteSkillByIndex(int index)
@@ -125,79 +123,71 @@ public class SimpleTutorialManager : MonoBehaviour
         var skill = tuanStatus.GetSkillByIndex(index);
         if (skill == null) return;
 
-        int actualCost = skill.apCost * 20; // 1 cục mana = 20 điểm AP
-
+        int actualCost = skill.apCost * 20;
         if (tuanStatus.currentAP >= actualCost)
         {
-            int calculatedDmg = 0;
-            if (skill.hits != null && skill.hits.Count > 0)
+            if (index == 2) StartCoroutine(BuffSequence(actualCost, skill));
+            else
             {
-                calculatedDmg = Mathf.RoundToInt(tuanStatus.Atk * skill.hits[0].damageMultiplier);
+                int calculatedDmg = Mathf.RoundToInt(tuanStatus.Atk * skill.hits[0].damageMultiplier);
+                GameObject slashVfx = (index == 0) ? longTramVFXPrefab : congKichVFXPrefab;
+                StartCoroutine(CombatSequence(calculatedDmg, actualCost, slashVfx, skill));
             }
-            StartCoroutine(CombatSequence(calculatedDmg, actualCost));
         }
-        else
-        {
-            Debug.Log("<color=yellow>Không đủ năng lượng! Cần " + skill.apCost + " cục mana.</color>");
-        }
+        else Debug.Log("<color=yellow>Không đủ Mana!</color>");
     }
 
-    public void ExecuteItemByIndex(int index)
-    {
-        canInput = false;
-        SwitchMenu(MenuState.Main);
-        SetMenuGroup(mainMenuCG, false);
-
-        switch (index)
-        {
-            case 0: // Bình Máu
-                int heal = 30;
-                tuanStatus.currentHP = Mathf.Min(tuanStatus.MaxHP, tuanStatus.currentHP + heal);
-                Debug.Log("<color=green>Hồi " + heal + " HP</color>");
-                break;
-            case 1: // Bình Năng Lượng
-                tuanStatus.RestoreAP(40);
-                Debug.Log("<color=cyan>Hồi 2 cục AP</color>");
-                break;
-            case 2: // Giải Độc
-                tuanStatus.ResetForBattle(0);
-                Debug.Log("<color=white>Giải trừ trạng thái xấu</color>");
-                break;
-        }
-
-        UpdateUI();
-        StartCoroutine(EndItemTurn());
-    }
-
-    IEnumerator CombatSequence(int dmg, int apCost)
+    // --- LOGIC HỘ THỂ ĐÃ CHỈNH SỬA ---
+    IEnumerator BuffSequence(int apCost, PlayerAttackData skillData)
     {
         canInput = false;
         SwitchMenu(MenuState.Main);
         SetMenuGroup(mainMenuCG, false);
         if (apCost > 0) tuanStatus.UseAP(apCost);
 
-        yield return MoveTo(tuanObj, linhHomePos - (linhHomePos - tuanHomePos).normalized * attackOffset, dashSpeed);
-        tuanVisual.PlayAttack();
-        yield return new WaitForSeconds(0.4f);
-        if (dmg > 0) linhStatus.TakeDamage(tuanStatus, dmg);
-        UpdateUI();
-        yield return new WaitForSeconds(0.6f);
-        yield return MoveTo(tuanObj, tuanHomePos, returnSpeed);
+        // 1. NHÂN VẬT ĐỨNG IM (Đã bỏ dòng chạy Animation doParry)
 
+        // 2. Hiện Cột Sáng Vàng và tự hủy sau 1.5 giây
+        if (hoTheVFXPrefab != null)
+        {
+            GameObject vfxInstance = Instantiate(hoTheVFXPrefab, tuanObj.transform.position, Quaternion.identity);
+            Destroy(vfxInstance, 0.5f); // Tự động xóa khỏi scene sau 1.5s
+        }
+
+        yield return new WaitForSeconds(1.0f);
+
+        // 3. Hiện Icon Kiếm Xanh dưới chân (Buff chỉ số)
+        if (skillData != null && skillData.effects != null)
+        {
+            foreach (var entry in skillData.effects)
+            {
+                if (entry.target == SkillEffectTarget.Self)
+                {
+                    tuanStatus.ApplyStatusEffect(entry.effect);
+                    if (activeBuffIcon != null) Destroy(activeBuffIcon);
+
+                    Vector3 feetPos = tuanObj.transform.position + new Vector3(0, debuffYOffset, 0);
+                    activeBuffIcon = Instantiate(buffHoTheIconPrefab, feetPos, Quaternion.identity);
+                    activeBuffIcon.transform.SetParent(tuanObj.transform);
+                    buffTurnsLeft = entry.effect.duration;
+                }
+            }
+        }
+
+        UpdateUI();
+        yield return new WaitForSeconds(0.5f);
         if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn());
-        else { canInput = true; SwitchMenu(MenuState.Main); }
+        else { canInput = true; UpdateUI(); }
     }
 
     IEnumerator EnemyComboTurn()
     {
         yield return MoveTo(linhObj, tuanHomePos - (tuanHomePos - linhHomePos).normalized * attackOffset, dashSpeed);
-
         var enemyAtkData = enemyData.attacks[0];
 
         foreach (var hit in enemyAtkData.hits)
         {
             if (hit.windUpTime > 0) yield return new WaitForSeconds(hit.windUpTime);
-
             tuanStatus.OpenParryWindow();
             linhVisual.PlayAttack();
 
@@ -213,34 +203,115 @@ public class SimpleTutorialManager : MonoBehaviour
 
             if (isParried)
             {
-                int counter = tuanStatus.Atk / 2;
-                linhStatus.TakeDamage(tuanStatus, counter);
+                linhStatus.TakeDamage(tuanStatus, tuanStatus.Atk / 2);
                 tuanStatus.RestoreAP(10);
-                Debug.Log("<color=green>PARRY THÀNH CÔNG!</color>");
-                yield return new WaitForSeconds(0.6f); // Đợi lính phục hồi sau khi bị phản đòn
+                yield return new WaitForSeconds(0.6f);
             }
-            else
-            {
-                int dmg = Mathf.RoundToInt(linhStatus.Atk * hit.damageMultiplier);
-                tuanStatus.TakeDamage(linhStatus, dmg);
-            }
+            else tuanStatus.TakeDamage(linhStatus, Mathf.RoundToInt(linhStatus.Atk * hit.damageMultiplier));
+
             UpdateUI();
             if (hit.delayBetweenHits > 0) yield return new WaitForSeconds(hit.delayBetweenHits);
         }
 
         yield return new WaitForSeconds(0.5f);
         yield return MoveTo(linhObj, linhHomePos, returnSpeed);
+
+        UpdateStatusDurations();
+
         canInput = true;
         SwitchMenu(MenuState.Main);
     }
 
-    // --- HELPER METHODS ---
-    IEnumerator EndItemTurn()
+    void UpdateStatusDurations()
     {
-        yield return new WaitForSeconds(0.8f);
-        if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn());
-        else { canInput = true; SwitchMenu(MenuState.Main); }
+        if (debuffTurnsLeft > 0)
+        {
+            debuffTurnsLeft--;
+            linhStatus.UpdateEffectDurations();
+            if (debuffTurnsLeft <= 0 && activeDebuffIcon != null) Destroy(activeDebuffIcon);
+        }
+
+        if (buffTurnsLeft > 0)
+        {
+            buffTurnsLeft--;
+            tuanStatus.UpdateEffectDurations();
+            if (buffTurnsLeft <= 0 && activeBuffIcon != null)
+            {
+                var handler = activeBuffIcon.GetComponent<VFXBuffHandler>();
+                if (handler != null) handler.DestroyIcon();
+                else Destroy(activeBuffIcon);
+            }
+        }
     }
+
+    public void ExecuteBasicAttack()
+    {
+        var basicAtk = tuanStatus.BasicAttack;
+        if (basicAtk != null)
+        {
+            tuanStatus.RestoreAP(20);
+            int dmg = (basicAtk.hits.Count > 0) ? Mathf.RoundToInt(tuanStatus.Atk * basicAtk.hits[0].damageMultiplier) : tuanStatus.Atk;
+            StartCoroutine(CombatSequence(dmg, 0, null, null));
+        }
+    }
+
+    IEnumerator CombatSequence(int dmg, int apCost, GameObject vfx, PlayerAttackData skillData)
+    {
+        canInput = false;
+        SwitchMenu(MenuState.Main);
+        SetMenuGroup(mainMenuCG, false);
+        if (apCost > 0) tuanStatus.UseAP(apCost);
+        yield return MoveTo(tuanObj, linhHomePos - (linhHomePos - tuanHomePos).normalized * attackOffset, dashSpeed);
+        tuanVisual.PlayAttack();
+        yield return new WaitForSeconds(0.4f);
+        if (dmg > 0)
+        {
+            linhStatus.TakeDamage(tuanStatus, dmg);
+            if (vfx != null) Instantiate(vfx, linhObj.transform.position, Quaternion.identity);
+            if (skillData != null && skillData.effects != null)
+            {
+                foreach (var entry in skillData.effects)
+                {
+                    if (entry.target == SkillEffectTarget.Enemy)
+                    {
+                        linhStatus.ApplyStatusEffect(entry.effect);
+                        if (entry.effect.effectType == StatusEffectType.DebuffDef) SpawnDebuffVisual(entry.effect.duration);
+                    }
+                }
+            }
+        }
+        UpdateUI();
+        yield return new WaitForSeconds(0.6f);
+        yield return MoveTo(tuanObj, tuanHomePos, returnSpeed);
+        if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn());
+        else { canInput = true; UpdateUI(); }
+    }
+
+    void SpawnDebuffVisual(int turns)
+    {
+        if (activeDebuffIcon != null) Destroy(activeDebuffIcon);
+        Vector3 headPos = linhObj.transform.position + new Vector3(0, 1.5f, 0);
+        activeDebuffIcon = Instantiate(debuffIconPrefab, headPos, Quaternion.identity);
+        activeDebuffIcon.transform.SetParent(linhObj.transform);
+        debuffTurnsLeft = turns;
+    }
+
+    public void ExecuteItemByIndex(int index)
+    {
+        canInput = false;
+        SwitchMenu(MenuState.Main);
+        SetMenuGroup(mainMenuCG, false);
+        switch (index)
+        {
+            case 0: tuanStatus.currentHP = Mathf.Min(tuanStatus.MaxHP, tuanStatus.currentHP + 30); break;
+            case 1: tuanStatus.RestoreAP(40); break;
+            case 2: tuanStatus.ResetForBattle(0); break;
+        }
+        UpdateUI();
+        StartCoroutine(EndItemTurn());
+    }
+
+    IEnumerator EndItemTurn() { yield return new WaitForSeconds(0.8f); if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn()); else { canInput = true; SwitchMenu(MenuState.Main); } }
 
     IEnumerator MoveTo(GameObject obj, Vector3 target, float speed)
     {

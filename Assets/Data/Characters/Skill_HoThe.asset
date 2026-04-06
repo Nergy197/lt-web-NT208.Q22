@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_HoThe
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackData
   attackName: "H\u1ED9 Th\u1EC3"
-  apCost: 1
+  apCost: 2
   hits:
   - windUpTime: 0
     damageMultiplier: 0
@@ -24,6 +24,6 @@ MonoBehaviour:
   - effect:
       effectName: 
       effectType: 0
-      value: 0
-      duration: 0
+      value: 30
+      duration: 3
     target: 0

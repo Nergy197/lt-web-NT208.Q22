@@ -2616,6 +2616,12 @@ MonoBehaviour:
   dashSpeed: 30
   returnSpeed: 20
   attackOffset: 5
+  longTramVFXPrefab: {fileID: 8394544048127168585, guid: 8b3d94dd5c8b943418ca15faa8316ded, type: 3}
+  congKichVFXPrefab: {fileID: 7051376047870926879, guid: b7bf59af927c2114ab790b0e8b122842, type: 3}
+  debuffIconPrefab: {fileID: 3145313485106775377, guid: f3b1f5e2c33100f4da89358549313e89, type: 3}
+  hoTheVFXPrefab: {fileID: 5460033623015122542, guid: 0734975a876d03843a28ea6eedd382e3, type: 3}
+  buffHoTheIconPrefab: {fileID: 5777027566741580552, guid: d5509982e34cd2a41bcc2ac036f8f6d2, type: 3}
+  debuffYOffset: -2.23
 --- !u!4 &824090961
 Transform:
   m_ObjectHideFlags: 0

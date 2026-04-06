@@ -16,7 +16,7 @@ public class PlayerAttack : AttackBase
     public int apCost;
 
     private List<PlayerAttackHit> hits;
-    private List<SkillEffectEntry> effects;
+    public List<SkillEffectEntry> effects;
 
     private PlayerStatus player;
     private EnemyStatus enemy;
