@@ -19,10 +19,18 @@ public class MapSceneBootstrap : MonoBehaviour
     void Awake()
     {
         // 1. Tự động tạo InputController nếu thiếu (cứu lỗi không di chuyển được)
-        if (InputController.Instance == null && inputControllerPrefab != null)
+        if (InputController.Instance == null)
         {
-            var ic = Instantiate(inputControllerPrefab);
-            ic.name = "InputController";
+            if (inputControllerPrefab != null)
+            {
+                var ic = Instantiate(inputControllerPrefab);
+                ic.name = "InputController";
+            }
+            else
+            {
+                // Tự động tạo GameObject kèm script nếu chưa có prefab
+                new GameObject("InputController").AddComponent<InputController>();
+            }
             Debug.Log("[Bootstrap] Đã tạo InputController cứu hộ.");
         }
 
