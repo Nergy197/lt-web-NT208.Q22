@@ -56,9 +56,14 @@ Assets/Editor/
  CreateGameContentTool.cs
  CreateSavePointUI.cs
  FixMapLayersTool.cs
+ FixSortingLayerTool.cs
  MapReplacerTool.cs
+ MinimapSetupTool.cs
+ QuestSetupTool.cs
  SetupInputControllerTool.cs
  StartMenuGenerator.cs
+ TeleportMenuSetupTool.cs
+ TeleportSetupTool.cs
 Temp/obj/Assembly-CSharp-Editor/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 
 [metadataReferences]

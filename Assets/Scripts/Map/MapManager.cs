@@ -41,6 +41,10 @@ public class MapManager : MonoBehaviour
 
         stepsSinceLastEncounter = 0;
         isInBattle = false;
+
+        // Cập nhật tên khu vực trên Minimap (nếu có)
+        if (Minimap.Instance != null)
+            Minimap.Instance.UpdateMapName();
     }
 
     public void CheckForEncounter()

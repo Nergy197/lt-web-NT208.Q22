@@ -86,16 +86,21 @@ Assets/
    BattleAction.cs
    CameraZone.cs
    ChangeMapAction.cs
+   CinemachinePlayerTarget.cs
    EnemyTrigger.cs
    MapAction.cs
    MapManager.cs
    MapSceneBootstrap.cs
    MapTrigger.cs
+   Minimap.cs
+   MinimapIcon.cs
    NpcData.cs
    NpcTrigger.cs
    PlayerInputConnector.cs
    QuestZoneTrigger.cs
    SavePoint.cs
+   TeleportPillar.cs
+   TeleportPortal.cs
   Player/Data/
    PlayerAttackData.cs
    PlayerData.cs
@@ -128,6 +133,7 @@ Assets/
    BattleUI.cs
    SavePointUI.cs
    StartMenuUI.cs
+   TeleportMenuUI.cs
   Utility/
    ChildMapObject.cs
    FixSorting.cs
