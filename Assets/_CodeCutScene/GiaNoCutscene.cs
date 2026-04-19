@@ -3,25 +3,32 @@ using System.Collections;
 
 public class GiaNoCutscene : MonoBehaviour
 {
+    [Header("Cấu Hình Nhân Vật")]
+    public Transform giaNoBody;
+    public Animator giaNoAnim;
+
+    [Header("Cấu Hình Hội Thoại")]
+    public QuanLyHoiThoai scriptHoiThoai;
+    public GameObject khungThoaiUI;
+
+    [Header("Điểm Di Chuyển")]
     public Transform diemBaoTin;
     public Transform diemCuaNha;
     public Transform diemCanhGiuong;
     public float tocDo = 4f;
 
-    [Tooltip("Kéo Canvas_BongBong thả vào đây nè anh")]
-    public GameObject khungThoaiUI;
-
-    [Tooltip("Kéo TranQuocTuan thả vào đây nha anh")]
+    [Header("Người Chơi")]
     public PlayerMovement_Cutscene playerScript;
-
-    private Animator anim;
 
     void Start()
     {
-        anim = GetComponent<Animator>();
-        transform.position = diemCuaNha.position;
+        if (giaNoBody == null || giaNoAnim == null || scriptHoiThoai == null)
+        {
+            Debug.LogError("Anh Chuẩn ơi! Nhớ kéo đủ đồ vào Manager nha!");
+            return;
+        }
 
-        // Giấu bong bóng đi lúc mới vào game
+        giaNoBody.position = diemCuaNha.position;
         if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
 
         StartCoroutine(DienCangBaoTin());
@@ -29,63 +36,54 @@ public class GiaNoCutscene : MonoBehaviour
 
     IEnumerator DienCangBaoTin()
     {
-        // --- NHỊP 1: MỚI VÀO GAME LÀ QUAY PHẢI NGẮM CẢNH ---
+        // 1. Khóa người chơi và cho quay mặt sang PHẢI (MoveX = 1)
         if (playerScript != null)
         {
-            playerScript.canMove = false; // Khóa chân
-
+            playerScript.canMove = false;
             Animator playerAnim = playerScript.GetComponent<Animator>();
             if (playerAnim != null)
             {
-                playerAnim.SetFloat("MoveX", 1f); // Ép quay PHẢI
+                playerAnim.SetFloat("MoveX", 1f);
                 playerAnim.SetFloat("MoveY", 0f);
             }
         }
 
-        // 1. Gia nô bắt đầu chạy từ cửa ra giữa sân
-        anim.Play("GiaNo_WalkDown");
-        while (Vector3.Distance(transform.position, diemBaoTin.position) > 0.1f)
+        // 2. Gia nô chạy ra
+        giaNoAnim.Play("GiaNo_WalkDown");
+        while (Vector3.Distance(giaNoBody.position, diemBaoTin.position) > 0.1f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, diemBaoTin.position, (tocDo * 2f) * Time.deltaTime);
+            giaNoBody.position = Vector3.MoveTowards(giaNoBody.position, diemBaoTin.position, (tocDo * 2f) * Time.deltaTime);
             yield return null;
         }
 
-        // 2. Gia nô tới nơi, đứng im
-        anim.Play("GiaNo_IdleDown");
+        // 3. Tới nơi & Đứng im (ĐÃ BỎ ĐOẠN QUAY TRÁI TẠI ĐÂY)
+        giaNoAnim.Play("GiaNo_IdleDown");
 
-        // --- NHỊP 2: GIA NÔ TỚI NƠI -> QUỐC TUẤN QUAY PHẮT SANG TRÁI ĐỂ NGHE ---
-        if (playerScript != null)
+        // Không còn dòng: playerAnim.SetFloat("MoveX", -1f); 
+        // Nhân vật sẽ giữ nguyên hướng nhìn bên phải từ bước 1
+
+        // 4. BẮT ĐẦU NÓI
+        if (khungThoaiUI != null) khungThoaiUI.SetActive(true);
+        scriptHoiThoai.BatDauThoai();
+
+        while (scriptHoiThoai.enabled && !scriptHoiThoai.daXongHetKichBan)
         {
-            Animator playerAnim = playerScript.GetComponent<Animator>();
-            if (playerAnim != null)
-            {
-                playerAnim.SetFloat("MoveX", -1f); // Ép quay TRÁI
-                playerAnim.SetFloat("MoveY", 0f);
-            }
+            yield return null;
         }
 
-        // Bật bong bóng thoại lên
-        if (khungThoaiUI != null) khungThoaiUI.SetActive(true);
-
-        // Chờ 5 giây để máy đánh chữ gõ hết 2 câu thoại
-        yield return new WaitForSeconds(5f);
-
-        // Đọc xong thì TẮT BONG BÓNG ĐI
         if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
-
-        // 3. GIẢI HUYỆT: Chữ vừa tắt là mở khóa cho thiếu gia phi theo ngay!
         if (playerScript != null) playerScript.canMove = true;
 
-        // 3. Gia nô quay đầu chạy vội vào nhà
-        anim.Play("GiaNo_WalkUp");
-        while (Vector3.Distance(transform.position, diemCuaNha.position) > 0.1f)
+        // 5. Chạy vào nhà
+        giaNoAnim.Play("GiaNo_WalkUp");
+        while (Vector3.Distance(giaNoBody.position, diemCuaNha.position) > 0.1f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, diemCuaNha.position, (tocDo * 2f) * Time.deltaTime);
+            giaNoBody.position = Vector3.MoveTowards(giaNoBody.position, diemCuaNha.position, (tocDo * 2f) * Time.deltaTime);
             yield return null;
         }
 
-        // 4. Gia nô dịch chuyển vào cạnh giường
-        transform.position = diemCanhGiuong.position;
-        anim.Play("GiaNo_IdleDown");
+        // 6. ĐỨNG CẠNH GIƯỜNG
+        giaNoBody.position = diemCanhGiuong.position;
+        giaNoAnim.Play("GiaNo_IdleDown");
     }
 }

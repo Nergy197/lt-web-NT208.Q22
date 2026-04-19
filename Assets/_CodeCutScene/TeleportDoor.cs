@@ -42,12 +42,6 @@ public class TeleportDoor : MonoBehaviour
                     );
                 }
             }
-
-            // 3. Kích hoạt chạy chữ L
-            if (kichBanPhongNgu != null)
-            {
-                kichBanPhongNgu.BatDauCutscene();
-            }
         }
     }
 }
