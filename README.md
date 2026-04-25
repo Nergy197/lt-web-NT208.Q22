@@ -1,259 +1,278 @@
-# 🎮 Lập Trình Ứng Dụng Web — NT208.Q22
+<div align="center">
 
-> Đồ án môn học **NT208 – Lập trình ứng dụng Web**, Đại học Công nghệ Thông tin – ĐHQG TP.HCM.
-> Một game nhập vai theo lượt (Turn-based RPG) chạy trên nền tảng **Unity WebGL**, kết hợp **Node.js backend** và cơ sở dữ liệu **MongoDB**.
+# Turn-Based RPG — Unity WebGL
+
+**NT208.Q22 — Lap trinh ung dung Web**
+Truong Dai hoc Cong nghe Thong tin — DHQG TP.HCM
+
+[![Unity](https://img.shields.io/badge/Unity-2022.3_LTS-000000?style=for-the-badge&logo=unity&logoColor=white)](https://unity.com/)
+[![C#](https://img.shields.io/badge/C%23-10.0-239120?style=for-the-badge&logo=csharp&logoColor=white)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+[![WebGL](https://img.shields.io/badge/WebGL-2.0-990000?style=for-the-badge&logo=webgl&logoColor=white)](https://www.khronos.org/webgl/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-5.0+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+
+[![Status](https://img.shields.io/badge/Status-In_Development-yellow?style=flat-square)]()
+[![License](https://img.shields.io/badge/License-Academic-blue?style=flat-square)]()
+[![Platform](https://img.shields.io/badge/Platform-Web_Browser-orange?style=flat-square)]()
+
+</div>
 
 ---
 
-## 📑 Mục lục
+## Gioi thieu
 
-- [Giới thiệu](#giới-thiệu)
-- [Tính năng](#tính-năng)
-- [Kiến trúc hệ thống](#kiến-trúc-hệ-thống)
-- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
-- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
-- [Hướng dẫn cài đặt](#hướng-dẫn-cài-đặt)
-- [Hướng dẫn chạy](#hướng-dẫn-chạy)
+Game nhap vai theo luot (Turn-based RPG) trien khai tren nen tang web thong qua **Unity WebGL**. Nguoi choi kham pha ban do, tuong tac voi NPC, thuc hien nhiem vu phan nhanh va chien dau voi quai vat theo co che luot. Du lieu nguoi choi duoc dong bo len server thong qua REST API.
+
+---
+
+## Muc luc
+
+- [Tinh nang chinh](#tinh-nang-chinh)
+- [Kien truc he thong](#kien-truc-he-thong)
+- [Cau truc thu muc](#cau-truc-thu-muc)
+- [Yeu cau he thong](#yeu-cau-he-thong)
+- [Huong dan cai dat](#huong-dan-cai-dat)
+- [Huong dan chay](#huong-dan-chay)
 - [API Backend](#api-backend)
-- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
-- [Thành viên nhóm](#thành-viên-nhóm)
-- [Giấy phép](#giấy-phép)
+- [Thanh vien nhom](#thanh-vien-nhom)
+- [Giay phep](#giay-phep)
 
 ---
 
-## Giới thiệu
+## Tinh nang chinh
 
-Dự án xây dựng một **game nhập vai theo lượt** (Turn-based RPG) triển khai trên nền tảng web thông qua **Unity WebGL**. Người chơi sẽ khám phá bản đồ, tương tác với NPC, thực hiện nhiệm vụ (quest) phân nhánh, và chiến đấu với quái vật theo cơ chế lượt. Dữ liệu người chơi được lưu trữ trên **MongoDB** thông qua một REST API backend viết bằng **Node.js / Express**.
+### He thong chien dau theo luot
+
+- Chien dau luot giua party nguoi choi va quai vat
+- He thong **Parry** giam sat thuong tu ke thu
+- Ky nang tan cong voi hieu ung trang thai: Poison, Stun
+- Chon muc tieu linh hoat, ho tro chuyen target
+- Co che bo chay (Flee) khoi tran dau
+- He thong EXP va phan thuong sau tran dau
+
+### Kham pha ban do
+
+- Di chuyen nhan vat tren ban do 2D bang Unity Input System
+- Chuyen canh giua cac khu vuc thong qua MapTrigger va TeleportPillar
+- Gap quai ngau nhien khi di vao vung EnemyTrigger
+- Camera zone tu dong dieu chinh theo khu vuc
+- He thong Minimap hien thi vi tri nguoi choi va cac diem quan trong
+
+### He thong nhiem vu (Quest)
+
+- Nhiem vu phan nhanh voi QuestBranchChoice
+- Quan ly muc tieu nhiem vu chi tiet
+- Giao dien Quest UI hien thi tien do
+- Luu trang thai nhiem vu dong bo voi backend
+
+### He thong luu tru da nen tang
+
+- **Local Storage**: Luu tuc thi vao trinh duyet bang PlayerPrefs
+- **Cloud Save**: Dong bo du lieu len server qua REST API
+- **Auto-save**: Tu dong luu khi nguoi choi dong hoac tai lai tab
+- **Transfer Code**: Tu sinh Guest ID duy nhat, cho phep chuyen du lieu sang may khac
+- Hoi sinh tai save point cuoi khi party bi danh bai
+
+### NPC va Tuong tac
+
+- He thong NPC voi hoi thoai va tuong tac
+- Kich hoat su kien cau chuyen thong qua NpcTrigger
 
 ---
 
-## Tính năng
-
-### ⚔️ Hệ thống chiến đấu theo lượt
-- Chiến đấu lượt giữa party người chơi và quái vật.
-- Hệ thống **Parry** (đỡ đòn) giảm sát thương từ kẻ thù.
-- Kỹ năng tấn công (*Skill*) với hiệu ứng trạng thái: **Poison** (độc), **Stun** (choáng).
-- Chọn mục tiêu tấn công linh hoạt, hỗ trợ chuyển target.
-- Cơ chế **bỏ chạy** (Flee) khỏi trận đấu.
-- Hệ thống EXP và phần thưởng sau trận đấu.
-
-### 🗺️ Khám phá bản đồ
-- Di chuyển nhân vật trên bản đồ 2D bằng Unity Input System.
-- Chuyển cảnh (scene transition) giữa các khu vực thông qua MapTrigger.
-- Gặp quái ngẫu nhiên (random encounter) khi đi vào vùng EnemyTrigger.
-- Camera zone tự động điều chỉnh camera theo khu vực.
-
-### 📜 Hệ thống nhiệm vụ (Quest)
-- Nhiệm vụ phân nhánh với **QuestBranchChoice** — người chơi lựa chọn hướng đi câu chuyện.
-- Quản lý mục tiêu nhiệm vụ (QuestObjective) chi tiết.
-- Giao diện Quest UI hiển thị tiến độ nhiệm vụ.
-- Lưu trạng thái nhiệm vụ (QuestSaveData) đồng bộ với backend.
-
-### 💾 Hệ thống lưu trữ đa nền tảng
-- **Lưu cục bộ (Local Storage)**: Game lưu trữ tức thời vào trình duyệt bằng `PlayerPrefs`.
-- **Đồng bộ Đám mây (Cloud Save)**: Đồng thời gửi dữ liệu party, quest & vị trí lên server qua REST API.
-- **Auto-save**: Tự động lưu game khi người chơi đóng hoặc tải lại tab trình duyệt.
-- **Transfer Code (Mã chuyển máy)**: Hệ thống tự sinh Guest ID duy nhất cho mỗi thiết bị, cho phép bảo lưu và chuyển dữ liệu Save sang điện thoại/máy tính khác mà không cần hệ thống đăng nhập phức tạp.
-- Hồi sinh (respawn) tại save point cuối khi party bị đánh bại.
-
-### 🤖 NPC & Tương tác
-- Hệ thống NPC với hội thoại và tương tác.
-- Kích hoạt sự kiện câu chuyện thông qua NpcTrigger.
-
----
-
-## Kiến trúc hệ thống
+## Kien truc he thong
 
 ```
-┌──────────────┐        HTTP / REST API        ┌──────────────────┐
-│  Unity WebGL │  ◄──────────────────────────►  │  Node.js Server  │
-│  (Frontend)  │       (port 3000)              │  (Express.js)    │
-└──────────────┘                                └────────┬─────────┘
-                                                         │
-                                                         ▼
-                                                ┌──────────────────┐
-                                                │     MongoDB      │
-                                                │  (webgame DB)    │
-                                                └──────────────────┘
++----------------+        HTTP / REST API        +--------------------+
+|  Unity WebGL   |  <------------------------->  |  Node.js Server    |
+|  (Frontend)    |       (port 3000)             |  (Express.js)      |
++----------------+                               +---------+----------+
+                                                           |
+                                                           v
+                                                  +--------------------+
+                                                  |     MongoDB        |
+                                                  |  (webgame DB)      |
+                                                  +--------------------+
 ```
 
-- **Frontend**: Game Unity được build thành WebGL, phục vụ dưới dạng static files.
-- **Backend**: Node.js + Express xử lý REST API (lưu/load dữ liệu người chơi).
-- **Database**: MongoDB lưu trữ thông tin player, party, và vị trí save point.
+| Tang          | Mo ta                                                           |
+| ------------- | --------------------------------------------------------------- |
+| **Frontend**  | Unity WebGL build, phuc vu duoi dang static files               |
+| **Backend**   | Node.js + Express xu ly REST API (luu/load du lieu nguoi choi)  |
+| **Database**  | MongoDB luu tru thong tin player, party va vi tri save point    |
 
 ---
 
-## Cấu trúc thư mục
+## Cau truc thu muc
 
 ```
 lt-web-NT208.Q22/
 ├── Assets/
 │   ├── Scripts/
-│   │   ├── Battle/          # Hệ thống chiến đấu (BattleManager, EnemyAttack, ...)
-│   │   │   ├── Runtime/     # Logic chiến đấu chính
-│   │   │   └── State/       # Trạng thái trận đấu
-│   │   ├── Core/            # Core gameplay (Combat, Data, Factory, Status, Turn)
-│   │   ├── Enemy/           # Dữ liệu & AI quái vật
-│   │   │   ├── Data/        # EnemyAttackData, EnemyData
-│   │   │   └── Runtime/     # EnemyStatus, logic runtime
-│   │   ├── Map/             # Bản đồ, NPC, SavePoint, Camera
-│   │   ├── Player/          # Dữ liệu & runtime nhân vật
-│   │   ├── Quest/           # Hệ thống nhiệm vụ
-│   │   ├── Save/            # PlayerSave, UnitSave
-│   │   ├── System/          # GameManager, EventManager, InputController
-│   │   └── UI/              # Giao diện người dùng (StartMenuUI.cs includes Transfer Code & Welcome panels)
-│   └── Data/                # GameInput, ScriptableObjects, ...
+│   │   ├── Battle/            # He thong chien dau
+│   │   │   ├── Runtime/       # Logic chien dau chinh
+│   │   │   └── State/         # Trang thai tran dau
+│   │   ├── Core/              # Core gameplay (Combat, Data, Factory, Status, Turn)
+│   │   ├── Enemy/             # Du lieu va AI quai vat
+│   │   │   ├── Data/          # EnemyAttackData, EnemyData
+│   │   │   └── Runtime/       # EnemyStatus, logic runtime
+│   │   ├── Map/               # Ban do, NPC, SavePoint, TeleportPillar
+│   │   ├── Player/            # Du lieu va runtime nhan vat
+│   │   ├── Quest/             # He thong nhiem vu
+│   │   ├── Save/              # PlayerSave, UnitSave
+│   │   ├── System/            # GameManager, EventManager, InputController
+│   │   └── UI/                # Giao dien nguoi dung
+│   ├── Editor/                # Editor tools (Teleport, Minimap, Quest setup)
+│   └── Data/                  # GameInput, ScriptableObjects
 ├── Backend/
-│   ├── server.js            # Entry point server Node.js
-│   ├── package.json         # Dependencies (express, mongodb, cors)
-│   ├── Database/            # Seed data (webgame.players.json)
-│   └── public/              # Unity WebGL build output
-├── Packages/                # Unity packages
-├── ProjectSettings/         # Cấu hình Unity project
-└── README.md                # Tài liệu này
+│   ├── server.js              # Entry point server Node.js
+│   ├── package.json           # Dependencies (express, mongodb, cors)
+│   ├── Database/              # Seed data (webgame.players.json)
+│   └── public/                # Unity WebGL build output
+├── Packages/                  # Unity packages
+├── ProjectSettings/           # Cau hinh Unity project
+└── README.md
 ```
 
 ---
 
-## Yêu cầu hệ thống
+## Yeu cau he thong
 
-| Thành phần     | Yêu cầu                                           |
-| -------------- | -------------------------------------------------- |
-| **Unity**      | 2021.3 LTS trở lên (khuyến nghị 2022.x)           |
-| **Node.js**    | v16 trở lên                                        |
-| **MongoDB**    | v5.0 trở lên (chạy local hoặc cloud)               |
-| **IDE**        | Visual Studio 2022 / VS Code                       |
-| **Trình duyệt**| Chrome, Firefox, Edge (hỗ trợ WebGL 2.0)          |
+| Thanh phan      | Yeu cau                                             |
+| --------------- | --------------------------------------------------- |
+| **Unity**       | 2021.3 LTS tro len (khuyen nghi 2022.x)            |
+| **Node.js**     | v16 tro len                                         |
+| **MongoDB**     | v5.0 tro len (local hoac cloud)                     |
+| **IDE**         | Visual Studio 2022 / VS Code                        |
+| **Trinh duyet** | Chrome, Firefox, Edge (ho tro WebGL 2.0)            |
 
 ---
 
-## Hướng dẫn cài đặt
+## Huong dan cai dat
 
 ### 1. Clone repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Nergy197/lt-web-NT208.Q22.git
 cd lt-web-NT208.Q22
 ```
 
-### 2. Mở project Unity
+### 2. Mo project Unity
 
-1. Mở **Unity Hub**.
-2. Nhấn **Add** → chọn thư mục `lt-web-NT208.Q22`.
-3. Unity sẽ tự động tải các package cần thiết khi mở lần đầu.
+1. Mo **Unity Hub**
+2. Nhan **Add** va chon thu muc `lt-web-NT208.Q22`
+3. Unity se tu dong tai cac package can thiet khi mo lan dau
 
-### 3. Cài đặt Backend
+### 3. Cai dat Backend
 
 ```bash
 cd Backend
 npm install
 ```
 
-### 4. Cài đặt MongoDB
+### 4. Cai dat MongoDB
 
-- Cài MongoDB Community Edition và đảm bảo service đang chạy trên `mongodb://127.0.0.1:27017`.
-- Hoặc cấu hình connection string trong `Backend/server.js` nếu dùng MongoDB Atlas.
+- Cai MongoDB Community Edition va dam bao service dang chay tren `mongodb://127.0.0.1:27017`
+- Hoac cau hinh connection string trong `Backend/server.js` neu dung MongoDB Atlas
 
 ---
 
-## Hướng dẫn chạy
+## Huong dan chay
 
-### Chạy trong Unity Editor (Development)
+### Development (Unity Editor)
 
-1. Mở project trong Unity.
-2. Nhấn nút **Play** để chạy game trực tiếp trong Editor.
+1. Mo project trong Unity
+2. Nhan **Play** de chay game truc tiep trong Editor
 
-### Chạy bản WebGL (Production)
+### Production (WebGL)
 
-1. **Build WebGL** trong Unity:
-   - Vào *File → Build Settings* → chọn **WebGL** → nhấn **Build**.
-   - Xuất ra thư mục `Backend/public/`.
+1. Build WebGL trong Unity: *File > Build Settings > WebGL > Build*. Xuat ra thu muc `Backend/public/`
 
-2. **Khởi động Backend**:
+2. Khoi dong Backend:
    ```bash
    cd Backend
    npm start
    ```
-   Server sẽ chạy tại `http://localhost:3000`.
+   Server chay tai `http://localhost:3000`
 
-3. **Truy cập game**: Mở trình duyệt và vào `http://localhost:3000`.
+3. Truy cap game: Mo trinh duyet va vao `http://localhost:3000`
 
 ---
 
 ## API Backend
 
-Backend cung cấp các endpoint sau:
-
-| Phương thức | Endpoint           | Mô tả                                    |
+| Phuong thuc | Endpoint           | Mo ta                                     |
 | ----------- | ------------------ | ----------------------------------------- |
-| `GET`       | `/player/:id`      | Lấy thông tin người chơi theo ID          |
-| `POST`      | `/player/save`     | Lưu dữ liệu party & vị trí save point    |
-| `GET`       | `/sync`            | Đồng bộ dữ liệu từ file seed vào MongoDB |
+| `GET`       | `/player/:id`      | Lay thong tin nguoi choi theo ID          |
+| `POST`      | `/player/save`     | Luu du lieu party va vi tri save point    |
+| `GET`       | `/sync`            | Dong bo du lieu tu file seed vao MongoDB  |
 
-### Ví dụ request
+### Vi du request
 
 ```bash
-# Lấy thông tin player bằng Guest ID
+# Lay thong tin player bang Guest ID
 curl http://localhost:3000/player/guest_a3f8b2c1_slot_0
 
-# Lưu dữ liệu lên Cloud
+# Luu du lieu len Cloud
 curl -X POST http://localhost:3000/player/save \
   -H "Content-Type: application/json" \
-  -d '{"_id": "guest_a3f8b2c1_slot_0", "slotId": 0, "party": [...], "lastSavePointId": "sp01", "lastSaveScene": "Map01"}'
+  -d '{"_id": "guest_a3f8b2c1_slot_0", "slotId": 0, "party": [...], "lastSavePointId": "sp01"}'
 ```
 
 ---
 
-## Công nghệ sử dụng
+## Cong nghe su dung
 
-| Công nghệ       | Vai trò                                   |
-| ---------------- | ----------------------------------------- |
-| **Unity**        | Game engine – xây dựng gameplay & UI      |
-| **C#**           | Ngôn ngữ lập trình game (scripts)         |
-| **WebGL**        | Nền tảng triển khai game trên trình duyệt |
-| **Node.js**      | Runtime backend                           |
-| **Express.js**   | Web framework xử lý REST API             |
-| **MongoDB**      | Cơ sở dữ liệu NoSQL lưu trữ player data |
-| **Unity Input System** | Quản lý input người chơi            |
+| Cong nghe            | Vai tro                                    |
+| -------------------- | ------------------------------------------ |
+| **Unity**            | Game engine — xay dung gameplay va UI      |
+| **C#**               | Ngon ngu lap trinh game (scripts)          |
+| **WebGL**            | Nen tang trien khai game tren trinh duyet  |
+| **Node.js**          | Runtime backend                            |
+| **Express.js**       | Web framework xu ly REST API               |
+| **MongoDB**          | Co so du lieu NoSQL luu tru player data    |
+| **Unity Input System** | Quan ly input nguoi choi                 |
+| **TextMeshPro**      | Hien thi text chat luong cao               |
 
 ---
 
-## Thành viên nhóm
+## Thanh vien nhom
 
-| Vai trò     | Họ và tên          | MSSV       | Phân chia    |
+| Vai tro     | Ho va ten          | MSSV       | Phan nhom    |
 | ----------- | ------------------ | ---------- | ------------ |
-| Thành viên  | Trầm Tính Ân       | 24520074   | Nhóm B       |
-| Thành viên  | Trần Đức Chuẩn     | 24520228   | Nhóm B       |
-| Nhóm trưởng | Nguyễn Mạnh Cường  | 24520238   | Nhóm A       |
-| Thành viên  | Nguyễn Tấn Danh    | 24520262   | Nhóm A       |
+| Nhom truong | Nguyen Manh Cuong  | 24520238   | Nhom A       |
+| Thanh vien  | Nguyen Tan Danh    | 24520262   | Nhom A       |
+| Thanh vien  | Tram Tinh An       | 24520074   | Nhom B       |
+| Thanh vien  | Tran Duc Chuan     | 24520228   | Nhom B       |
 
-### 🅰️ Nhóm A — Gameplay & Logic
+### Nhom A — Gameplay va Logic
 
-| STT | Nội dung cần học       | Mục tiêu học                    | Công nghệ / Công cụ   |
-| --- | ---------------------- | ------------------------------- | ---------------------- |
-| 1   | Unity Editor cơ bản    | Biết tạo scene, prefab, script  | Unity Editor           |
-| 2   | C# cơ bản trong Unity  | Viết script, hiểu MonoBehaviour | C#                     |
-| 3   | ScriptableObject       | Quản lý dữ liệu nhân vật, skill| ScriptableObject       |
-| 4   | Turn-based logic       | Sắp xếp lượt theo SPD          | C# (List, Sort)        |
-| 5   | BattleManager          | Quản lý trạng thái trận         | C#                     |
-| 6   | Skill & damage         | Tính sát thương                 | C#                     |
-| 7   | AI cơ bản              | Chọn mục tiêu, hành động       | Rule-based AI          |
+| STT | Noi dung               | Muc tieu                          | Cong nghe              |
+| --- | ---------------------- | --------------------------------- | ---------------------- |
+| 1   | Unity Editor co ban    | Tao scene, prefab, script         | Unity Editor           |
+| 2   | C# co ban trong Unity  | Viet script, hieu MonoBehaviour   | C#                     |
+| 3   | ScriptableObject       | Quan ly du lieu nhan vat, skill   | ScriptableObject       |
+| 4   | Turn-based logic       | Sap xep luot theo SPD             | C# (List, Sort)        |
+| 5   | BattleManager          | Quan ly trang thai tran           | C#                     |
+| 6   | Skill va damage        | Tinh sat thuong                   | C#                     |
+| 7   | AI co ban              | Chon muc tieu, hanh dong          | Rule-based AI          |
 
-### 🅱️ Nhóm B — UI, Audio & Deployment
+### Nhom B — UI, Audio va Deployment
 
-| STT | Nội dung cần học       | Mục tiêu học                    | Công nghệ / Công cụ   |
-| --- | ---------------------- | ------------------------------- | ---------------------- |
-| 1   | Unity UI cơ bản        | Hiểu Canvas, Panel, Button     | Unity UI               |
-| 2   | Slider & TextMeshPro   | Hiển thị HP, text               | Slider, TMP            |
-| 3   | UI Event               | Kết nối nút với logic           | Unity Event            |
-| 4   | UI feedback            | Damage popup, đổi lượt          | C#, TMP                |
-| 5   | Audio trong Unity      | Thêm SFX                       | AudioSource            |
-| 6   | Save/Load cơ bản       | Lưu & tải tiến trình            | PlayerPrefs / JSON     |
-| 7   | WebGL build            | Build game chạy web             | Unity WebGL            |
-| 8   | Deploy itch.io         | Upload & test                   | itch.io                |
+| STT | Noi dung               | Muc tieu                          | Cong nghe              |
+| --- | ---------------------- | --------------------------------- | ---------------------- |
+| 1   | Unity UI co ban        | Hieu Canvas, Panel, Button        | Unity UI               |
+| 2   | Slider va TextMeshPro  | Hien thi HP, text                 | Slider, TMP            |
+| 3   | UI Event               | Ket noi nut voi logic             | Unity Event            |
+| 4   | UI feedback            | Damage popup, doi luot            | C#, TMP                |
+| 5   | Audio trong Unity      | Them SFX                          | AudioSource            |
+| 6   | Save/Load co ban       | Luu va tai tien trinh             | PlayerPrefs / JSON     |
+| 7   | WebGL build            | Build game chay web               | Unity WebGL            |
+| 8   | Deploy itch.io         | Upload va test                    | itch.io                |
 
 ---
 
-## Giấy phép
+## Giay phep
 
-Dự án này được phát triển phục vụ mục đích học tập trong khuôn khổ môn học **NT208 – Lập trình ứng dụng Web**, Đại học Công nghệ Thông tin – ĐHQG TP.HCM.
+Du an nay duoc phat trien phuc vu muc dich hoc tap trong khuon kho mon hoc **NT208 — Lap trinh ung dung Web**, Truong Dai hoc Cong nghe Thong tin — DHQG TP.HCM.
