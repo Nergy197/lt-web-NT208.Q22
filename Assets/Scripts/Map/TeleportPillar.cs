@@ -88,28 +88,44 @@ public class TeleportPillar : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log($"[TeleportPillar] OnTriggerEnter2D: tag={other.tag}, name={other.gameObject.name}");
         if (!other.CompareTag("Player")) return;
+        
         if (InputController.Instance != null &&
-            InputController.Instance.Mode != InputMode.Map) return;
+            InputController.Instance.Mode != InputMode.Map)
+        {
+            Debug.LogWarning($"[TeleportPillar] Bỏ qua: InputMode = {InputController.Instance.Mode} (cần Map)");
+            return;
+        }
 
         isPlayerInRange = true;
-        Debug.Log($"[TeleportPillar] Nhấn F để mở menu dịch chuyển ({pillarName})");
+        Debug.Log($"[TeleportPillar] ✅ Player trong vùng! Nhấn F để mở menu ({pillarName})");
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
         isPlayerInRange = false;
+        Debug.Log($"[TeleportPillar] Player rời khỏi vùng ({pillarName})");
     }
 
     private void Update()
     {
         if (!isPlayerInRange) return;
-        if (InputController.Instance == null) return;
+        
+        // Tự tạo InputController nếu thiếu (khi play trực tiếp MapScene)
+        if (InputController.Instance == null)
+        {
+            Debug.LogWarning("[TeleportPillar] InputController.Instance = null → tự tạo!");
+            new GameObject("InputController").AddComponent<InputController>();
+            return; // Đợi frame sau để InputController khởi tạo xong
+        }
+        
         if (InputController.Instance.Mode != InputMode.Map) return;
 
         if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
         {
+            Debug.Log("[TeleportPillar] ✅ Phím F được nhấn → mở menu!");
             OpenMenu();
         }
     }
@@ -119,7 +135,7 @@ public class TeleportPillar : MonoBehaviour
         if (TeleportMenuUI.Instance == null)
         {
             Debug.LogError("[TeleportPillar] Không tìm thấy TeleportMenuUI trong scene! " +
-                           "Hãy chạy Tools/Teleport Menu/1. Tạo Teleport Menu UI Tự Động");
+                           "Hãy chạy Tools/Teleport/1. Tạo Teleport Menu UI Tự Động");
             return;
         }
 
@@ -135,7 +151,9 @@ public class TeleportPillar : MonoBehaviour
 
         if (destinations.Count == 0)
         {
-            Debug.LogWarning($"[TeleportPillar] {pillarName}: Không có trụ nào khác trong scene để dịch chuyển tới!");
+            // Không có trụ đích → mở menu chọn map thay thế
+            Debug.Log($"[TeleportPillar] {pillarName}: Không có trụ khác → mở menu chọn map.");
+            TeleportMenuUI.Instance.OpenMapMenu(this);
             return;
         }
 

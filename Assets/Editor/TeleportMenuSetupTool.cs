@@ -14,7 +14,7 @@ public class TeleportMenuSetupTool
     // ================================================================
     //  TOOL 1: TẠO TELEPORT MENU UI TỰ ĐỘNG
     // ================================================================
-    [MenuItem("Tools/Teleport Menu/1. Tạo Teleport Menu UI Tự Động")]
+    [MenuItem("Tools/Teleport/1. Tạo Teleport Menu UI Tự Động")]
     public static void CreateTeleportMenuUI()
     {
         TeleportMenuUI existingUI = Object.FindFirstObjectByType<TeleportMenuUI>();
@@ -25,20 +25,30 @@ public class TeleportMenuSetupTool
             return;
         }
 
-        // Canvas
-        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+        // Tạo Canvas RIÊNG cho Teleport Menu (không dùng chung với Minimap hay Canvas khác)
+        Canvas canvas = null;
+        foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+        {
+            if (c.gameObject.name == "TeleportCanvas")
+            {
+                canvas = c;
+                break;
+            }
+        }
+
         if (canvas == null)
         {
-            GameObject canvasObj = new GameObject("Canvas");
+            GameObject canvasObj = new GameObject("TeleportCanvas");
             canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 100;
+            canvas.sortingOrder = 200; // Cao hơn Minimap (100) và Quest (90)
             UnityEngine.UI.CanvasScaler scaler = canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
             scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
             canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-            Undo.RegisterCreatedObjectUndo(canvasObj, "Create Canvas");
+            Undo.RegisterCreatedObjectUndo(canvasObj, "Create TeleportCanvas");
+            Debug.Log("[TeleportMenuSetupTool] Đã tạo TeleportCanvas riêng (sortingOrder=200).");
         }
 
         // EventSystem
@@ -247,6 +257,26 @@ public class TeleportMenuSetupTool
         so.FindProperty("buttonContainer").objectReferenceValue = contentObj;
         so.FindProperty("closeButton").objectReferenceValue = closeBtn;
         so.FindProperty("buttonTemplate").objectReferenceValue = templateObj;
+
+        // Tự động tìm tất cả Mapdata assets và gán vào availableMaps
+        string[] mapGuids = AssetDatabase.FindAssets("t:Mapdata");
+        SerializedProperty mapListProp = so.FindProperty("availableMaps");
+        if (mapListProp != null)
+        {
+            mapListProp.ClearArray();
+            for (int i = 0; i < mapGuids.Length; i++)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(mapGuids[i]);
+                Mapdata mapAsset = AssetDatabase.LoadAssetAtPath<Mapdata>(path);
+                if (mapAsset != null)
+                {
+                    mapListProp.InsertArrayElementAtIndex(i);
+                    mapListProp.GetArrayElementAtIndex(i).objectReferenceValue = mapAsset;
+                }
+            }
+            Debug.Log($"[TeleportMenuSetupTool] Đã gán {mapGuids.Length} Mapdata vào availableMaps.");
+        }
+
         so.ApplyModifiedProperties();
 
         panelObj.SetActive(false);
@@ -258,11 +288,36 @@ public class TeleportMenuSetupTool
     }
 
     // ================================================================
-    //  TOOL 2: TẠO TRỤ DỊCH CHUYỂN (ĐƠN GIẢN, KHÔNG CÒN SPAWN POINT)
+    //  TOOL 2: TẠO TRỤ MỚI (THAY THẾ CŨ)
+    //  Xóa tất cả trụ cũ trong scene trước khi tạo trụ mới.
+    //  Đảm bảo mỗi scene chỉ có đúng 1 trụ teleport.
     // ================================================================
-    [MenuItem("Tools/Teleport Menu/2. Tạo Trụ Dịch Chuyển")]
+    [MenuItem("Tools/Teleport/2. Tạo Trụ Mới (Thay Thế Cũ)")]
     public static void CreateTeleportPillar()
     {
+        // Xóa tất cả trụ cũ trong scene
+        TeleportPillar[] existingPillars = Object.FindObjectsByType<TeleportPillar>(FindObjectsSortMode.None);
+        if (existingPillars.Length > 0)
+        {
+            bool confirm = EditorUtility.DisplayDialog(
+                "Xác nhận thay thế trụ",
+                $"Hiện có {existingPillars.Length} trụ teleport trong scene.\n" +
+                "Tất cả sẽ bị XÓA trước khi tạo trụ mới.\n\n" +
+                "Bạn có chắc muốn tiếp tục?",
+                "Xóa và tạo mới",
+                "Hủy"
+            );
+
+            if (!confirm) return;
+
+            foreach (var old in existingPillars)
+            {
+                Debug.Log($"[TeleportMenuSetupTool] Xóa trụ cũ: '{old.pillarName}' ({old.gameObject.name})");
+                Undo.DestroyObjectImmediate(old.gameObject);
+            }
+        }
+
+        // Tạo trụ mới
         GameObject pillarObj = new GameObject("TeleportPillar");
         Undo.RegisterCreatedObjectUndo(pillarObj, "Create Teleport Pillar");
 
@@ -296,17 +351,17 @@ public class TeleportMenuSetupTool
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         Selection.activeGameObject = pillarObj;
 
-        Debug.Log("[TeleportMenuSetupTool] Đã tạo Trụ Dịch Chuyển." +
+        Debug.Log("[TeleportMenuSetupTool] ✅ Đã tạo Trụ Dịch Chuyển mới (đã xóa trụ cũ nếu có)." +
                   "\n  → Đổi tên trong 'Pillar Name'." +
                   "\n  → Kéo tới vị trí mong muốn." +
                   "\n  → Gán Mapdata nếu cần." +
-                  "\n  → Các trụ tự tìm nhau khi chạy game, KHÔNG cần gán thủ công!");
+                  "\n  → Mỗi map nên chỉ có 1 trụ duy nhất!");
     }
 
     // ================================================================
     //  TOOL 3: KIỂM TRA LỖI
     // ================================================================
-    [MenuItem("Tools/Teleport Menu/3. Kiểm Tra Lỗi Hệ Thống Teleport")]
+    [MenuItem("Tools/Teleport/3. Kiểm Tra Lỗi Hệ Thống Teleport")]
     public static void ValidateSystem()
     {
         var report = new List<string>();
@@ -328,9 +383,15 @@ public class TeleportMenuSetupTool
         TeleportPillar[] pillars = Object.FindObjectsByType<TeleportPillar>(FindObjectsSortMode.None);
         report.Add($"\n=== Tìm thấy {pillars.Length} TeleportPillar ===");
 
-        if (pillars.Length < 2)
+        if (pillars.Length == 0)
         {
-            report.Add("⚠️ CẢNH BÁO: Cần ít nhất 2 trụ để có thể dịch chuyển qua lại!");
+            report.Add("⚠️ CẢNH BÁO: Chưa có trụ nào! Chạy Tool 2 để tạo.");
+            warnings++;
+        }
+        else if (pillars.Length > 1)
+        {
+            report.Add("⚠️ CẢNH BÁO: Có nhiều hơn 1 trụ trong scene! Nên chỉ có 1 trụ mỗi map.");
+            report.Add("   → Dùng Tool 4 để xóa sạch, rồi Tool 2 để tạo lại 1 trụ duy nhất.");
             warnings++;
         }
 
@@ -376,5 +437,88 @@ public class TeleportMenuSetupTool
             report.Add("🎉 Tất cả đều hợp lệ!");
 
         Debug.Log(string.Join("\n", report));
+    }
+
+    // ================================================================
+    //  TOOL 4: XÓA TOÀN BỘ HỆ THỐNG TELEPORT
+    //  Xóa tất cả TeleportPillar và TeleportMenuUI trong scene.
+    // ================================================================
+    [MenuItem("Tools/Teleport/4. Xóa Toàn Bộ Hệ Thống Teleport")]
+    public static void DeleteAllTeleportSystem()
+    {
+        TeleportPillar[] pillars = Object.FindObjectsByType<TeleportPillar>(FindObjectsSortMode.None);
+        TeleportMenuUI[] menus = Object.FindObjectsByType<TeleportMenuUI>(FindObjectsSortMode.None);
+
+        int totalCount = pillars.Length + menus.Length;
+
+        if (totalCount == 0)
+        {
+            EditorUtility.DisplayDialog(
+                "Không có gì để xóa",
+                "Không tìm thấy TeleportPillar hoặc TeleportMenuUI nào trong scene.",
+                "OK"
+            );
+            return;
+        }
+
+        // Tạo danh sách chi tiết
+        var details = new List<string>();
+        foreach (var p in pillars)
+            details.Add($"  • Trụ: '{p.pillarName}' ({p.gameObject.name})");
+        foreach (var m in menus)
+            details.Add($"  • Menu UI: {m.gameObject.name}");
+
+        bool confirm = EditorUtility.DisplayDialog(
+            "Xác nhận xóa toàn bộ",
+            $"Sẽ xóa {totalCount} đối tượng teleport:\n\n" +
+            string.Join("\n", details) +
+            "\n\nHành động này có thể Undo (Ctrl+Z).\nBạn có chắc muốn xóa?",
+            "Xóa tất cả",
+            "Hủy"
+        );
+
+        if (!confirm) return;
+
+        int deleted = 0;
+
+        // Xóa tất cả TeleportPillar
+        foreach (var p in pillars)
+        {
+            if (p != null && p.gameObject != null)
+            {
+                Debug.Log($"[TeleportMenuSetupTool] Xóa trụ: '{p.pillarName}' ({p.gameObject.name})");
+                Undo.DestroyObjectImmediate(p.gameObject);
+                deleted++;
+            }
+        }
+
+        // Xóa tất cả TeleportMenuUI (bao gồm TeleportMenuSystem parent)
+        foreach (var m in menus)
+        {
+            if (m != null && m.gameObject != null)
+            {
+                // Xóa root parent nếu tên là TeleportMenuSystem
+                GameObject toDelete = m.gameObject;
+                if (toDelete.name == "TeleportMenuSystem" || toDelete.transform.parent == null)
+                {
+                    // Xóa cả system root
+                }
+                else if (toDelete.transform.parent != null &&
+                         toDelete.transform.parent.name == "TeleportMenuSystem")
+                {
+                    toDelete = toDelete.transform.parent.gameObject;
+                }
+
+                Debug.Log($"[TeleportMenuSetupTool] Xóa menu UI: {toDelete.name}");
+                Undo.DestroyObjectImmediate(toDelete);
+                deleted++;
+            }
+        }
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+        Debug.Log($"🗑️ [TeleportMenuSetupTool] Đã xóa {deleted} đối tượng teleport." +
+                  "\n  → Dùng Ctrl+Z nếu muốn hoàn tác." +
+                  "\n  → Chạy Tool 1 + Tool 2 để tạo lại hệ thống mới.");
     }
 }
