@@ -114,8 +114,13 @@ public class TeleportPillar : MonoBehaviour
     {
         if (!isPlayerInRange) return;
         
-        // InputController chưa sẵn sàng → bỏ qua (MapSceneBootstrap sẽ tạo nếu cần)
-        if (InputController.Instance == null) return;
+        // Tự tạo InputController nếu thiếu (play trực tiếp MapScene không qua StartScene)
+        if (InputController.Instance == null)
+        {
+            Debug.LogWarning("[TeleportPillar] InputController chưa có → tự tạo!");
+            new GameObject("InputController").AddComponent<InputController>();
+            return; // Đợi frame sau để InputController khởi tạo
+        }
         
         if (InputController.Instance.Mode != InputMode.Map) return;
 
