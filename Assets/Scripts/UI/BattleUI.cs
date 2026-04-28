@@ -18,6 +18,9 @@ public class BattleUI : MonoBehaviour
 {
     public static BattleUI Instance { get; private set; }
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     // ================= PLAYER HUD =================
 
     [Header("Player HUD (gan cho moi player slot)")]
@@ -160,6 +163,25 @@ public class BattleUI : MonoBehaviour
                 else
                 {
                     playerHUDs[i].gameObject.SetActive(false);
+                }
+            }
+        }
+
+        // Update Enemy HUDs
+        if (bm.EnemyParty != null)
+        {
+            for (int i = 0; i < enemyHUDs.Count; i++)
+            {
+                if (i < bm.EnemyParty.Members.Count)
+                {
+                    var member = bm.EnemyParty.Members[i];
+                    enemyHUDs[i].gameObject.SetActive(member.IsAlive);
+                    if (member.IsAlive)
+                        enemyHUDs[i].UpdateHUD(member.entityName, member.currentHP, member.MaxHP);
+                }
+                else
+                {
+                    enemyHUDs[i].gameObject.SetActive(false);
                 }
             }
         }
@@ -352,54 +374,5 @@ public class BattleUI : MonoBehaviour
     public void SetExpResult(string expInfo)
     {
         if (expText != null) expText.text = expInfo;
-    }
-}
-
-// ================= UNIT HUD COMPONENT =================
-
-/// <summary>
-/// Component UI cho moi unit: hien thi ten, HP bar, AP bar.
-/// Attach vao moi unit HUD prefab/panel.
-/// </summary>
-public class UnitHUD : MonoBehaviour
-{
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private Slider hpSlider;
-    [SerializeField] private TextMeshProUGUI hpText;
-    [SerializeField] private Slider apSlider;
-    [SerializeField] private TextMeshProUGUI apText;
-
-    public void UpdateHUD(string unitName, int currentHP, int maxHP, int currentAP = -1, int maxAP = -1)
-    {
-        if (nameText != null) nameText.text = unitName;
-
-        if (hpSlider != null)
-        {
-            hpSlider.maxValue = maxHP;
-            hpSlider.value = currentHP;
-        }
-
-        if (hpText != null) hpText.text = $"{currentHP}/{maxHP}";
-
-        // AP bar (chi hien cho player)
-        if (currentAP >= 0 && maxAP > 0)
-        {
-            if (apSlider != null)
-            {
-                apSlider.gameObject.SetActive(true);
-                apSlider.maxValue = maxAP;
-                apSlider.value = currentAP;
-            }
-            if (apText != null)
-            {
-                apText.gameObject.SetActive(true);
-                apText.text = $"AP: {currentAP}/{maxAP}";
-            }
-        }
-        else
-        {
-            if (apSlider != null) apSlider.gameObject.SetActive(false);
-            if (apText != null) apText.gameObject.SetActive(false);
-        }
     }
 }

@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     [Header("Backend")]
     // Editor: tự động dùng "http://localhost:3000" | WebGL build: dùng URL tương đối ""
     [HideInInspector] public string backendBaseURL = "";
@@ -648,22 +651,5 @@ public class GameManager : MonoBehaviour
             qm.CompletedQuests.Clear();
             PlayerPrefs.DeleteKey(QuestManager.SaveKey);
         }
-    }
-}
-
-public class Reward
-{
-    public int expAmount = 0;
-    public List<string> itemRewards = new List<string>();
-
-    public Reward(int exp = 0)
-    {
-        expAmount = exp;
-    }
-
-    public void AddItem(string itemName)
-    {
-        if (!itemRewards.Contains(itemName))
-            itemRewards.Add(itemName);
     }
 }

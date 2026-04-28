@@ -54,6 +54,8 @@ public class Mapdata : ScriptableObject
 
     // ---------------- RANDOM GENERATOR ----------------
     // Generate player buffs/debuffs heuristically depending on map difficulty (enemyLevel)
+    // LƯU Ý: Hàm này ghi đè dữ liệu trên ScriptableObject — chỉ nên gọi trong Editor
+    // hoặc tạo runtime copy trước khi gọi.
     public void GenerateRandomPlayerEffects(int seed = 0)
     {
         playerBuffs.Clear();
@@ -103,6 +105,7 @@ public class Mapdata : ScriptableObject
     }
 
     // optional: generate enemy effects similarly
+    // LƯU Ý: Hàm này ghi đè dữ liệu trên ScriptableObject — chỉ nên gọi trong Editor.
     public void GenerateRandomEnemyEffects(int seed = 0)
     {
         enemyBuffs.Clear();

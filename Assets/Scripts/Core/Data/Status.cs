@@ -110,6 +110,10 @@ public abstract class Status
     protected virtual void Die()
     {
         Debug.Log($"{entityName} died");
+
+        // Undo tất cả buff/debuff để base stat không bị corrupt vĩnh viễn
+        ClearAllEffects();
+
         if (SpawnedModel != null)
         {
             var visual = SpawnedModel.GetComponent<UnitVisual>();
@@ -188,7 +192,7 @@ public abstract class Status
     {
         var toRemove = new List<StatusEffect>();
         foreach (var effect in activeEffects)
-            if (effect.duration <= 0) { toRemove.Add(effect); UndoStatusEffect(effect); }
+            if (effect.duration == 0) { toRemove.Add(effect); UndoStatusEffect(effect); }
 
         foreach (var effect in toRemove)
         {

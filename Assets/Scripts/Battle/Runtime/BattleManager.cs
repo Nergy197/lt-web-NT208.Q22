@@ -6,8 +6,14 @@ public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     /// <summary>Expose để PlayerAttack.ResolveEffectTarget có thể lấy ally target.</summary>
     public Party PlayerParty => playerParty;
+
+    /// <summary>Expose để BattleUI có thể update enemy HUDs.</summary>
+    public Party EnemyParty => enemyParty;
 
     private Party playerParty;
     private Party enemyParty;
@@ -495,22 +501,12 @@ public class BattleManager : MonoBehaviour
         else if (playerWon)
         {
             EventManager.Publish(GameEvent.BattleWin);
-
-            // Hoàn thành objective "Dẫn quân ra trận" và "Đánh giá thực lực địch" (Q002).
-            QuestManager.Instance?.CompleteObjective("Q002", "O2");
-            QuestManager.Instance?.CompleteObjective("Q002", "O3");
-
-            // Đã đủ sức mạnh dù không thua → bỏ qua yêu cầu thua trận của Q003.O1.
-            QuestManager.Instance?.CompleteObjective("Q003", "O1");
+            // Quest objectives giờ được xử lý bởi BattleQuestTrigger qua EventManager
         }
         else
         {
             EventManager.Publish(GameEvent.BattleLose);
-
-            // Thua trận → trận chiến vẫn diễn ra (O2, O3) và nếm mùi thất bại (O1).
-            QuestManager.Instance?.CompleteObjective("Q002", "O2");
-            QuestManager.Instance?.CompleteObjective("Q002", "O3");
-            QuestManager.Instance?.CompleteObjective("Q003", "O1");
+            // Quest objectives giờ được xử lý bởi BattleQuestTrigger qua EventManager
         }
 
         if (playerWon)
@@ -546,8 +542,12 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        GameManager.Instance.SavePlayerParty();
-        QuestManager.Instance?.SaveProgress();
+        // Chỉ save khi thắng hoặc bỏ chạy — khi thua, RespawnAtSavePoint() sẽ hồi máu trước rồi save sau
+        if (playerWon || playerFled)
+        {
+            GameManager.Instance.SavePlayerParty();
+            QuestManager.Instance?.SaveProgress();
+        }
 
         InputController.Instance.UnbindBattleManager();
         MapManager.Instance.EndBattle(playerWon);

@@ -33,13 +33,16 @@ public class SavePoint : MonoBehaviour
 
     private void Update()
     {
-        if (isPlayerInRange && InputController.Instance != null)
+        if (!isPlayerInRange) return;
+        if (InputController.Instance == null) return;
+
+        // Chỉ xử lý khi đang ở chế độ Map (tránh xung đột phím F với Battle/UI khác)
+        if (InputController.Instance.Mode != InputMode.Map) return;
+
+        // Nhấn phím F (Interact) để mở Menu Party
+        if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
         {
-            // Nhấn phím F (Interact) để mở Menu Party
-            if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
-            {
-                SavePointUI.Instance?.Open(this);
-            }
+            SavePointUI.Instance?.Open(this);
         }
     }
 }

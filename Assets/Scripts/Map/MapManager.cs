@@ -6,6 +6,9 @@ public class MapManager : MonoBehaviour
 {
     public static MapManager Instance;
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     [Header("Current Map")]
     public Mapdata currentMap;
 

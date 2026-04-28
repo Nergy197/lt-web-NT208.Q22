@@ -134,6 +134,14 @@ app.get("/sync", async (req, res) => {
   }
 });
 
+/* ================= SPA FALLBACK ================= */
+
+// BUG FIX: SPA fallback phải đăng ký SAU tất cả API routes
+// nhưng TRƯỚC khi server listen, tránh race condition
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"));
+});
+
 /* ================= CONNECT + START ================= */
 
 client.connect()
@@ -146,14 +154,15 @@ client.connect()
 
     app.listen(3000, () => {
       console.log("Server running on port 3000");
-
-      // BUG FIX: SPA fallback phải đăng ký SAU tất cả API routes
-      // và SAU khi server đã listen, tránh override các route API
-      app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "public/index.html"));
-      });
     });
   })
   .catch(err => {
     console.error(err);
   });
+
+// Đóng MongoDB connection khi process thoát
+process.on('SIGINT', async () => {
+  await client.close();
+  console.log("MongoDB disconnected");
+  process.exit(0);
+});

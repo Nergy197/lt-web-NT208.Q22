@@ -46,6 +46,13 @@ public class TeleportPillar : MonoBehaviour
     // Tất cả các trụ trong scene tự đăng ký vào đây
     private static List<TeleportPillar> allPillars = new List<TeleportPillar>();
 
+    // Tự động clear khi Play mode bắt đầu (tránh stale references từ lần Play trước)
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        allPillars.Clear();
+    }
+
     /// <summary>Trả về danh sách tất cả trụ đang active trong scene.</summary>
     public static List<TeleportPillar> GetAllPillars() => allPillars;
 
@@ -90,14 +97,8 @@ public class TeleportPillar : MonoBehaviour
     {
         Debug.Log($"[TeleportPillar] OnTriggerEnter2D: tag={other.tag}, name={other.gameObject.name}");
         if (!other.CompareTag("Player")) return;
-        
-        if (InputController.Instance != null &&
-            InputController.Instance.Mode != InputMode.Map)
-        {
-            Debug.LogWarning($"[TeleportPillar] Bỏ qua: InputMode = {InputController.Instance.Mode} (cần Map)");
-            return;
-        }
 
+        // Luôn set isPlayerInRange — kiểm tra InputMode ở Update() là đủ
         isPlayerInRange = true;
         Debug.Log($"[TeleportPillar] ✅ Player trong vùng! Nhấn F để mở menu ({pillarName})");
     }
@@ -113,13 +114,8 @@ public class TeleportPillar : MonoBehaviour
     {
         if (!isPlayerInRange) return;
         
-        // Tự tạo InputController nếu thiếu (khi play trực tiếp MapScene)
-        if (InputController.Instance == null)
-        {
-            Debug.LogWarning("[TeleportPillar] InputController.Instance = null → tự tạo!");
-            new GameObject("InputController").AddComponent<InputController>();
-            return; // Đợi frame sau để InputController khởi tạo xong
-        }
+        // InputController chưa sẵn sàng → bỏ qua (MapSceneBootstrap sẽ tạo nếu cần)
+        if (InputController.Instance == null) return;
         
         if (InputController.Instance.Mode != InputMode.Map) return;
 

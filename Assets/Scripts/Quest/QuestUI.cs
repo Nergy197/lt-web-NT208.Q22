@@ -54,6 +54,10 @@ public class QuestUI : MonoBehaviour
         QuestEvents.OnQuestStarted       -= OnQuestStarted;
         QuestEvents.OnObjectiveCompleted -= OnObjectiveCompleted;
         QuestEvents.OnQuestCompleted     -= OnQuestCompleted;
+
+        // Đảm bảo Time.timeScale được restore nếu branch panel đang mở khi scene chuyển
+        if (Time.timeScale == 0f)
+            Time.timeScale = 1f;
     }
 
     // ─── Event handlers ──────────────────────────────────────────────────
