@@ -4,6 +4,9 @@ const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
 
+// Load biến môi trường từ .env (nếu có)
+require("dotenv").config();
+
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
@@ -14,7 +17,7 @@ app.use(express.json());
 
 /* ================= DATABASE ================= */
 
-const client = new MongoClient("mongodb://127.0.0.1:27017");
+const client = new MongoClient(process.env.MONGO_URI || "mongodb://127.0.0.1:27017");
 let db;
 
 /* ================= SERVE UNITY WEBGL ================= */
