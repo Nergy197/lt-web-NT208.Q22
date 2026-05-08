@@ -74,6 +74,13 @@ public class MapManager : MonoBehaviour
             currentEnemies.Add(enemy);
         }
 
+        // Nếu pool toàn null thì huỷ encounter để tránh load BattleScene rỗng.
+        if (currentEnemies.Count == 0)
+        {
+            Debug.LogWarning("[MapManager] Random encounter aborted: tất cả enemy data trả về null. Kiểm tra Mapdata.possibleEnemies.");
+            return;
+        }
+
         currentMapLevel = currentMap.enemyLevel;
 
         Debug.Log("===== ENCOUNTER =====");
@@ -87,9 +94,17 @@ public class MapManager : MonoBehaviour
     {
         if (isInBattle) return;
 
+        if (currentEnemies == null || currentEnemies.Count == 0)
+        {
+            Debug.LogError("[MapManager] No enemies to battle");
+            return;
+        }
+
+        // Loại bỏ entry null để BattleManager.LoadEnemy không phải gặp data lỗi.
+        currentEnemies.RemoveAll(e => e == null);
         if (currentEnemies.Count == 0)
         {
-            Debug.LogError("No enemies to battle");
+            Debug.LogError("[MapManager] Tất cả enemy data null sau khi clean — huỷ battle.");
             return;
         }
 

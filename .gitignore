@@ -6,6 +6,8 @@
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
+[Bb]uild[Ll]ogs/
+[Bb]uild[Rr]eports/
 [Ll]ogs/
 [Uu]serSettings/
 [Mm]emoryCaptures/
@@ -41,6 +43,9 @@ sysinfo.txt
 debug.log
 *.log
 crashlytics-build.properties
+[Cc]rash[Rr]eports/
+[Pp]rofiling/
+[Pp]rofile[Dd]ata/
 
 ####################################
 # UNITY - ADDRESSABLE BUILD CACHE
@@ -61,6 +66,10 @@ crashlytics-build.properties
 ####################################
 # TextMesh Pro
 [Aa]ssets/TextMesh*Pro/
+
+# Generated light baking cache / GI data
+[Aa]ssets/**/[Ll]ighting[Dd]ata*.asset
+[Aa]ssets/**/[Ll]ightmap-[Ss]napshot*.asset
 
 # Plastic SCM
 *.private.0
@@ -132,6 +141,9 @@ $RECYCLE.BIN/
 .agents/
 _agent/
 _agents/
+.cursor/
+.cursor-chat-history/
+.cursor-tutor/
 
 ####################################
 # NOTE: DO NOT IGNORE .meta FILES!
