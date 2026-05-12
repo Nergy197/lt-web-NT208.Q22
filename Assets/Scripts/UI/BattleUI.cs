@@ -18,6 +18,9 @@ public class BattleUI : MonoBehaviour
 {
     public static BattleUI Instance { get; private set; }
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     // ================= PLAYER HUD =================
 
     [Header("Player HUD (gan cho moi player slot)")]
@@ -54,6 +57,9 @@ public class BattleUI : MonoBehaviour
     [SerializeField] private GameObject turnOrderPanel;
     [SerializeField] private TextMeshProUGUI turnOrderText;
 
+    [Header("Turn Indicator")]
+    [SerializeField] private TextMeshProUGUI turnIndicatorText;
+
     // ================= BATTLE LOG =================
 
     [Header("Battle Log")]
@@ -82,6 +88,10 @@ public class BattleUI : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
+
+        // Reset HUD ngay từ Awake để xoá các placeholder cố định trong scene
+        // (ví dụ tên "Trần Quốc Tuấn" baked vào TMP) trước khi runtime data sẵn sàng.
+        ClearAllHUDs();
     }
 
     void Start()
@@ -90,6 +100,12 @@ public class BattleUI : MonoBehaviour
         if (actionMenuPanel != null) actionMenuPanel.SetActive(false);
         if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
         if (resultPanel != null) resultPanel.SetActive(false);
+
+        if (turnIndicatorText != null) turnIndicatorText.text = string.Empty;
+        if (turnOrderText != null) turnOrderText.text = string.Empty;
+        if (battleLogText != null) battleLogText.text = string.Empty;
+        if (playerEffectsText != null) playerEffectsText.text = string.Empty;
+        if (enemyEffectsText != null) enemyEffectsText.text = string.Empty;
 
         // Bind buttons
         if (btnAttack != null) btnAttack.onClick.AddListener(OnAttackPressed);
@@ -137,8 +153,32 @@ public class BattleUI : MonoBehaviour
     {
         if (bm == null) return;
 
+        // Chỉ update HUD khi cả hai party đã được khởi tạo. Nếu chưa, giữ
+        // khung HUD ở trạng thái rỗng (đã reset trong Awake) để tránh nhấp nháy.
+        if (bm.PlayerParty == null || bm.EnemyParty == null) return;
+
         UpdateAllHUDs();
         UpdateStatusEffects();
+    }
+
+    /// <summary>
+    /// Đặt toàn bộ HUD player/enemy về trạng thái rỗng (giữ khung, không có dữ liệu).
+    /// Gọi khi mới mở scene hoặc khi battle reset.
+    /// </summary>
+    public void ClearAllHUDs()
+    {
+        for (int i = 0; i < playerHUDs.Count; i++)
+        {
+            if (playerHUDs[i] == null) continue;
+            playerHUDs[i].gameObject.SetActive(true);
+            playerHUDs[i].SetEmpty();
+        }
+        for (int i = 0; i < enemyHUDs.Count; i++)
+        {
+            if (enemyHUDs[i] == null) continue;
+            enemyHUDs[i].gameObject.SetActive(true);
+            enemyHUDs[i].SetEmpty();
+        }
     }
 
     // ================= HUD UPDATE =================
@@ -149,6 +189,8 @@ public class BattleUI : MonoBehaviour
         {
             for (int i = 0; i < playerHUDs.Count; i++)
             {
+                if (playerHUDs[i] == null) continue;
+
                 if (i < bm.PlayerParty.Members.Count)
                 {
                     var member = bm.PlayerParty.Members[i];
@@ -160,6 +202,27 @@ public class BattleUI : MonoBehaviour
                 else
                 {
                     playerHUDs[i].gameObject.SetActive(false);
+                }
+            }
+        }
+
+        // Update Enemy HUDs
+        if (bm.EnemyParty != null)
+        {
+            for (int i = 0; i < enemyHUDs.Count; i++)
+            {
+                if (enemyHUDs[i] == null) continue;
+
+                if (i < bm.EnemyParty.Members.Count)
+                {
+                    var member = bm.EnemyParty.Members[i];
+                    enemyHUDs[i].gameObject.SetActive(member.IsAlive);
+                    if (member.IsAlive)
+                        enemyHUDs[i].UpdateHUD(member.entityName, member.currentHP, member.MaxHP);
+                }
+                else
+                {
+                    enemyHUDs[i].gameObject.SetActive(false);
                 }
             }
         }
@@ -196,6 +259,13 @@ public class BattleUI : MonoBehaviour
         if (actionMenuPanel != null) actionMenuPanel.SetActive(true);
         if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
 
+        // Update turn indicator + highlight active HUD slot
+        if (player != null)
+        {
+            SetTurnIndicator($"Luot: {player.entityName}");
+            HighlightActivePlayerHUD(player.BattleSlotId);
+        }
+
         // Update skill menu content
         UpdateSkillMenu(player);
     }
@@ -206,12 +276,35 @@ public class BattleUI : MonoBehaviour
         if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
     }
 
+    /// <summary>
+    /// Highlight player HUD dang den luot, tat highlight cac slot khac.
+    /// Goi -1 de tat tat ca highlight (vi du khi den luot enemy).
+    /// </summary>
+    public void HighlightActivePlayerHUD(int slotId)
+    {
+        for (int i = 0; i < playerHUDs.Count; i++)
+        {
+            if (playerHUDs[i] != null)
+                playerHUDs[i].SetHighlight(i == slotId);
+        }
+    }
+
+    /// <summary>
+    /// Cap nhat text Turn Indicator (top-center).
+    /// </summary>
+    public void SetTurnIndicator(string label)
+    {
+        if (turnIndicatorText != null) turnIndicatorText.text = label;
+    }
+
     void UpdateSkillMenu(PlayerStatus player)
     {
         if (player == null) return;
 
         for (int i = 0; i < skillButtons.Count; i++)
         {
+            if (skillButtons[i] == null) continue;
+
             if (i < player.SkillCount)
             {
                 var skill = player.GetSkillByIndex(i);
@@ -345,61 +438,19 @@ public class BattleUI : MonoBehaviour
     void ShowResult(string result, bool isWin)
     {
         HideActionMenu();
+        HighlightActivePlayerHUD(-1);
+        SetTurnIndicator(string.Empty);
         if (resultPanel != null) resultPanel.SetActive(true);
-        if (resultText != null) resultText.text = result;
+        if (resultText != null)
+        {
+            resultText.text = result;
+            resultText.color = isWin ? new Color(1f, 0.85f, 0.3f) : new Color(1f, 0.4f, 0.4f);
+        }
+        if (expText != null) expText.text = string.Empty;
     }
 
     public void SetExpResult(string expInfo)
     {
         if (expText != null) expText.text = expInfo;
-    }
-}
-
-// ================= UNIT HUD COMPONENT =================
-
-/// <summary>
-/// Component UI cho moi unit: hien thi ten, HP bar, AP bar.
-/// Attach vao moi unit HUD prefab/panel.
-/// </summary>
-public class UnitHUD : MonoBehaviour
-{
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private Slider hpSlider;
-    [SerializeField] private TextMeshProUGUI hpText;
-    [SerializeField] private Slider apSlider;
-    [SerializeField] private TextMeshProUGUI apText;
-
-    public void UpdateHUD(string unitName, int currentHP, int maxHP, int currentAP = -1, int maxAP = -1)
-    {
-        if (nameText != null) nameText.text = unitName;
-
-        if (hpSlider != null)
-        {
-            hpSlider.maxValue = maxHP;
-            hpSlider.value = currentHP;
-        }
-
-        if (hpText != null) hpText.text = $"{currentHP}/{maxHP}";
-
-        // AP bar (chi hien cho player)
-        if (currentAP >= 0 && maxAP > 0)
-        {
-            if (apSlider != null)
-            {
-                apSlider.gameObject.SetActive(true);
-                apSlider.maxValue = maxAP;
-                apSlider.value = currentAP;
-            }
-            if (apText != null)
-            {
-                apText.gameObject.SetActive(true);
-                apText.text = $"AP: {currentAP}/{maxAP}";
-            }
-        }
-        else
-        {
-            if (apSlider != null) apSlider.gameObject.SetActive(false);
-            if (apText != null) apText.gameObject.SetActive(false);
-        }
     }
 }

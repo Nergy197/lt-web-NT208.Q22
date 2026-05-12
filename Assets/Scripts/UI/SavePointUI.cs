@@ -10,6 +10,9 @@ public class SavePointUI : MonoBehaviour
 {
     public static SavePointUI Instance;
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     [Header("Panel Root")]
     [SerializeField] private GameObject panel; // Root Panel - bật/tắt để hiện/ẩn
 
@@ -136,19 +139,11 @@ public class SavePointUI : MonoBehaviour
 
         string sceneName = SceneManager.GetActiveScene().name;
 
+        // Lưu Save Point (hồi máu + lưu local + backup server) — CHỈ gọi 1 lần
+        // SaveRoutine() bên trong đã tự gọi QuestManager.SaveProgress()
         GameManager.Instance.SaveAtPoint(currentPoint.pointId, sceneName);
-        QuestManager.Instance?.SaveProgress();   // lưu tiến độ quest cùng party
 
-        SetStatus("Đang lưu...");
-
-        // Lưu thêm một lần với callback để cập nhật UI khi hoàn tất
-        GameManager.Instance.SavePlayerPartyWithCallback((serverOk) =>
-        {
-            if (serverOk)
-                SetStatus("Lưu thành công!");
-            else
-                SetStatus("Đã lưu offline!");
-        });
+        SetStatus("Đã lưu thành công!");
 
         Debug.Log($"[SavePointUI] Saving at {currentPoint.pointId} in {sceneName}");
     }

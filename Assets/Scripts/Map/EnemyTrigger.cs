@@ -40,6 +40,9 @@ public class EnemyTrigger : MonoBehaviour
 
         if (requireInteract && isPlayerInRange && InputController.Instance != null)
         {
+            // Chỉ xử lý khi đang ở chế độ Map (tránh xung đột với UI/Battle)
+            if (InputController.Instance.Mode != InputMode.Map) return;
+
             if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
             {
                 StartBattle();

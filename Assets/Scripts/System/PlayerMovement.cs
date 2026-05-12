@@ -13,6 +13,10 @@ public class PlayerMovement : MonoBehaviour
 
     public float speed = 5f;
 
+    // Lưu reference delegate để unsubscribe khi Destroy (tránh input leak)
+    private System.Action<InputAction.CallbackContext> onMovePerformed;
+    private System.Action<InputAction.CallbackContext> onMoveCanceled;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -29,24 +33,27 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        input.Input.Map.Moves.performed += ctx =>
+        onMovePerformed = ctx =>
         {
             move = ctx.ReadValue<Vector2>();
 
             // UPDATE ANIMATION
             UpdateAnimation();
 
-            Debug.Log("MOVE INPUT: " + move);
+            GameLog.Log("MOVE INPUT: " + move);
             TryEncounter();
         };
 
-        input.Input.Map.Moves.canceled += ctx =>
+        onMoveCanceled = ctx =>
         {
             move = Vector2.zero;
 
             // UPDATE ANIMATION
             UpdateAnimation();
         };
+
+        input.Input.Map.Moves.performed += onMovePerformed;
+        input.Input.Map.Moves.canceled += onMoveCanceled;
 
         // Khôi phục vị trí sau Battle
         if (GameManager.Instance != null &&
@@ -77,6 +84,16 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Debug.Log("PLAYER READY");
+    }
+
+    void OnDestroy()
+    {
+        // Unsubscribe để tránh input leak khi scene reload
+        if (input != null && input.Input != null)
+        {
+            if (onMovePerformed != null) input.Input.Map.Moves.performed -= onMovePerformed;
+            if (onMoveCanceled != null) input.Input.Map.Moves.canceled -= onMoveCanceled;
+        }
     }
 
     void FixedUpdate()

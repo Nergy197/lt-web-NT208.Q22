@@ -5,6 +5,9 @@ public class InputController : MonoBehaviour
 {
     public static InputController Instance;
 
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     public GameInput Input;
     public InputMode Mode;
 

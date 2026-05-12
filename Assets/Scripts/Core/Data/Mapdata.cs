@@ -8,6 +8,10 @@ public class Mapdata : ScriptableObject
     public string mapName;
     public int mapId;
 
+    [Header("=== BATTLE BACKGROUND ===")]
+    [Tooltip("Prefab nền chiến đấu cho map này. Nếu null, BattleScene sẽ dùng background mặc định (Tutorial).")]
+    public GameObject battleBackgroundPrefab;
+
     [Header("=== DIFFICULTY / ENEMY LEVEL ===")]
     [Tooltip("Common level applied to every enemy in this map")]
     public int enemyLevel = 1;
@@ -54,6 +58,8 @@ public class Mapdata : ScriptableObject
 
     // ---------------- RANDOM GENERATOR ----------------
     // Generate player buffs/debuffs heuristically depending on map difficulty (enemyLevel)
+    // LƯU Ý: Hàm này ghi đè dữ liệu trên ScriptableObject — chỉ nên gọi trong Editor
+    // hoặc tạo runtime copy trước khi gọi.
     public void GenerateRandomPlayerEffects(int seed = 0)
     {
         playerBuffs.Clear();
@@ -103,6 +109,7 @@ public class Mapdata : ScriptableObject
     }
 
     // optional: generate enemy effects similarly
+    // LƯU Ý: Hàm này ghi đè dữ liệu trên ScriptableObject — chỉ nên gọi trong Editor.
     public void GenerateRandomEnemyEffects(int seed = 0)
     {
         enemyBuffs.Clear();

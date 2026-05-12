@@ -14,11 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::QuestSO
   Id: Q001
   Title: "Di nguy\u1EC7n c\u1EE7a cha"
-  Description: 
+  Description: "Tr\u1EA7n Qu\u1ED1c Tu\u1EA5n ch\u1EE9ng ki\u1EBFn di nguy\u1EC7n c\u1EE7a
+    Tr\u1EA7n Li\u1EC5u; gi\u1EEF b\u00ED m\u1EADt trong l\u00F2ng."
   IsMainQuest: 1
   Objectives:
   - Id: 01
     Description: "g\u1EB7p cha"
     IsCompleted: 0
   BranchChoices: []
-  NextQuests: []
+  NextQuests:
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd0, type: 2}

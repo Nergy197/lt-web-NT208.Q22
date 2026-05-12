@@ -17,6 +17,13 @@ public static class EventManager
     private static readonly Dictionary<GameEvent, List<Action<object>>> listeners
         = new Dictionary<GameEvent, List<Action<object>>>();
 
+    // Tự động clear listeners khi Play mode bắt đầu (tránh stale callbacks từ lần Play trước)
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics()
+    {
+        listeners.Clear();
+    }
+
     // ================= SUBSCRIBE =================
 
     public static void Subscribe(GameEvent eventType, Action<object> callback)
@@ -58,7 +65,7 @@ public static class EventManager
             }
         }
 
-        Debug.Log($"[EVENT] {eventType}" + (payload != null ? $" | payload: {payload.GetType().Name}" : ""));
+        GameLog.Log($"[EVENT] {eventType}" + (payload != null ? $" | payload: {payload.GetType().Name}" : ""));
     }
 
     // ================= CLEAR (dùng khi test hoặc reset game) =================

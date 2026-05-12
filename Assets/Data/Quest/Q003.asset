@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe64214402921f4388473cbc2870363, type: 3}
+  m_Name: Q003
+  m_EditorClassIdentifier: Assembly-CSharp::QuestSO
+  Id: Q003
+  Title: "Tr\u1EADn chi\u1EBFn \u0111\u1EA7u ti\u00EAn"
+  Description: "L\u1EA7n \u0111\u1EA7u ch\u1EA1m tr\u00E1n qu\u00E2n M\u00F4ng Nguy\u00EAn
+    quy m\u00F4 l\u1EDBn. Tr\u1EADn n\u00E0y thi\u1EBFt k\u1EBF thua b\u1EAFt bu\u1ED9c."
+  IsMainQuest: 1
+  Objectives:
+  - Id: O1
+    Description: "V\u00E0o tr\u1EADn v\u00E0 ho\u00E0n t\u1EA5t pha m\u1EDF \u0111\u1EA7u"
+    IsCompleted: 0
+  - Id: O2
+    Description: "Ho\u00E0n th\u00E0nh m\u1EE5c ti\u00EAu ph\u1EE5 trong tr\u1EADn"
+    IsCompleted: 0
+  - Id: O3
+    Description: "Ch\u1ECBu \u00E1p l\u1EF1c t\u1EA5n c\u00F4ng c\u1EE7a \u0111\u1ECBch"
+    IsCompleted: 0
+  - Id: O4
+    Description: "Thua tr\u1EADn theo k\u1ECBch b\u1EA3n (s\u1EE5p \u0111\u1ED5 ph\u00F2ng
+      tuy\u1EBFn)"
+    IsCompleted: 0
+  BranchChoices: []
+  NextQuests:
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd2, type: 2}

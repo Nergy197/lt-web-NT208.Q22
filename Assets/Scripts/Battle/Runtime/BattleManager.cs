@@ -6,8 +6,14 @@ public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance { get; private set; }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetStatics() => Instance = null;
+
     /// <summary>Expose để PlayerAttack.ResolveEffectTarget có thể lấy ally target.</summary>
     public Party PlayerParty => playerParty;
+
+    /// <summary>Expose để BattleUI có thể update enemy HUDs.</summary>
+    public Party EnemyParty => enemyParty;
 
     private Party playerParty;
     private Party enemyParty;
@@ -49,14 +55,77 @@ public class BattleManager : MonoBehaviour
 
         BattleEvents.OnAttackFinished += OnAttackFinished;
 
-        yield return new WaitUntil(() =>
-            GameManager.Instance != null &&
-            GameManager.Instance.isLoaded);
+        // Đợi GameManager sẵn sàng (cứu các trường hợp khác thứ tự load).
+        // Có timeout cứng để không treo BattleScene mãi mãi nếu cấu hình lỗi.
+        float timeout = 5f;
+        while ((GameManager.Instance == null || !GameManager.Instance.isLoaded) && timeout > 0f)
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (GameManager.Instance == null || !GameManager.Instance.isLoaded)
+        {
+            Debug.LogError("[BATTLE] GameManager chưa sẵn sàng — không thể vào trận. Quay lại MapScene.");
+            FailSafeBackToMap();
+            yield break;
+        }
 
         playerParty = GameManager.Instance.GetPlayerParty();
+
+        // Guard 1: party rỗng / null → không thể battle.
+        if (playerParty == null || playerParty.Members == null || playerParty.Members.Count == 0)
+        {
+            Debug.LogError("[BATTLE] Player party rỗng hoặc null — kiểm tra GameManager.LoadPlayerParty hoặc save data.");
+            FailSafeBackToMap();
+            yield break;
+        }
+
+        // Guard 2: phải có MapManager để load enemy. Nếu không có (ví dụ Play
+        // trực tiếp BattleScene mà không qua MapScene) → fail-safe.
+        if (MapManager.Instance == null)
+        {
+            Debug.LogError("[BATTLE] MapManager.Instance == null — BattleScene cần được mở qua MapScene/random encounter.");
+            FailSafeBackToMap();
+            yield break;
+        }
+
         LoadEnemy();
-        InputController.Instance.BindBattleManager(this);
+
+        // Guard 3: enemy party phải có thành viên. Nếu encounter chưa cấu hình
+        // đầy đủ thì không cho battle (tránh CheckEndBattle “win ngay” bất thường).
+        if (enemyParty == null || enemyParty.Members == null || enemyParty.Members.Count == 0)
+        {
+            Debug.LogError("[BATTLE] Không có enemy nào được tạo — kiểm tra MapManager.currentEnemies hoặc Mapdata.possibleEnemies.");
+            FailSafeBackToMap();
+            yield break;
+        }
+
+        // Guard 4: InputController không bắt buộc cho battle loop, nhưng cảnh báo
+        // rõ ràng để người chơi biết phím tắt sẽ không hoạt động.
+        if (InputController.Instance != null)
+            InputController.Instance.BindBattleManager(this);
+        else
+            Debug.LogWarning("[BATTLE] InputController.Instance == null — phím tắt battle sẽ không hoạt động.");
+
         InitBattle();
+    }
+
+    /// <summary>
+    /// Quay về MapScene khi battle không thể bắt đầu hợp lệ. Reset cờ
+    /// MapManager.isInBattle để random encounter tiếp tục hoạt động.
+    /// </summary>
+    void FailSafeBackToMap()
+    {
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.isInBattle = false;
+            if (MapManager.Instance.currentEnemies != null)
+                MapManager.Instance.currentEnemies.Clear();
+        }
+        if (InputController.Instance != null)
+            InputController.Instance.UnbindBattleManager();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MapScene");
     }
 
     void OnDestroy()
@@ -97,9 +166,17 @@ public class BattleManager : MonoBehaviour
     void LoadEnemy()
     {
         enemyParty = new Party(PartyType.Enemy);
-        // Dùng CreateEnemyStatuses() để enemy được SetLevel + apply map effects đúng cách
-        foreach (var e in MapManager.Instance.CreateEnemyStatuses())
+        if (MapManager.Instance == null)
         {
+            Log("[BATTLE] LoadEnemy: MapManager.Instance == null, bỏ qua spawn enemy.");
+            return;
+        }
+        // Dùng CreateEnemyStatuses() để enemy được SetLevel + apply map effects đúng cách
+        var statuses = MapManager.Instance.CreateEnemyStatuses();
+        if (statuses == null) return;
+        foreach (var e in statuses)
+        {
+            if (e == null) continue;
             enemyParty.AddMember(e);
             Log($"[BATTLE] Spawn enemy: {e.entityName} Lv{e.level}");
         }
@@ -182,6 +259,9 @@ public class BattleManager : MonoBehaviour
             if (currentUnit == null || !currentUnit.IsAlive) continue;
 
             Log("[TURN] " + currentUnit.entityName);
+
+            if (BattleUI.Instance != null)
+                BattleUI.Instance.UpdateTurnOrder(BuildTurnOrderInfo());
 
             // Xử lý Poison và Stun trước khi unit hành động (delegate sang TurnManager).
             bool isStunned = turnManager.ProcessTurnEffects(currentUnit);
@@ -371,6 +451,20 @@ public class BattleManager : MonoBehaviour
     {
         var enemy = currentUnit as EnemyStatus;
 
+        // Guard: nếu currentUnit không phải EnemyStatus (lỗi dữ liệu), bỏ qua lượt.
+        if (enemy == null)
+        {
+            Log("[ENEMY] currentUnit không phải EnemyStatus — bỏ qua lượt.");
+            yield break;
+        }
+
+        // Tat highlight player + cap nhat turn indicator hien thi luot enemy
+        if (BattleUI.Instance != null)
+        {
+            BattleUI.Instance.HighlightActivePlayerHUD(-1);
+            BattleUI.Instance.SetTurnIndicator($"Luot dich: {enemy.entityName}");
+        }
+
         // Neu enemy co AI, de AI quyet dinh hanh dong
         if (enemy.HasAI)
         {
@@ -463,6 +557,15 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    string BuildTurnOrderInfo()
+    {
+        // Tom luoc party con song de hien thi tren UI (turn order panel).
+        int playerAlive = 0, enemyAlive = 0;
+        foreach (var p in playerParty.Members) if (p.IsAlive) playerAlive++;
+        foreach (var e in enemyParty.Members) if (e.IsAlive) enemyAlive++;
+        return $"Player: {playerAlive}  |  Enemy: {enemyAlive}";
+    }
+
     bool CheckEndBattle()
     {
         if (playerFled) return true;
@@ -495,22 +598,12 @@ public class BattleManager : MonoBehaviour
         else if (playerWon)
         {
             EventManager.Publish(GameEvent.BattleWin);
-
-            // Hoàn thành objective "Dẫn quân ra trận" và "Đánh giá thực lực địch" (Q002).
-            QuestManager.Instance?.CompleteObjective("Q002", "O2");
-            QuestManager.Instance?.CompleteObjective("Q002", "O3");
-
-            // Đã đủ sức mạnh dù không thua → bỏ qua yêu cầu thua trận của Q003.O1.
-            QuestManager.Instance?.CompleteObjective("Q003", "O1");
+            // Quest objectives giờ được xử lý bởi BattleQuestTrigger qua EventManager
         }
         else
         {
             EventManager.Publish(GameEvent.BattleLose);
-
-            // Thua trận → trận chiến vẫn diễn ra (O2, O3) và nếm mùi thất bại (O1).
-            QuestManager.Instance?.CompleteObjective("Q002", "O2");
-            QuestManager.Instance?.CompleteObjective("Q002", "O3");
-            QuestManager.Instance?.CompleteObjective("Q003", "O1");
+            // Quest objectives giờ được xử lý bởi BattleQuestTrigger qua EventManager
         }
 
         if (playerWon)
@@ -535,6 +628,8 @@ public class BattleManager : MonoBehaviour
             int expPerPlayer = aliveCount > 0 ? Mathf.Max(1, totalExp / aliveCount) : 0;
             Log($"[EXP] Total: {totalExp} | Alive: {aliveCount} | Each: {expPerPlayer} (AvgLv {avgLevel})");
 
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"EXP nhan duoc: {expPerPlayer} / nguoi");
             foreach (var p in playerParty.Members)
             {
                 var ps = p as PlayerStatus;
@@ -542,14 +637,34 @@ public class BattleManager : MonoBehaviour
                 {
                     ps.GainExp(expPerPlayer);
                     Log($"[EXP] {ps.entityName}: +{expPerPlayer} EXP → Lv{ps.level} ({ps.currentExp}/{ps.expToNextLevel})");
+                    sb.AppendLine($"{ps.entityName} → Lv{ps.level} ({ps.currentExp}/{ps.expToNextLevel})");
                 }
             }
+
+            if (BattleUI.Instance != null)
+                BattleUI.Instance.SetExpResult(sb.ToString());
         }
 
-        GameManager.Instance.SavePlayerParty();
-        QuestManager.Instance?.SaveProgress();
+        // Chỉ save khi thắng hoặc bỏ chạy — khi thua, RespawnAtSavePoint() sẽ hồi máu trước rồi save sau
+        if (playerWon || playerFled)
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.SavePlayerParty();
+            QuestManager.Instance?.SaveProgress();
+        }
 
-        InputController.Instance.UnbindBattleManager();
-        MapManager.Instance.EndBattle(playerWon);
+        if (InputController.Instance != null)
+            InputController.Instance.UnbindBattleManager();
+
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.EndBattle(playerWon);
+        }
+        else
+        {
+            // Không có MapManager (ví dụ khi test BattleScene độc lập) → load thẳng MapScene.
+            Debug.LogWarning("[BATTLE] EndBattle: MapManager.Instance == null, fallback load MapScene.");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MapScene");
+        }
     }
 }

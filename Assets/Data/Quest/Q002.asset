@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe64214402921f4388473cbc2870363, type: 3}
+  m_Name: Q002
+  m_EditorClassIdentifier: Assembly-CSharp::QuestSO
+  Id: Q002
+  Title: "Ti\u1EBFng tr\u1ED1ng bi\u00EAn \u1EA3i"
+  Description: "Nhi\u1EC1u n\u0103m sau di nguy\u1EC7n, qu\u00E2n M\u00F4ng C\u1ED5 tr\u00E0n
+    v\u00E0o \u0110\u1EA1i Vi\u1EC7t. Qu\u1ED1c Tu\u1EA5n nh\u1EADn l\u1EC7nh ra chi\u1EBFn
+    tuy\u1EBFn."
+  IsMainQuest: 1
+  Objectives:
+  - Id: O1
+    Description: "\u0110\u1EBFn \u0111i\u1EC3m h\u1ECDp qu\u00E2n / nh\u1EADn tin gi\u1EB7c"
+    IsCompleted: 0
+  - Id: O2
+    Description: "Nghe b\u00E1o c\u00E1o t\u00ECnh h\u00ECnh bi\u00EAn \u1EA3i"
+    IsCompleted: 0
+  - Id: O3
+    Description: "G\u1EB7p t\u01B0\u1EDBng \u0111\u1ED3ng minh / th\u1EE7 l\u0129nh c\u00E1nh
+      qu\u00E2n"
+    IsCompleted: 0
+  - Id: O4
+    Description: "Nh\u1EADn l\u1EC7nh xu\u1EA5t ph\u00E1t t\u1EDBi tr\u1EADn \u0111\u1ECBa"
+    IsCompleted: 0
+  BranchChoices: []
+  NextQuests:
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd1, type: 2}

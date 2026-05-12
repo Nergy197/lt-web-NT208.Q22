@@ -24,12 +24,13 @@ public class BattleDebugUI : MonoBehaviour
         while (logLines.Count > MAX_LINES)
             logLines.RemoveAt(0);
 
-        debugText.text = string.Join("\n", logLines);
+        if (debugText != null)
+            debugText.text = string.Join("\n", logLines);
     }
 
     public void Clear()
     {
         logLines.Clear();
-        debugText.text = "";
+        if (debugText != null) debugText.text = "";
     }
 }
