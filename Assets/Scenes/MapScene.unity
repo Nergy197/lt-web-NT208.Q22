@@ -546,7 +546,7 @@ MonoBehaviour:
   currentEnemies: []
   currentMapLevel: 0
   isInBattle: 0
-  encounterRate: 0
+  encounterRate: 0.001
 --- !u!4 &1216307299
 Transform:
   m_ObjectHideFlags: 0

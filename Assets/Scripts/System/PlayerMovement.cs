@@ -41,7 +41,6 @@ public class PlayerMovement : MonoBehaviour
             UpdateAnimation();
 
             GameLog.Log("MOVE INPUT: " + move);
-            TryEncounter();
         };
 
         onMoveCanceled = ctx =>
@@ -102,6 +101,10 @@ public class PlayerMovement : MonoBehaviour
 
         // đảm bảo update liên tục
         UpdateAnimation();
+
+        // Random encounter: tối đa 1 roll / FixedUpdate khi đang di chuyển (tránh spam theo từng input performed).
+        if (move.sqrMagnitude > 0.0001f)
+            TryEncounter();
     }
 
     // ================= ANIMATION =================

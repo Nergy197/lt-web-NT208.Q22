@@ -18,7 +18,9 @@ public class MapManager : MonoBehaviour
     public bool isInBattle = false;
 
     [Header("Random Encounter")]
-    public float encounterRate = 0.02f;
+    [Tooltip("Xác suất mỗi lần CheckForEncounter() (0–1). Nên gọi CheckForEncounter tối đa ~1 lần/FixedUpdate khi đang di chuyển — ví dụ 0.001 ≈ trung bình vài chục giây đi liên tục (50Hz).")]
+    [Range(0f, 1f)]
+    public float encounterRate = 0.001f;
     private int stepsSinceLastEncounter = 0;
 
     private void Awake()
