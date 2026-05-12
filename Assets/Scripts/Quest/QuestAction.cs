@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Một hành động quest được cấu hình trực tiếp trong Inspector.
@@ -23,6 +24,7 @@ public class QuestAction
     {
         CompleteObjective,  // Hoàn thành 1 objective trong quest
         StartQuest,         // Bắt đầu quest mới
+        LoadScene,          // Chuyển scene (tên trong SceneName)
     }
 
     [Tooltip("Khi nào kích hoạt hành động này")]
@@ -37,6 +39,9 @@ public class QuestAction
     [Tooltip("ID objective cần hoàn thành — ví dụ: O1, O2  (chỉ dùng cho CompleteObjective)")]
     public string ObjectiveId;
 
+    [Tooltip("Tên scene trong Build Settings (chỉ dùng cho LoadScene)")]
+    public string SceneName;
+
     // ─── Static helper ───────────────────────────────────────────────────
 
     /// <summary>
@@ -49,7 +54,8 @@ public class QuestAction
 
         foreach (var a in actions)
         {
-            if (a.TriggerOn != when || a.Quest == null) continue;
+            if (a.TriggerOn != when) continue;
+            if (a.Action != ActionType.LoadScene && a.Quest == null) continue;
 
             switch (a.Action)
             {
@@ -64,8 +70,19 @@ public class QuestAction
                     break;
 
                 case ActionType.StartQuest:
+                    if (a.Quest == null) break;
                     Debug.Log($"[QUEST ACTION] StartQuest {a.Quest.Id}");
                     QuestManager.Instance?.StartQuest(a.Quest);
+                    break;
+
+                case ActionType.LoadScene:
+                    if (string.IsNullOrEmpty(a.SceneName))
+                    {
+                        Debug.LogWarning("[QUEST ACTION] LoadScene: SceneName trống.");
+                        break;
+                    }
+                    Debug.Log($"[QUEST ACTION] LoadScene {a.SceneName}");
+                    SceneManager.LoadScene(a.SceneName);
                     break;
             }
         }

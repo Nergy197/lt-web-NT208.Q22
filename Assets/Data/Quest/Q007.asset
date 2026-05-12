@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe64214402921f4388473cbc2870363, type: 3}
+  m_Name: Q007
+  m_EditorClassIdentifier: Assembly-CSharp::QuestSO
+  Id: Q007
+  Title: "\u0110\u00F4ng B\u1ED9 \u0110\u1EA7u"
+  Description: "Ph\u1EA3n c\u00F4ng c\u00E1nh qu\u00E2n suy y\u1EBFu; th\u1EAFng l\u1EE3i
+    chi\u1EBFn l\u01B0\u1EE3c, kh\u00F4ng nh\u1EA5t thi\u1EBFt ph\u1EA3i ti\u00EAu di\u1EC7t
+    to\u00E0n b\u1ED9 \u0111\u1ECBch."
+  IsMainQuest: 1
+  Objectives:
+  - Id: O1
+    Description: "\u0110\u1EBFn \u0111i\u1EC3m h\u1ED9i qu\u00E2n tr\u01B0\u1EDBc
+      tr\u1EADn"
+    IsCompleted: 0
+  - Id: O2
+    Description: "G\u1EB7p ch\u1EC9 huy c\u00E1nh qu\u00E2n / nh\u1EADn vai tr\u00F2"
+    IsCompleted: 0
+  - Id: O3
+    Description: "Tr\u1EADn \u0110\u00F4ng B\u1ED9 \u0110\u1EA7u \u2014 th\u1EAFng
+      theo \u0111i\u1EC1u ki\u1EC7n k\u1ECBch b\u1EA3n"
+    IsCompleted: 0
+  - Id: O4
+    Description: "\u0110i\u1EC3m quan s\u00E1t \u2014 ch\u1EE9ng ki\u1EBFn gi\u1EB7c
+      r\u00FAt"
+    IsCompleted: 0
+  - Id: O5
+    Description: "B\u00E1o c\u00E1o t\u00F3m t\u1EAFt"
+    IsCompleted: 0
+  BranchChoices: []
+  NextQuests:
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd6, type: 2}

@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fe64214402921f4388473cbc2870363, type: 3}
+  m_Name: Q004
+  m_EditorClassIdentifier: Assembly-CSharp::QuestSO
+  Id: Q004
+  Title: "L\u1EC7nh r\u00FAt lui"
+  Description: "Sau th\u1EA3m b\u1EA1i: ch\u1EE9ng ki\u1EBFn th\u01B0\u01A1ng vong,
+    c\u1EE9u binh c\u00F2n s\u1ED1ng, truy\u1EC1n l\u1EC7nh r\u00FAt lui, t\u1EADp k\u1EBFt
+    t\u00E0n qu\u00E2n."
+  IsMainQuest: 1
+  Objectives:
+  - Id: O1
+    Description: "H\u1ED3i t\u1EC9nh / \u0111\u1EE9ng d\u1EADy sau h\u1ED7n lo\u1EA1n"
+    IsCompleted: 0
+  - Id: O2
+    Description: "\u0110i\u1EC3m quan s\u00E1t A \u2014 d\u00E2n b\u1ECB th\u01B0\u01A1ng
+      / tan hoang"
+    IsCompleted: 0
+  - Id: O3
+    Description: "\u0110i\u1EC3m quan s\u00E1t B \u2014 binh \u0111\u00E3 t\u1EED tr\u1EADn"
+    IsCompleted: 0
+  - Id: O4
+    Description: "C\u1EE9u binh l\u00EDnh c\u00F2n s\u1ED1ng (nh\u00F3m 1)"
+    IsCompleted: 0
+  - Id: O5
+    Description: "C\u1EE9u binh l\u00EDnh c\u00F2n s\u1ED1ng (nh\u00F3m 2)"
+    IsCompleted: 0
+  - Id: O6
+    Description: "Truy\u1EC1n l\u1EC7nh r\u00FAt lui"
+    IsCompleted: 0
+  - Id: O7
+    Description: "D\u1EABn t\u00E0n qu\u00E2n t\u1EDBi \u0111i\u1EC3m t\u1EADp k\u1EBFt
+      r\u00FAt lui"
+    IsCompleted: 0
+  BranchChoices: []
+  NextQuests:
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd3, type: 2}
