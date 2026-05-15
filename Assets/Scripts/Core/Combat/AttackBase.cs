@@ -9,7 +9,6 @@ public abstract class AttackBase
     protected Status attacker;
     protected Status target;
 
-    /// <summary>Đặt = true trong Prepare() nếu attack cần bị hủy (thiếu AP, target null, ...).</summary>
     protected bool cancelled = false;
 
     public void StartAttack(Status attacker, Status target)
@@ -17,14 +16,14 @@ public abstract class AttackBase
         this.attacker = attacker;
         this.target = target;
         cancelled = false;
-        
+
         if (BattleRunner.Instance == null)
         {
-            Debug.LogError("[ERROR] BattleRunner.Instance is null! Please add BattleRunner to scene.");
+            Debug.LogError("[ERROR] BattleRunner.Instance is null!");
             BattleEvents.RaiseAttackFinished();
             return;
         }
-        
+
         BattleRunner.Instance.StartCoroutine(Run());
     }
 
@@ -33,11 +32,21 @@ public abstract class AttackBase
         Phase = AttackPhase.Prepare;
         yield return Prepare();
 
-        // Nếu Prepare thất bại (cancelled hoặc attacker/target null) → skip Execute & Recovery
         if (!cancelled && attacker != null && target != null)
         {
+            // Lướt tới mục tiêu trước khi ra đòn
+            var visual = attacker.SpawnedModel?.GetComponent<UnitVisual>();
+            var targetTransform = target.SpawnedModel?.transform;
+            if (visual != null && targetTransform != null)
+                yield return visual.DashToward(targetTransform);
+
+            // Execute tự gọi PlayAttack() đúng thời điểm cho từng hit
             Phase = AttackPhase.Execute;
             yield return Execute();
+
+            // Lướt về sau khi đánh xong
+            if (visual != null)
+                yield return visual.ReturnToOrigin();
 
             Phase = AttackPhase.Recovery;
             yield return Recovery();
@@ -47,10 +56,15 @@ public abstract class AttackBase
         BattleEvents.RaiseAttackFinished();
     }
 
+    /// <summary>Gọi animation tấn công trên model của attacker.</summary>
+    protected void PlayAttackerAnimation()
+    {
+        attacker?.SpawnedModel?.GetComponent<UnitVisual>()?.PlayAttack();
+    }
+
     protected virtual IEnumerator Prepare() { yield break; }
     protected abstract IEnumerator Execute();
     protected virtual IEnumerator Recovery() { yield break; }
 
-    // Add abstract Use method for polymorphic attack execution
     public abstract void Use(Status attacker, Status target);
 }

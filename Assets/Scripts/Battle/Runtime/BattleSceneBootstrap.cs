@@ -1,31 +1,23 @@
 using UnityEngine;
 
 /// <summary>
-/// Bootstrap cho BattleScene — đảm bảo các runtime singleton tối thiểu tồn tại
-/// khi developer mở thẳng BattleScene trong Editor (không đi qua MapScene).
+/// Bootstrap cho BattleScene — đảm bảo các singleton tối thiểu tồn tại
+/// khi mở thẳng BattleScene trong Editor mà không qua MapScene.
 ///
-/// Trong build thực tế, các singleton này đã được tạo từ StartScene/MapScene
-/// và DontDestroyOnLoad nên bootstrap sẽ tự huỷ.
-///
-/// Gắn component này vào một GameObject "BattleSceneBootstrap" trong BattleScene.
+/// Trong build thực, GameManager/InputController đã được tạo từ StartScene
+/// và DontDestroyOnLoad → bootstrap tự bỏ qua.
 /// </summary>
 public class BattleSceneBootstrap : MonoBehaviour
 {
-    [Header("Editor-only fallbacks")]
-    [Tooltip("Prefab GameManager dùng khi mở thẳng BattleScene (test). Có thể để trống nếu đã chạy từ StartScene/MapScene.")]
-    [SerializeField] private GameManager gameManagerPrefab;
+    [Header("Debug Enemy Spawn")]
+    [Tooltip("MapData dùng để lấy possibleEnemies + enemyLevel khi test BattleScene trực tiếp.")]
+    [SerializeField] private Mapdata debugMapData;
 
-    [Tooltip("Prefab InputController dùng khi mở thẳng BattleScene (test).")]
-    [SerializeField] private InputController inputControllerPrefab;
+    [Tooltip("Số enemy tối thiểu spawn trong trận test.")]
+    [SerializeField][Range(1, 5)] private int minEnemies = 1;
 
-    [Tooltip("Prefab MapManager dùng khi mở thẳng BattleScene (test) — cần để có currentEnemies giả lập.")]
-    [SerializeField] private MapManager mapManagerPrefab;
-
-    [Tooltip("Test enemy list khi mở thẳng BattleScene (chỉ dùng nếu MapManager mới được spawn).")]
-    [SerializeField] private System.Collections.Generic.List<EnemyData> debugEnemies = new System.Collections.Generic.List<EnemyData>();
-
-    [Tooltip("Test map level khi mở thẳng BattleScene.")]
-    [SerializeField] private int debugMapLevel = 1;
+    [Tooltip("Số enemy tối đa spawn trong trận test.")]
+    [SerializeField][Range(1, 5)] private int maxEnemies = 3;
 
     void Awake()
     {
@@ -33,63 +25,50 @@ public class BattleSceneBootstrap : MonoBehaviour
         EnsureInputController();
         EnsureMapManager();
 
-        // Sau khi đã có MapManager, nếu chưa có enemy nào (vì không qua MapScene),
-        // nạp tạm danh sách debug để BattleManager có dữ liệu mà chạy.
         if (MapManager.Instance != null &&
-            (MapManager.Instance.currentEnemies == null || MapManager.Instance.currentEnemies.Count == 0) &&
-            debugEnemies != null && debugEnemies.Count > 0)
+            (MapManager.Instance.currentEnemies == null || MapManager.Instance.currentEnemies.Count == 0))
         {
-            MapManager.Instance.currentEnemies = new System.Collections.Generic.List<EnemyData>(debugEnemies);
-            MapManager.Instance.currentMapLevel = Mathf.Max(1, debugMapLevel);
-            MapManager.Instance.isInBattle = true;
-            Debug.Log($"[BattleBootstrap] Đã nạp {debugEnemies.Count} enemy debug để test BattleScene.");
+            LoadDebugEnemies();
         }
     }
 
     void EnsureGameManager()
     {
         if (GameManager.Instance != null) return;
-        if (gameManagerPrefab != null)
-        {
-            var gm = Instantiate(gameManagerPrefab);
-            gm.name = "GameManager";
-            Debug.Log("[BattleBootstrap] Tạo GameManager cứu hộ.");
-        }
-        else
-        {
-            Debug.LogWarning("[BattleBootstrap] Thiếu GameManager prefab — battle có thể không hoạt động khi test.");
-        }
+        new GameObject("GameManager").AddComponent<GameManager>();
+        Debug.Log("[BattleBootstrap] Tạo GameManager.");
     }
 
     void EnsureInputController()
     {
         if (InputController.Instance != null) return;
-        if (inputControllerPrefab != null)
-        {
-            var ic = Instantiate(inputControllerPrefab);
-            ic.name = "InputController";
-            Debug.Log("[BattleBootstrap] Tạo InputController cứu hộ.");
-        }
-        else
-        {
-            new GameObject("InputController").AddComponent<InputController>();
-            Debug.Log("[BattleBootstrap] Tạo InputController mặc định (không có prefab).");
-        }
+        new GameObject("InputController").AddComponent<InputController>();
+        Debug.Log("[BattleBootstrap] Tạo InputController.");
     }
 
     void EnsureMapManager()
     {
         if (MapManager.Instance != null) return;
-        if (mapManagerPrefab != null)
+        new GameObject("MapManager").AddComponent<MapManager>();
+        Debug.Log("[BattleBootstrap] Tạo MapManager.");
+    }
+
+    void LoadDebugEnemies()
+    {
+        if (debugMapData == null || debugMapData.possibleEnemies.Count == 0)
         {
-            var mm = Instantiate(mapManagerPrefab);
-            mm.name = "MapManager";
-            Debug.Log("[BattleBootstrap] Tạo MapManager cứu hộ.");
+            Debug.LogWarning("[BattleBootstrap] Chưa gán debugMapData — BattleManager sẽ dùng demo fallback.");
+            return;
         }
-        else
-        {
-            new GameObject("MapManager").AddComponent<MapManager>();
-            Debug.Log("[BattleBootstrap] Tạo MapManager mặc định (không có prefab).");
-        }
+
+        int count = UnityEngine.Random.Range(minEnemies, maxEnemies + 1);
+        var picked = new System.Collections.Generic.List<EnemyData>();
+        for (int i = 0; i < count; i++)
+            picked.Add(debugMapData.GetRandomEnemy());
+
+        MapManager.Instance.currentEnemies = picked;
+        MapManager.Instance.currentMapLevel = Mathf.Max(1, debugMapData.enemyLevel);
+        MapManager.Instance.isInBattle = true;
+        Debug.Log($"[BattleBootstrap] Spawn {count} enemy ngẫu nhiên từ '{debugMapData.mapName}' (level {debugMapData.enemyLevel}).");
     }
 }

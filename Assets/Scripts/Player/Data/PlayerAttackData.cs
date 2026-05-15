@@ -40,7 +40,11 @@ public class PlayerAttackData : ScriptableObject
 {
     [Header("Info")]
     public string attackName = "New Player Attack";
-    public int apCost = 2;
+    [Tooltip("AP tiêu khi dùng skill (0 = basic attack, 1-5 = skill).")]
+    public int apCost = 0;
+
+    [Tooltip("AP cộng khi đòn trúng. Basic attack nên để 1.")]
+    public int apRestore = 0;
 
     [Header("Damage Hits")]
     [Tooltip("Để trống nếu skill chỉ là buff/debuff (không gây damage)")]
@@ -68,6 +72,6 @@ public class PlayerAttackData : ScriptableObject
         // Clone danh sách effects
         var effectObjs = new List<SkillEffectEntry>(effects);
 
-        return new PlayerAttack(attackName, apCost, hitObjs, effectObjs);
+        return new PlayerAttack(attackName, apCost, apRestore, hitObjs, effectObjs);
     }
 }

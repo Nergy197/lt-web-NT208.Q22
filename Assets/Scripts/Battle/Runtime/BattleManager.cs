@@ -34,10 +34,37 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Transform playerSpawnAnchor;
     [SerializeField] private Transform enemySpawnAnchor;
     [SerializeField] private float spawnSpacing = 2f;
+    [Tooltip("Scale nhân vật player khi spawn (1 = giữ nguyên prefab).")]
+    [SerializeField] private float playerSpawnScale = 1f;
+    [Tooltip("Scale kẻ địch khi spawn — chỉnh để bằng cỡ player.")]
+    [SerializeField] private float enemySpawnScale = 1f;
+
+    [Header("Camera")]
+    [Tooltip("Orthographic size của camera khi vào battle (tăng để thu xa, giảm để gần).")]
+    [SerializeField] private float battleCameraSize = 4f;
 
     [Header("UI System")]
     [SerializeField] private GameObject targetCursor;
     [SerializeField] private Vector3 cursorOffset = new Vector3(0, 0f, 0);
+    [Tooltip("Cursor chỉ vào player đang hành động.")]
+    [SerializeField] private GameObject playerTurnCursor;
+    [SerializeField] private Vector3 playerCursorOffset = new Vector3(-1.2f, 0f, 0f);
+
+    [Header("Enemy World HUD")]
+    [Tooltip("Prefab WorldSpace canvas có UnitHUD — spawn dưới chân mỗi enemy lúc battle bắt đầu.")]
+    [SerializeField] private GameObject enemyHUDPrefab;
+    [Tooltip("Offset local so với model enemy — âm Y để nằm dưới chân sprite.")]
+    [SerializeField] private Vector3 enemyHUDOffset = new Vector3(0f, -1f, 0f);
+    [Tooltip("Scale của canvas HP enemy sau khi bù parent scale (0.5–1 là vừa).")]
+    [SerializeField] private float enemyHUDCanvasScale = 0.7f;
+
+    [Header("Demo/Test Mode")]
+    [SerializeField] private bool useDemoModeIfMissingManager = true;
+    [Tooltip("Kéo PlayerData asset vào để test — tự tạo player với đủ stats, prefab, skills.")]
+    [SerializeField] private PlayerData debugPlayerData;
+    [Tooltip("Fallback nếu không có debugPlayerData và không có MapData enemy.")]
+    [SerializeField] private GameObject debugEnemyPrefab;
+    [SerializeField] private EnemyAttackData debugEnemyAttack;
 
     private bool isTargetingAlly = false;
 
@@ -55,58 +82,63 @@ public class BattleManager : MonoBehaviour
 
         BattleEvents.OnAttackFinished += OnAttackFinished;
 
-        // Đợi GameManager sẵn sàng (cứu các trường hợp khác thứ tự load).
-        // Có timeout cứng để không treo BattleScene mãi mãi nếu cấu hình lỗi.
-        float timeout = 5f;
-        while ((GameManager.Instance == null || !GameManager.Instance.isLoaded) && timeout > 0f)
+        // Đợi GameManager sẵn sàng. Bỏ qua nếu demo mode đã bật.
+        if (!useDemoModeIfMissingManager)
         {
-            timeout -= Time.unscaledDeltaTime;
+            float timeout = 5f;
+            while ((GameManager.Instance == null || !GameManager.Instance.isLoaded) && timeout > 0f)
+            {
+                timeout -= Time.unscaledDeltaTime;
+                yield return null;
+            }
+        }
+        else
+        {
+            // Demo mode: chờ 1 frame để các singleton khác kịp Awake
             yield return null;
         }
 
         if (GameManager.Instance == null || !GameManager.Instance.isLoaded)
         {
-            Debug.LogError("[BATTLE] GameManager chưa sẵn sàng — không thể vào trận. Quay lại MapScene.");
-            FailSafeBackToMap();
-            yield break;
+            if (useDemoModeIfMissingManager)
+            {
+                Log("[BATTLE] GameManager chưa sẵn sàng — Kích hoạt DEMO MODE.");
+                LoadDemoData();
+            }
+            else
+            {
+                Debug.LogError("[BATTLE] GameManager chưa sẵn sàng — không thể vào trận. Quay lại MapScene.");
+                FailSafeBackToMap();
+                yield break;
+            }
         }
-
-        playerParty = GameManager.Instance.GetPlayerParty();
-
-        // Guard 1: party rỗng / null → không thể battle.
-        if (playerParty == null || playerParty.Members == null || playerParty.Members.Count == 0)
+        else
         {
-            Debug.LogError("[BATTLE] Player party rỗng hoặc null — kiểm tra GameManager.LoadPlayerParty hoặc save data.");
-            FailSafeBackToMap();
-            yield break;
-        }
-
-        // Guard 2: phải có MapManager để load enemy. Nếu không có (ví dụ Play
-        // trực tiếp BattleScene mà không qua MapScene) → fail-safe.
-        if (MapManager.Instance == null)
-        {
-            Debug.LogError("[BATTLE] MapManager.Instance == null — BattleScene cần được mở qua MapScene/random encounter.");
-            FailSafeBackToMap();
-            yield break;
-        }
-
-        LoadEnemy();
-
-        // Guard 3: enemy party phải có thành viên. Nếu encounter chưa cấu hình
-        // đầy đủ thì không cho battle (tránh CheckEndBattle “win ngay” bất thường).
-        if (enemyParty == null || enemyParty.Members == null || enemyParty.Members.Count == 0)
-        {
-            Debug.LogError("[BATTLE] Không có enemy nào được tạo — kiểm tra MapManager.currentEnemies hoặc Mapdata.possibleEnemies.");
-            FailSafeBackToMap();
-            yield break;
+            playerParty = GameManager.Instance.GetPlayerParty();
+            
+            if (playerParty == null || playerParty.Members == null || playerParty.Members.Count == 0)
+            {
+                Log("[BATTLE] Player party rỗng — Kích hoạt DEMO MODE.");
+                LoadDemoData();
+            }
+            else
+            {
+                if (MapManager.Instance == null)
+                {
+                    Log("[BATTLE] MapManager null — Kích hoạt DEMO ENEMY.");
+                    LoadDemoEnemy();
+                }
+                else
+                {
+                    LoadEnemy();
+                    if (enemyParty == null || enemyParty.Members.Count == 0) LoadDemoEnemy();
+                }
+            }
         }
 
         // Guard 4: InputController không bắt buộc cho battle loop, nhưng cảnh báo
-        // rõ ràng để người chơi biết phím tắt sẽ không hoạt động.
         if (InputController.Instance != null)
             InputController.Instance.BindBattleManager(this);
-        else
-            Debug.LogWarning("[BATTLE] InputController.Instance == null — phím tắt battle sẽ không hoạt động.");
 
         InitBattle();
     }
@@ -161,17 +193,79 @@ public class BattleManager : MonoBehaviour
         {
             if (targetCursor.activeSelf) targetCursor.SetActive(false);
         }
+
+        // EnemyHPBar script tự update trong Update() của chính nó
+
+        // Cursor chỉ vào player đang hành động
+        if (playerTurnCursor != null)
+        {
+            if (waitingForPlayerAction && currentUnit != null && currentUnit.SpawnedModel != null)
+            {
+                playerTurnCursor.SetActive(true);
+                playerTurnCursor.transform.position = currentUnit.SpawnedModel.transform.position + playerCursorOffset;
+            }
+            else
+            {
+                playerTurnCursor.SetActive(false);
+            }
+        }
+    }
+
+    UnitHUD SetupEnemyHUD(GameObject model, Status enemy)
+    {
+        // Tìm Canvas Screen Space
+        Canvas uiCanvas = null;
+        if (BattleUI.Instance != null)
+        {
+            uiCanvas = BattleUI.Instance.GetComponent<Canvas>();
+            if (uiCanvas == null) uiCanvas = BattleUI.Instance.GetComponentInParent<Canvas>();
+        }
+        if (uiCanvas == null) uiCanvas = Object.FindFirstObjectByType<Canvas>();
+        if (uiCanvas == null) return null;
+
+        // Root bar — Screen Space, pivot center
+        var root  = new GameObject("EnemyHPBar", typeof(RectTransform));
+        root.transform.SetParent(uiCanvas.transform, false);
+        var rt    = root.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(80f, 10f);
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+
+        // Background tối
+        var bg = new GameObject("BG", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+        bg.transform.SetParent(root.transform, false);
+        bg.GetComponent<UnityEngine.UI.Image>().color = new Color(0.08f, 0.08f, 0.08f, 0.85f);
+        FillRect(bg.GetComponent<RectTransform>());
+
+        // Fill đỏ — dùng anchorMax.x để co dãn, không cần sprite hay fillAmount
+        float initRatio = enemy.MaxHP > 0 ? (float)enemy.currentHP / enemy.MaxHP : 1f;
+        var fillGO  = new GameObject("Fill", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+        fillGO.transform.SetParent(root.transform, false);
+        fillGO.GetComponent<UnityEngine.UI.Image>().color = new Color(0.88f, 0.06f, 0.06f);
+        var fillRt       = fillGO.GetComponent<RectTransform>();
+        fillRt.anchorMin = new Vector2(0f, 0f);
+        fillRt.anchorMax = new Vector2(initRatio, 1f);
+        fillRt.offsetMin = new Vector2(2f, 2f);
+        fillRt.offsetMax = new Vector2(-2f, -2f);
+
+        var bar          = root.AddComponent<EnemyHPBar>();
+        bar.trackedEnemy = enemy;
+        bar.fillRect     = fillRt;
+        bar.worldOffset  = enemyHUDOffset;
+
+        return null;
+    }
+
+    static void FillRect(RectTransform rt)
+    {
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
     }
 
     void LoadEnemy()
     {
         enemyParty = new Party(PartyType.Enemy);
-        if (MapManager.Instance == null)
-        {
-            Log("[BATTLE] LoadEnemy: MapManager.Instance == null, bỏ qua spawn enemy.");
-            return;
-        }
-        // Dùng CreateEnemyStatuses() để enemy được SetLevel + apply map effects đúng cách
+        if (MapManager.Instance == null) return;
+
         var statuses = MapManager.Instance.CreateEnemyStatuses();
         if (statuses == null) return;
         foreach (var e in statuses)
@@ -182,8 +276,50 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    void LoadDemoData()
+    {
+        playerParty = new Party(PartyType.Player);
+        if (debugPlayerData != null)
+        {
+            playerParty.AddMember(debugPlayerData.CreateStatus());
+        }
+        else
+        {
+            var p = new PlayerStatus("Player Demo", 100, 20, 10, 15);
+            playerParty.AddMember(p);
+            Log("[BATTLE] debugPlayerData chưa gán — dùng player fallback không có prefab/skill.");
+        }
+
+        // Ưu tiên enemy từ MapData (nạp qua BattleSceneBootstrap)
+        if (MapManager.Instance != null &&
+            MapManager.Instance.currentEnemies != null &&
+            MapManager.Instance.currentEnemies.Count > 0)
+        {
+            LoadEnemy();
+        }
+        else
+        {
+            LoadDemoEnemy();
+        }
+    }
+
+    void LoadDemoEnemy()
+    {
+        enemyParty = new Party(PartyType.Enemy);
+        var e1 = new EnemyStatus("Enemy Demo", 50, 15, 5, 10);
+        e1.battlePrefab = debugEnemyPrefab;
+        if (debugEnemyAttack != null) e1.AddAttack(debugEnemyAttack);
+        enemyParty.AddMember(e1);
+        Log("[BATTLE] debugEnemyPrefab fallback — gán debugMapData vào BattleSceneBootstrap để dùng enemy thật.");
+    }
+
     void InitBattle()
     {
+        // Zoom camera ra theo thiết lập
+        var cam = Camera.main;
+        if (cam != null && cam.orthographic)
+            cam.orthographicSize = battleCameraSize;
+
         // Tạo TurnManager mới cho trận đấu này
         turnManager = new TurnManager();
         turnManager.AddParty(playerParty);
@@ -242,8 +378,18 @@ public class BattleManager : MonoBehaviour
             Vector3 spawnPos = anchor.position + offset;
 
             var model = Object.Instantiate(prefab, spawnPos, anchor.rotation);
+            float scale = member is PlayerStatus ? playerSpawnScale : enemySpawnScale;
+            if (scale != 1f) model.transform.localScale *= scale;
             member.SpawnedModel = model;
             member.BattleSlotId = i;
+
+            // Enemy prefab đã có Enemy_HP_Canvas (giống Tutorial) — wire UnitHUD runtime
+            if (member is EnemyStatus)
+            {
+                var hud = SetupEnemyHUD(model, member);
+                if (hud != null)
+                    BattleUI.Instance?.RegisterEnemyHUD(i, hud);
+            }
 
             Log($"[SPAWN] {member.entityName} → {spawnPos}");
         }
@@ -300,17 +446,25 @@ public class BattleManager : MonoBehaviour
         waitingForAttackFinish = false;
         Log("[TURN] Waiting Player Action");
 
-        // Hien thi action menu cho player hien tai
         var playerUnit = currentUnit as PlayerStatus;
         if (BattleUI.Instance != null && playerUnit != null)
+        {
             BattleUI.Instance.ShowActionMenu(playerUnit);
+            BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
+            var target = GetEnemyTarget();
+            if (target != null) BattleUI.Instance.SetTargetName(target.entityName);
+        }
 
         // Buoc 1: Doi player chon hanh dong (attack, skill, flee...).
         yield return new WaitUntil(() => !waitingForPlayerAction);
 
         // An action menu sau khi chon
         if (BattleUI.Instance != null)
+        {
             BattleUI.Instance.HideActionMenu();
+            BattleUI.Instance.HighlightEnemyHUD(-1);
+            BattleUI.Instance.SetTargetName(string.Empty);
+        }
 
         // Buoc 2: Doi coroutine attack chay den phase Finished.
         if (waitingForAttackFinish)
@@ -320,68 +474,98 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void SelectBasicAttack()
+    // -1 = basicAttack, 0+ = skill index, -2 = chưa chọn
+    private int pendingSkillIndex = -2;
+    private bool isSelectingTarget = false;
+
+
+    public void BackToActionMenu()
     {
         if (!waitingForPlayerAction) return;
+        isSelectingTarget = false;
+        pendingSkillIndex = -2;
+        BattleUI.Instance?.HighlightEnemyHUD(-1);
+        BattleUI.Instance?.SetTargetName(string.Empty);
+        BattleUI.Instance?.ShowActionMenu(currentUnit as PlayerStatus);
+        InputController.Instance?.SetMode(InputMode.Battle);
+    }
 
+    public void RequestOpenSkillMenu()
+    {
+        if (!waitingForPlayerAction || isSelectingTarget) return;
         var player = currentUnit as PlayerStatus;
-        var enemy = GetEnemyTarget();
+        BattleUI.Instance?.ShowSkillMenuUI(player);
+        InputController.Instance?.SetMode(InputMode.BattleSkillMenu);
+    }
 
-        if (enemy == null)
-        {
-            Log("[ERROR] No enemy target");
-            return;
-        }
+    void EnterTargetSelection(int skillIndex)
+    {
+        pendingSkillIndex = skillIndex;
+        isSelectingTarget = true;
+        BattleUI.Instance?.HideActionMenu();
+        BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
+        var t = GetEnemyTarget();
+        if (t != null) BattleUI.Instance?.SetTargetName(t.entityName);
+        // Đảm bảo mode Battle để Confirm/Cancel hoạt động dù vào từ SkillMenu
+        InputController.Instance?.SetMode(InputMode.Battle);
+        Log("[TARGET] A/D: đổi mục tiêu | Enter: xác nhận | Esc: huỷ");
+    }
 
-        Log("[ACTION] Attack → " + enemy.entityName);
-
-        // Phải set cờ trước khi gọi Use() vì coroutine attack chạy ngay trong frame đó.
-        waitingForAttackFinish = true;
-        player.BasicAttack.CreateInstance().Use(player, enemy);
-
-        waitingForPlayerAction = false;
+    public void SelectBasicAttack()
+    {
+        if (!waitingForPlayerAction || isSelectingTarget) return;
+        var player = currentUnit as PlayerStatus;
+        if (player?.BasicAttack == null) { Log("[ERROR] No basic attack"); return; }
+        EnterTargetSelection(-1);
     }
 
     public void UseSkill(int index)
     {
-        if (!waitingForPlayerAction) return;
+        if (!waitingForPlayerAction || isSelectingTarget) return;
+        var player = currentUnit as PlayerStatus;
+        if (player == null) return;
+        var skill = player.GetSkillByIndex(index);
+        if (skill == null) { Log($"[ERROR] Skill[{index}] not found"); return; }
+        if (!player.CanUseAP(skill.apCost)) { Log($"[ERROR] Not enough AP"); return; }
+        EnterTargetSelection(index);
+    }
+
+    public void ConfirmAction()
+    {
+        if (!waitingForPlayerAction || !isSelectingTarget) return;
+        isSelectingTarget = false;
 
         var player = currentUnit as PlayerStatus;
-        if (player == null)
+        var enemy  = GetEnemyTarget();
+        if (player == null || enemy == null) { Log("[ERROR] Invalid target"); return; }
+
+        if (pendingSkillIndex == -1)
         {
-            Log("[ERROR] Current unit is not a player");
-            return;
+            Log("[ACTION] Attack → " + enemy.entityName);
+            waitingForAttackFinish = true;
+            player.BasicAttack.CreateInstance().Use(player, enemy);
+        }
+        else
+        {
+            var skill = player.GetSkillByIndex(pendingSkillIndex);
+            if (skill == null || !player.CanUseAP(skill.apCost)) return;
+            Log($"[ACTION] Skill[{pendingSkillIndex}] → {skill.attackName}");
+            waitingForAttackFinish = true;
+            skill.CreateInstance().Use(player, enemy);
         }
 
-        var enemy = GetEnemyTarget();
-        if (enemy == null)
-        {
-            Log("[ERROR] No enemy target");
-            // Giữ waitingForPlayerAction = true → player chọn lại
-            return;
-        }
-
-        var skill = player.GetSkillByIndex(index);
-        if (skill == null)
-        {
-            Log($"[ERROR] Skill[{index}] not found (player has {player.SkillCount} skills)");
-            // Giữ waitingForPlayerAction = true → player chọn lại
-            return;
-        }
-
-        if (!player.CanUseAP(skill.apCost))
-        {
-            Log($"[ERROR] Not enough AP: need {skill.apCost}, have {player.currentAP}");
-            // Giữ waitingForPlayerAction = true → player chọn lại
-            return;
-        }
-
-        Log($"[ACTION] Skill[{index}] → {skill.attackName} (AP: {skill.apCost})");
-
-        waitingForAttackFinish = true;
-        skill.CreateInstance().Use(player, enemy);
-
+        pendingSkillIndex = -2;
         waitingForPlayerAction = false;
+    }
+
+    public void CancelTargetSelection()
+    {
+        if (!isSelectingTarget) return;
+        isSelectingTarget = false;
+        pendingSkillIndex = -2;
+        BattleUI.Instance?.HighlightEnemyHUD(-1);
+        BattleUI.Instance?.SetTargetName(string.Empty);
+        BattleUI.Instance?.ShowActionMenu(currentUnit as PlayerStatus);
     }
 
     public void RequestParry()
@@ -462,6 +646,8 @@ public class BattleManager : MonoBehaviour
         if (BattleUI.Instance != null)
         {
             BattleUI.Instance.HighlightActivePlayerHUD(-1);
+            BattleUI.Instance.HighlightEnemyHUD(-1);
+            BattleUI.Instance.SetTargetName(string.Empty);
             BattleUI.Instance.SetTurnIndicator($"Luot dich: {enemy.entityName}");
         }
 
@@ -503,6 +689,7 @@ public class BattleManager : MonoBehaviour
 
     EnemyStatus GetEnemyTarget()
     {
+        if (enemyParty == null) return null;
         var alive = new List<EnemyStatus>();
         foreach (var e in enemyParty.Members)
             if (e.IsAlive) alive.Add(e as EnemyStatus);
@@ -516,6 +703,7 @@ public class BattleManager : MonoBehaviour
 
     PlayerStatus GetAlivePlayer()
     {
+        if (playerParty == null) return null;
         foreach (var p in playerParty.Members)
             if (p.IsAlive) return p as PlayerStatus;
         return null;
@@ -523,6 +711,7 @@ public class BattleManager : MonoBehaviour
 
     public PlayerStatus GetAllyTarget()
     {
+        if (playerParty == null) return null;
         var alive = new List<PlayerStatus>();
         foreach (var p in playerParty.Members)
             if (p.IsAlive) alive.Add(p as PlayerStatus);
@@ -535,6 +724,8 @@ public class BattleManager : MonoBehaviour
 
     public void ChangeTargetInput(int dir)
     {
+        if (enemyParty == null || playerParty == null) return;
+
         var aliveEnemies = new List<EnemyStatus>();
         foreach (var e in enemyParty.Members)
             if (e.IsAlive) aliveEnemies.Add(e as EnemyStatus);
@@ -549,11 +740,20 @@ public class BattleManager : MonoBehaviour
         {
             currentTargetIndex = (currentTargetIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
             Log("[TARGET ENEMY] → " + aliveEnemies[currentTargetIndex].entityName);
+            
+            if (BattleUI.Instance != null)
+            {
+                BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
+                BattleUI.Instance.SetTargetName(aliveEnemies[currentTargetIndex].entityName);
+            }
         }
         else if (isTargetingAlly && aliveAllies.Count > 0)
         {
             currentAllyTargetIndex = (currentAllyTargetIndex + dir + aliveAllies.Count) % aliveAllies.Count;
             Log("[TARGET ALLY] → " + aliveAllies[currentAllyTargetIndex].entityName);
+            
+            if (BattleUI.Instance != null)
+                BattleUI.Instance.SetTargetName(aliveAllies[currentAllyTargetIndex].entityName);
         }
     }
 

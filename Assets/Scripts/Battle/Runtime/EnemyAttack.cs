@@ -6,20 +6,12 @@ using UnityEngine;
 public class EnemyAttackHit
 {
     public bool canBeParried = true;
-
-    // Thoi gian enemy chuan bi truoc khi don danh xay ra (giay).
-    // Player dung khoang nay de nhan biet animation va chuan bi parry.
     public float windUpTime = 0.5f;
-
-    // Thoi gian player duoc phep bam parry sau khi wind-up ket thuc.
     public float parryWindowDuration = 1.5f;
-
     public float damageMultiplier = 1f;
-
+    public int apRestoreOnParry = 25;
     public int repeat = 1;
-
     public float delayBetweenHits = 0f;
-
     public List<float> timingOffsets = new List<float>();
 }
 
@@ -40,12 +32,6 @@ public class EnemyAttack : AttackBase
 
     public override void Use(Status attacker, Status target)
     {
-        if (attacker.SpawnedModel != null)
-        {
-            var visual = attacker.SpawnedModel.GetComponent<UnitVisual>();
-            if (visual != null) visual.PlayAttack();
-        }
-
         this.attacker = attacker;
         this.target = target;
         StartAttack(attacker, target);
@@ -60,9 +46,16 @@ public class EnemyAttack : AttackBase
 
     protected override IEnumerator Execute()
     {
-        // --- DAMAGE HITS ---
-        foreach (var hit in hits)
+        var effectiveHits = hits != null && hits.Count > 0
+            ? hits
+            : new System.Collections.Generic.List<EnemyAttackHit>
+              { new EnemyAttackHit { windUpTime = 0.3f, parryWindowDuration = 1.5f,
+                                     damageMultiplier = 1f, repeat = 1, canBeParried = true } };
+
+        foreach (var hit in effectiveHits)
         {
+            PlayAttackerAnimation();
+
             if (hit.windUpTime > 0f)
                 yield return new WaitForSeconds(hit.windUpTime);
 
@@ -91,10 +84,11 @@ public class EnemyAttack : AttackBase
 
                 if (parried && i == 0)
                 {
-                    // Parry thanh cong o don dau -> player phan cong bang nua Atk.
+                    // Parry thành công → counter + cộng AP
+                    player.RestoreAP(hit.apRestoreOnParry);
                     int counter = player.Atk / 2;
                     enemy.TakeDamage(player, counter);
-                    Debug.Log("PARRY SUCCESS -> COUNTER DAMAGE: " + counter);
+                    Debug.Log($"PARRY SUCCESS → counter {counter} dmg | AP +{hit.apRestoreOnParry}");
                 }
                 else
                 {

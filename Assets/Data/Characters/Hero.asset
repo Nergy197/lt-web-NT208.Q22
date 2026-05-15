@@ -13,10 +13,14 @@ MonoBehaviour:
   m_Name: Hero
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   entityName: Hero
-  battlePrefab: {fileID: 0}
+  battlePrefab: {fileID: 6757238513391220709, guid: 38dcaa828ede44bce97d232444fd2c79, type: 3}
   baseHP: 100
   baseAtk: 15
   baseDef: 10
-  baseSpd: 5
+  baseSpd: 100
   maxAP: 100
-  attacks: []
+  attacks:
+  - {fileID: 11400000, guid: 2d199c659b0d0f043bf6a17040d5411d, type: 2}
+  - {fileID: 11400000, guid: 4c7877b76ac2ea448a542626748bbd90, type: 2}
+  - {fileID: 11400000, guid: 823b610a9d073c744a2827947f2e7b42, type: 2}
+  - {fileID: 11400000, guid: 7247a06987e22f648b0b10d8fa3579b0, type: 2}

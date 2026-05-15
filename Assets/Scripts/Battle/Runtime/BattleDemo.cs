@@ -14,7 +14,7 @@ public class BattleDemo : MonoBehaviour
     public PlayerAttackData skill2;
 
     [Header("Test Enemies (assign in Inspector)")]
-    public EnemyData enemyData;
+    public Mapdata mapData;
 
     // =========================================================
 
@@ -90,15 +90,16 @@ public class BattleDemo : MonoBehaviour
 
     void SetupEnemy()
     {
-        if (enemyData != null)
+        if (mapData != null && mapData.possibleEnemies.Count > 0)
         {
-            enemy = enemyData.CreateStatus() as EnemyStatus;
+            var data = mapData.GetRandomEnemy();
+            enemy = data.CreateStatus() as EnemyStatus;
+            mapData.ApplyEnemyEffects(enemy);
         }
         else
         {
-            // Fallback: minimal enemy
             enemy = new EnemyStatus("Goblin", 50, 10, 5, 10);
-            Log("[DEMO] No enemyData assigned → using fallback Goblin");
+            Log("[DEMO] No mapData assigned → using fallback Goblin");
         }
 
         Log($"[DEMO] Enemy: {enemy.entityName} HP={enemy.currentHP}/{enemy.MaxHP}");

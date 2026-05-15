@@ -8,6 +8,8 @@ public class EnemyAttackHitData
     public float windUpTime = 0.5f;
     public float parryWindowDuration = 1.5f;
     public float damageMultiplier = 1f;
+    [Tooltip("AP cộng cho player khi parry thành công đòn này (1-2 điểm).")]
+    public int apRestoreOnParry = 2;
     public int repeat = 1;
     public float delayBetweenHits = 0f; // default delay if timingOffsets is empty
     [Tooltip("Custom delay before each repeat (overrides delayBetweenHits). Leave empty to use delayBetweenHits for all. Example: [0, 0.2, 0.15] for 3 repeats.")]
@@ -29,15 +31,16 @@ public class EnemyAttackData : ScriptableObject
         var hitObjs = new List<EnemyAttackHit>();
         foreach (var h in hits)
         {
-            var hit = new EnemyAttackHit 
-            { 
-                canBeParried = h.canBeParried, 
-                windUpTime = h.windUpTime, 
+            var hit = new EnemyAttackHit
+            {
+                canBeParried        = h.canBeParried,
+                windUpTime          = h.windUpTime,
                 parryWindowDuration = h.parryWindowDuration,
-                damageMultiplier = h.damageMultiplier, 
-                repeat = Mathf.Max(1, h.repeat), 
-                delayBetweenHits = h.delayBetweenHits,
-                timingOffsets = new List<float>(h.timingOffsets)
+                damageMultiplier    = h.damageMultiplier,
+                apRestoreOnParry    = h.apRestoreOnParry,
+                repeat              = Mathf.Max(1, h.repeat),
+                delayBetweenHits    = h.delayBetweenHits,
+                timingOffsets       = new List<float>(h.timingOffsets)
             };
             hitObjs.Add(hit);
         }

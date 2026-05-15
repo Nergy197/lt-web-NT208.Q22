@@ -148,7 +148,7 @@ public class PlayerStatus : Status
     public override void ResetForBattle(float baseDelay)
     {
         base.ResetForBattle(baseDelay);
-        RestoreFullAP();
+        currentAP = 0; // AP tích lũy trong battle, bắt đầu từ 0
     }
 
     public PlayerStatus(
@@ -157,10 +157,10 @@ public class PlayerStatus : Status
         int baseAtk,
         int baseDef,
         int baseSpd,
-        int maxAP = 100
+        int maxAP = 5
     ) : base(name, baseHP, baseAtk, baseDef, baseSpd)
     {
         MaxAP     = maxAP;
-        currentAP = MaxAP;
+        currentAP = 0;
     }
 }

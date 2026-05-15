@@ -3,115 +3,138 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Component UI cho moi unit: hien thi ten, HP bar, AP bar.
-/// Attach vao moi unit HUD prefab/panel.
+/// HUD cho mỗi unit trong battle. Hỗ trợ Image.fillAmount (style Tutorial)
+/// cho HP/AP thay vì Slider.
 /// </summary>
 public class UnitHUD : MonoBehaviour
 {
+    [Header("Text")]
     [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private Slider hpSlider;
     [SerializeField] private TextMeshProUGUI hpText;
-    [SerializeField] private Slider apSlider;
     [SerializeField] private TextMeshProUGUI apText;
 
+    [Header("HP Bar (Image fillAmount)")]
+    [SerializeField] private Image hpFillImage;
+
+    [Header("AP Dots (BP_Dot style)")]
+    [Tooltip("Mảng các dot AP theo thứ tự — mỗi dot sáng lên khi currentAP >= (i+1) * apPerDot.")]
+    [SerializeField] private GameObject[] apDots;
+    [Tooltip("Lượng AP mỗi dot đại diện (1 dot = 1 AP, maxAP = 5).")]
+    [SerializeField] private int apPerDot = 1;
+
     [Header("Visual")]
-    [Tooltip("Anh nen panel (de phan biet player vs enemy hoac doi mau khi can).")]
     [SerializeField] private Image backgroundImage;
-
-    [Tooltip("Anh vien highlight, an mac dinh; sang len khi unit den luot.")]
     [SerializeField] private Image highlightImage;
-
-    [Tooltip("Mau highlight khi unit den luot.")]
     [SerializeField] private Color highlightActiveColor = new Color(1f, 0.85f, 0.2f, 1f);
 
-    void Awake()
+    [Header("Animation")]
+    [SerializeField] private float fillLerpSpeed = 5f;
+
+    private float targetFill = 0f;
+
+    void Awake() => SetEmpty();
+
+    void Update()
     {
-        // Đảm bảo HUD luôn xuất hiện ở trạng thái rỗng cho tới khi BattleManager
-        // gắn dữ liệu runtime (party/enemy có thể khác nhau theo map).
-        SetEmpty();
+        if (hpFillImage == null || Mathf.Approximately(hpFillImage.fillAmount, targetFill)) return;
+        hpFillImage.fillAmount = Mathf.MoveTowards(
+            hpFillImage.fillAmount, targetFill, fillLerpSpeed * Time.deltaTime);
     }
 
-    /// <summary>
-    /// Reset HUD về trạng thái rỗng (khung còn, dữ liệu rỗng).
-    /// Dùng trước khi runtime data sẵn sàng để tránh hiển thị placeholder
-    /// như tên cố định "Trần Quốc Tuấn" trong scene file.
-    /// </summary>
+    /// <summary>Wire HP fill và text từ bên ngoài (dùng khi gắn UnitHUD vào Enemy_HP_Canvas lúc runtime).</summary>
+    public void SetHPFill(Image fill, TMPro.TextMeshPro worldTMP = null)
+    {
+        hpFillImage  = fill;
+        _worldHPText = worldTMP;
+        if (fill == null) Debug.LogWarning("[UnitHUD] SetHPFill: fill image is NULL.");
+        // fillAmount và targetFill được set bởi UpdateHUD ngay sau đó
+    }
+
+    private TMPro.TextMeshPro _worldHPText;
+
     public void SetEmpty()
     {
         if (nameText != null) nameText.text = string.Empty;
-
-        if (hpSlider != null)
-        {
-            hpSlider.maxValue = 1f;
-            hpSlider.value = 0f;
-        }
-        if (hpText != null) hpText.text = string.Empty;
-
-        if (apSlider != null)
-        {
-            apSlider.maxValue = 1f;
-            apSlider.value = 0f;
-            apSlider.gameObject.SetActive(false);
-        }
-        if (apText != null)
-        {
-            apText.text = string.Empty;
-            apText.gameObject.SetActive(false);
-        }
-
+        if (hpText != null)   hpText.text   = string.Empty;
+        if (apText != null)   apText.text   = string.Empty;
+        targetFill = 0f;
+        if (hpFillImage != null) hpFillImage.fillAmount = 0f;
+        SetAPDots(0, 5);
         SetHighlight(false);
     }
 
-    public void UpdateHUD(string unitName, int currentHP, int maxHP, int currentAP = -1, int maxAP = -1)
+    public void UpdateHUD(string unitName, int currentHP, int maxHP, int currentAP = -1, int maxAP = -1, bool instant = false)
     {
         if (nameText != null) nameText.text = unitName;
 
-        if (hpSlider != null)
-        {
-            hpSlider.maxValue = maxHP;
-            hpSlider.value = currentHP;
-        }
+        targetFill = maxHP > 0 ? (float)currentHP / maxHP : 0f;
+        // Luôn set trực tiếp — đảm bảo hiển thị đúng kể cả khi Update() không chạy
+        if (hpFillImage != null) hpFillImage.fillAmount = instant ? targetFill
+            : Mathf.MoveTowards(hpFillImage.fillAmount, targetFill, 0.5f);
 
-        if (hpText != null) hpText.text = $"{currentHP}/{maxHP}";
+        if (hpText != null)
+            hpText.text = $"{currentHP}/{maxHP}";
+        if (_worldHPText != null)
+            _worldHPText.text = $"{currentHP}";
 
-        // AP bar (chi hien cho player)
         if (currentAP >= 0 && maxAP > 0)
         {
-            if (apSlider != null)
-            {
-                apSlider.gameObject.SetActive(true);
-                apSlider.maxValue = maxAP;
-                apSlider.value = currentAP;
-            }
+            SetAPDots(currentAP, maxAP);
             if (apText != null)
             {
                 apText.gameObject.SetActive(true);
-                apText.text = $"AP: {currentAP}/{maxAP}";
+                apText.text = $"AP:{currentAP}/{maxAP}";
             }
         }
         else
         {
-            if (apSlider != null) apSlider.gameObject.SetActive(false);
+            SetAPDots(0, 1);
             if (apText != null) apText.gameObject.SetActive(false);
         }
     }
 
-    /// <summary>
-    /// Bat/tat highlight (vi du khi unit den luot).
-    /// </summary>
     public void SetHighlight(bool active)
     {
         if (highlightImage == null) return;
-        Color c = highlightActiveColor;
+        var c = highlightActiveColor;
         c.a = active ? highlightActiveColor.a : 0f;
         highlightImage.color = c;
     }
 
-    /// <summary>
-    /// Doi mau nen (de phan biet player/enemy hoac trang thai sap chet).
-    /// </summary>
+    static void SetDotLit(GameObject dot, bool lit)
+    {
+        var img = dot.GetComponent<UnityEngine.UI.Image>();
+        if (img == null) return;
+        var c = img.color;
+        c.a = lit ? 1f : 0.25f;
+        img.color = c;
+    }
+
     public void SetBackgroundColor(Color color)
     {
         if (backgroundImage != null) backgroundImage.color = color;
+    }
+
+    void SetAPDots(int currentAP, int maxAP)
+    {
+        if (apDots == null || apDots.Length == 0) return;
+        for (int i = 0; i < apDots.Length; i++)
+        {
+            if (apDots[i] == null) continue;
+
+            // Dot background luôn hiện
+            apDots[i].SetActive(true);
+
+            // Tìm child glow (tên có thể là Yellow_Glow, Glow, hoặc AP_Glow)
+            bool lit = currentAP >= (i + 1) * apPerDot;
+            Transform glow = apDots[i].transform.Find("Yellow_Glow")
+                          ?? apDots[i].transform.Find("Glow")
+                          ?? apDots[i].transform.Find("AP_Glow");
+            if (glow != null)
+                glow.gameObject.SetActive(lit);
+            else
+                // Fallback: nếu không có child glow, bật tắt Image color của dot
+                SetDotLit(apDots[i], lit);
+        }
     }
 }

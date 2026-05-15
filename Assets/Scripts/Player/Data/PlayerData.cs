@@ -16,7 +16,7 @@ public class PlayerData : ScriptableObject
     public int baseAtk = 8;
     public int baseDef = 2;
     public int baseSpd = 3;
-    public int maxAP = 100;
+    public int maxAP = 5;
 
 
     [Header("Attack List")]

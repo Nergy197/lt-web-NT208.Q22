@@ -466,6 +466,15 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Skill3"",
+                    ""type"": ""Button"",
+                    ""id"": ""2e85fa7c-afbf-5669-a056-ce5e7f7c6c2e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Cancel"",
                     ""type"": ""Button"",
                     ""id"": ""93a3a612-305b-45b9-8ea2-426e762c4d8d"",
@@ -479,18 +488,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a8066d46-11ce-4e8c-b84b-1fc186661ffd"",
-                    ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Skill1"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""efcdd272-d814-4a97-8367-33c01b51a795"",
-                    ""path"": ""<Mouse>/leftButton"",
+                    ""path"": ""<Keyboard>/q"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -511,12 +509,12 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""f088a1d4-63c1-4b85-8250-799a6d68a5a0"",
-                    ""path"": ""<Mouse>/leftButton"",
+                    ""id"": ""3f96ab8d-bcca-6770-b167-de6f8a8d7d3f"",
+                    ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Skill2"",
+                    ""action"": ""Skill3"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -666,6 +664,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         m_SkillMenu = asset.FindActionMap("SkillMenu", throwIfNotFound: true);
         m_SkillMenu_Skill1 = m_SkillMenu.FindAction("Skill1", throwIfNotFound: true);
         m_SkillMenu_Skill2 = m_SkillMenu.FindAction("Skill2", throwIfNotFound: true);
+        m_SkillMenu_Skill3 = m_SkillMenu.FindAction("Skill3", throwIfNotFound: true);
         m_SkillMenu_Cancel = m_SkillMenu.FindAction("Cancel", throwIfNotFound: true);
         // SavePointMenu
         m_SavePointMenu = asset.FindActionMap("SavePointMenu", throwIfNotFound: true);
@@ -1060,6 +1059,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
     private List<ISkillMenuActions> m_SkillMenuActionsCallbackInterfaces = new List<ISkillMenuActions>();
     private readonly InputAction m_SkillMenu_Skill1;
     private readonly InputAction m_SkillMenu_Skill2;
+    private readonly InputAction m_SkillMenu_Skill3;
     private readonly InputAction m_SkillMenu_Cancel;
     /// <summary>
     /// Provides access to input actions defined in input action map "SkillMenu".
@@ -1080,6 +1080,10 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "SkillMenu/Skill2".
         /// </summary>
         public InputAction @Skill2 => m_Wrapper.m_SkillMenu_Skill2;
+        /// <summary>
+        /// Provides access to the underlying input action "SkillMenu/Skill3".
+        /// </summary>
+        public InputAction @Skill3 => m_Wrapper.m_SkillMenu_Skill3;
         /// <summary>
         /// Provides access to the underlying input action "SkillMenu/Cancel".
         /// </summary>
@@ -1116,6 +1120,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @Skill2.started += instance.OnSkill2;
             @Skill2.performed += instance.OnSkill2;
             @Skill2.canceled += instance.OnSkill2;
+            @Skill3.started += instance.OnSkill3;
+            @Skill3.performed += instance.OnSkill3;
+            @Skill3.canceled += instance.OnSkill3;
             @Cancel.started += instance.OnCancel;
             @Cancel.performed += instance.OnCancel;
             @Cancel.canceled += instance.OnCancel;
@@ -1136,6 +1143,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @Skill2.started -= instance.OnSkill2;
             @Skill2.performed -= instance.OnSkill2;
             @Skill2.canceled -= instance.OnSkill2;
+            @Skill3.started -= instance.OnSkill3;
+            @Skill3.performed -= instance.OnSkill3;
+            @Skill3.canceled -= instance.OnSkill3;
             @Cancel.started -= instance.OnCancel;
             @Cancel.performed -= instance.OnCancel;
             @Cancel.canceled -= instance.OnCancel;
@@ -1422,6 +1432,13 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkill2(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Skill3" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSkill3(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Cancel" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

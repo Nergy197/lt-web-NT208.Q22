@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Mapdata
   mapName: "\u0110\u1ED3ng c\u1ECF"
   mapId: 1
-  enemyLevel: 1
+  battleBackgroundPrefab: {fileID: 0}
+  enemyLevel: 10
   possibleEnemies:
-  - {fileID: 11400000, guid: 1c9b81a5094f54c36a1ed220c1757eba, type: 2}
-  - {fileID: 11400000, guid: 24105cc1d43134320b355a0e2e74ce31, type: 2}
-  - {fileID: 11400000, guid: 1c9b81a5094f54c36a1ed220c1757eba, type: 2}
-  - {fileID: 11400000, guid: 24105cc1d43134320b355a0e2e74ce31, type: 2}
+  - {fileID: 11400000, guid: b4200fd5dd9ad4a6abce15116b7d1b95, type: 2}
+  - {fileID: 11400000, guid: 8ce766c612a9549e181b9543a26ecd6e, type: 2}
   enemyBuffs: []
   enemyDebuffs: []
   playerBuffs: []

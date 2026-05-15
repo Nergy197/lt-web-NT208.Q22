@@ -4,6 +4,26 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 
+// Helper — show/hide panel kể cả khi có CanvasGroup (Tutorial dùng CG.alpha thay vì SetActive)
+static class PanelHelper
+{
+    public static void Show(GameObject panel)
+    {
+        if (panel == null) return;
+        panel.SetActive(true);
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg != null) { cg.alpha = 1f; cg.interactable = true; cg.blocksRaycasts = true; }
+    }
+
+    public static void Hide(GameObject panel)
+    {
+        if (panel == null) return;
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg != null) { cg.alpha = 0f; cg.interactable = false; cg.blocksRaycasts = false; }
+        else panel.SetActive(false);
+    }
+}
+
 /// <summary>
 /// BattleUI: Giao dien chien dau hoan chinh.
 /// Hien thi HP/AP bars, menu hanh dong, damage popup, turn order, status effect icons.
@@ -29,22 +49,36 @@ public class BattleUI : MonoBehaviour
     [Header("Enemy HUD (gan cho moi enemy slot)")]
     [SerializeField] private List<UnitHUD> enemyHUDs = new List<UnitHUD>();
 
-    // ================= ACTION MENU =================
+    /// <summary>Đăng ký UnitHUD WorldSpace được spawn runtime từ BattleManager.</summary>
+    public void RegisterEnemyHUD(int slot, UnitHUD hud)
+    {
+        while (enemyHUDs.Count <= slot) enemyHUDs.Add(null);
+        enemyHUDs[slot] = hud;
+    }
 
-    [Header("Action Menu")]
+    // ================= ACTION MENU (Menu_Frame) =================
+
+    [Header("Action Menu — Menu_Frame")]
     [SerializeField] private GameObject actionMenuPanel;
-    [SerializeField] private Button btnAttack;
-    [SerializeField] private Button btnSkill;
-    [SerializeField] private Button btnFlee;
-    [SerializeField] private Button btnParry;
+    [SerializeField] private Button btnAttack;    // Btn_Attack  → chọn target rồi đánh
+    [SerializeField] private Button btnSkill;     // Btn_Skills  → mở Skill_Frame
+    [SerializeField] private Button btnOpenItem;  // Btn_Items   → mở Item_Frame
 
-    // ================= SKILL MENU =================
+    // ================= SKILL MENU (Skill_Frame) =================
 
-    [Header("Skill Menu")]
+    [Header("Skill Menu — Skill_Frame")]
     [SerializeField] private GameObject skillMenuPanel;
     [SerializeField] private Button btnSkillBack;
     [SerializeField] private List<Button> skillButtons = new List<Button>();
     [SerializeField] private List<TextMeshProUGUI> skillLabels = new List<TextMeshProUGUI>();
+
+    // ================= ITEM MENU (Item_Frame) =================
+
+    [Header("Item Menu — Item_Frame")]
+    [SerializeField] private GameObject itemMenuPanel;
+    [SerializeField] private Button btnParry;     // Btn_Heal    → parry
+    [SerializeField] private Button btnItemBack;  // Btn_Energy  → về Menu_Frame
+    [SerializeField] private Button btnFlee;      // Btn_Cleanse → chạy trốn
 
     // ================= DAMAGE POPUP =================
 
@@ -80,6 +114,9 @@ public class BattleUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI resultText;
     [SerializeField] private TextMeshProUGUI expText;
 
+    [Header("Targeting")]
+    [SerializeField] private TextMeshProUGUI targetNameText;
+
     // ================= INTERNAL =================
 
     private BattleManager bm;
@@ -97,9 +134,10 @@ public class BattleUI : MonoBehaviour
     void Start()
     {
         // An cac panel khi bat dau
-        if (actionMenuPanel != null) actionMenuPanel.SetActive(false);
-        if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
-        if (resultPanel != null) resultPanel.SetActive(false);
+        PanelHelper.Hide(actionMenuPanel);
+        PanelHelper.Hide(skillMenuPanel);
+        PanelHelper.Hide(itemMenuPanel);
+        PanelHelper.Hide(resultPanel);
 
         if (turnIndicatorText != null) turnIndicatorText.text = string.Empty;
         if (turnOrderText != null) turnOrderText.text = string.Empty;
@@ -107,12 +145,18 @@ public class BattleUI : MonoBehaviour
         if (playerEffectsText != null) playerEffectsText.text = string.Empty;
         if (enemyEffectsText != null) enemyEffectsText.text = string.Empty;
 
-        // Bind buttons
-        if (btnAttack != null) btnAttack.onClick.AddListener(OnAttackPressed);
-        if (btnSkill != null) btnSkill.onClick.AddListener(OnSkillMenuOpen);
-        if (btnFlee != null) btnFlee.onClick.AddListener(OnFleePressed);
-        if (btnParry != null) btnParry.onClick.AddListener(OnParryPressed);
+        // Bind buttons — Action Menu
+        if (btnAttack   != null) btnAttack.onClick.AddListener(OnAttackPressed);
+        if (btnSkill    != null) btnSkill.onClick.AddListener(OnSkillMenuOpen);
+        if (btnOpenItem != null) btnOpenItem.onClick.AddListener(OnItemMenuOpen);
+
+        // Skill Menu
         if (btnSkillBack != null) btnSkillBack.onClick.AddListener(OnSkillMenuClose);
+
+        // Item Menu
+        if (btnParry    != null) btnParry.onClick.AddListener(OnParryPressed);
+        if (btnItemBack != null) btnItemBack.onClick.AddListener(OnItemMenuClose);
+        if (btnFlee     != null) btnFlee.onClick.AddListener(OnFleePressed);
 
         // Bind skill buttons
         for (int i = 0; i < skillButtons.Count; i++)
@@ -170,19 +214,19 @@ public class BattleUI : MonoBehaviour
         for (int i = 0; i < playerHUDs.Count; i++)
         {
             if (playerHUDs[i] == null) continue;
-            playerHUDs[i].gameObject.SetActive(true);
+            playerHUDs[i].gameObject.SetActive(false); // An mac dinh, chi hien khi co unit
             playerHUDs[i].SetEmpty();
         }
         for (int i = 0; i < enemyHUDs.Count; i++)
         {
             if (enemyHUDs[i] == null) continue;
-            enemyHUDs[i].gameObject.SetActive(true);
+            enemyHUDs[i].gameObject.SetActive(false); // An mac dinh
             enemyHUDs[i].SetEmpty();
         }
     }
 
     // ================= HUD UPDATE =================
-
+    
     void UpdateAllHUDs()
     {
         if (bm.PlayerParty != null)
@@ -249,22 +293,48 @@ public class BattleUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Highlight enemy HUD dang bi target.
+    /// </summary>
+    public void HighlightEnemyHUD(int slotId)
+    {
+        for (int i = 0; i < enemyHUDs.Count; i++)
+        {
+            if (enemyHUDs[i] != null)
+                enemyHUDs[i].SetHighlight(i == slotId);
+        }
+    }
+
+    /// <summary>
+    /// Cap nhat ten muc tieu dang chon tren UI.
+    /// </summary>
+    public void SetTargetName(string name)
+    {
+        if (targetNameText != null) targetNameText.text = name;
+    }
+
     // ================= ACTION MENU =================
 
     /// <summary>
     /// Goi boi BattleManager khi den luot player.
     /// </summary>
+    public void ShowSkillMenuUI(PlayerStatus player)
+    {
+        PanelHelper.Hide(actionMenuPanel);
+        PanelHelper.Hide(itemMenuPanel);
+        PanelHelper.Show(skillMenuPanel);
+        if (player != null) UpdateSkillMenu(player);
+    }
+
     public void ShowActionMenu(PlayerStatus player)
     {
-        if (actionMenuPanel != null) actionMenuPanel.SetActive(true);
-        if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
+        if (actionMenuPanel == null) Debug.LogWarning("[BattleUI] actionMenuPanel chưa wire!");
+        PanelHelper.Show(actionMenuPanel);
+        PanelHelper.Hide(skillMenuPanel);
+        PanelHelper.Hide(itemMenuPanel);
 
-        // Update turn indicator + highlight active HUD slot
         if (player != null)
-        {
             SetTurnIndicator($"Luot: {player.entityName}");
-            HighlightActivePlayerHUD(player.BattleSlotId);
-        }
 
         // Update skill menu content
         UpdateSkillMenu(player);
@@ -272,8 +342,9 @@ public class BattleUI : MonoBehaviour
 
     public void HideActionMenu()
     {
-        if (actionMenuPanel != null) actionMenuPanel.SetActive(false);
-        if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
+        PanelHelper.Hide(actionMenuPanel);
+        PanelHelper.Hide(skillMenuPanel);
+        PanelHelper.Hide(itemMenuPanel);
     }
 
     /// <summary>
@@ -326,27 +397,43 @@ public class BattleUI : MonoBehaviour
     void OnAttackPressed()
     {
         if (bm == null) return;
-        HideActionMenu();
-        bm.SelectBasicAttack();
+        bm.SelectBasicAttack(); // BattleManager tự hide menu khi vào target selection
     }
 
     void OnSkillMenuOpen()
     {
-        if (actionMenuPanel != null) actionMenuPanel.SetActive(false);
-        if (skillMenuPanel != null) skillMenuPanel.SetActive(true);
+        PanelHelper.Hide(actionMenuPanel);
+        PanelHelper.Hide(itemMenuPanel);
+        PanelHelper.Show(skillMenuPanel);
+        if (InputController.Instance != null)
+            InputController.Instance.SetMode(InputMode.BattleSkillMenu);
     }
 
     void OnSkillMenuClose()
     {
-        if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
-        if (actionMenuPanel != null) actionMenuPanel.SetActive(true);
+        PanelHelper.Hide(skillMenuPanel);
+        PanelHelper.Show(actionMenuPanel);
+        if (InputController.Instance != null)
+            InputController.Instance.SetMode(InputMode.Battle);
+    }
+
+    void OnItemMenuOpen()
+    {
+        PanelHelper.Hide(actionMenuPanel);
+        PanelHelper.Hide(skillMenuPanel);
+        PanelHelper.Show(itemMenuPanel);
+    }
+
+    void OnItemMenuClose()
+    {
+        PanelHelper.Hide(itemMenuPanel);
+        PanelHelper.Show(actionMenuPanel);
     }
 
     void OnSkillSelected(int index)
     {
         if (bm == null) return;
-        HideActionMenu();
-        bm.UseSkill(index);
+        bm.UseSkill(index); // BattleManager tự hide menu khi vào target selection
     }
 
     void OnFleePressed()
@@ -410,7 +497,10 @@ public class BattleUI : MonoBehaviour
     void OnBattleStart(object data)
     {
         Log("Battle Start!");
-        if (resultPanel != null) resultPanel.SetActive(false);
+        Log("He thong UI moi da san sang.");
+        Log("Su dung phím mui ten de chon muc tieu.");
+        Log("Nhan 'Attack' de tan cong.");
+        PanelHelper.Hide(resultPanel);
     }
 
     void OnBattleWin(object data)
@@ -440,7 +530,7 @@ public class BattleUI : MonoBehaviour
         HideActionMenu();
         HighlightActivePlayerHUD(-1);
         SetTurnIndicator(string.Empty);
-        if (resultPanel != null) resultPanel.SetActive(true);
+        PanelHelper.Show(resultPanel);
         if (resultText != null)
         {
             resultText.text = result;

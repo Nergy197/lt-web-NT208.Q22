@@ -380,6 +380,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Skill3",
+                    "type": "Button",
+                    "id": "2e85fa7c-afbf-5669-a056-ce5e7f7c6c2e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Cancel",
                     "type": "Button",
                     "id": "93a3a612-305b-45b9-8ea2-426e762c4d8d",
@@ -393,18 +402,7 @@
                 {
                     "name": "",
                     "id": "a8066d46-11ce-4e8c-b84b-1fc186661ffd",
-                    "path": "<Keyboard>/e",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Skill1",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "efcdd272-d814-4a97-8367-33c01b51a795",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -425,12 +423,12 @@
                 },
                 {
                     "name": "",
-                    "id": "f088a1d4-63c1-4b85-8250-799a6d68a5a0",
-                    "path": "<Mouse>/leftButton",
+                    "id": "3f96ab8d-bcca-6770-b167-de6f8a8d7d3f",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Skill2",
+                    "action": "Skill3",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

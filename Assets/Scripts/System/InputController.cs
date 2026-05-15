@@ -79,20 +79,23 @@ public class InputController : MonoBehaviour
 
     void BindBattleInput()
     {
-        Input.Battle.BasicAttack.performed  += _ => battle?.SelectBasicAttack();
-        Input.Battle.NextTarget.performed   += _ => battle?.ChangeTargetInput(1);
-        Input.Battle.PrevTarget.performed   += _ => battle?.ChangeTargetInput(-1);
-        Input.Battle.Parry.performed        += _ => battle?.RequestParry();
-        Input.Battle.OpenSkillMenu.performed += _ => SetMode(InputMode.BattleSkillMenu);
+        Input.Battle.BasicAttack.performed   += _ => battle?.SelectBasicAttack();
+        Input.Battle.NextTarget.performed    += _ => battle?.ChangeTargetInput(1);
+        Input.Battle.PrevTarget.performed    += _ => battle?.ChangeTargetInput(-1);
+        Input.Battle.Parry.performed         += _ => battle?.RequestParry();
+        Input.Battle.OpenSkillMenu.performed += _ => battle?.RequestOpenSkillMenu();
         Input.Battle.OpenItemMenu.performed  += _ => Debug.Log("[INPUT] OpenItemMenu (chưa implement)");
-        Input.Battle.Flee.performed         += _ => battle?.TryFlee();
+        Input.Battle.Flee.performed          += _ => battle?.TryFlee();
+        Input.Battle.Confirm.performed       += _ => battle?.ConfirmAction();
+        Input.Battle.Cancel.performed        += _ => battle?.BackToActionMenu();
     }
 
     void BindSkillMenuInput()
     {
-        Input.SkillMenu.Skill1.performed += _ => { battle?.UseSkill(0); SetMode(InputMode.Battle); };
-        Input.SkillMenu.Skill2.performed += _ => { battle?.UseSkill(1); SetMode(InputMode.Battle); };
-        Input.SkillMenu.Cancel.performed += _ => SetMode(InputMode.Battle);
+        Input.SkillMenu.Skill1.performed += _ => { battle?.UseSkill(0); };
+        Input.SkillMenu.Skill2.performed += _ => { battle?.UseSkill(1); };
+        Input.SkillMenu.Skill3.performed += _ => { battle?.UseSkill(2); };
+        Input.SkillMenu.Cancel.performed += _ => battle?.BackToActionMenu();
     }
 
     void BindSavePointMenuInput()

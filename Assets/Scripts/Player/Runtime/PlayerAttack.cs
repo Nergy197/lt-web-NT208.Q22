@@ -14,6 +14,7 @@ public class PlayerAttackHit
 public class PlayerAttack : AttackBase
 {
     public int apCost;
+    public int apRestore;
 
     private List<PlayerAttackHit> hits;
     public List<SkillEffectEntry> effects;
@@ -24,24 +25,20 @@ public class PlayerAttack : AttackBase
     public PlayerAttack(
         string name,
         int apCost,
+        int apRestore,
         List<PlayerAttackHit> hits,
         List<SkillEffectEntry> effects = null)
     {
-        Name = name;
-        this.apCost = apCost;
-        this.hits = hits;
-        this.effects = effects ?? new List<SkillEffectEntry>();
+        Name       = name;
+        this.apCost   = apCost;
+        this.apRestore = apRestore;
+        this.hits     = hits;
+        this.effects  = effects ?? new List<SkillEffectEntry>();
     }
 
     // Bắt buộc implement từ AttackBase
     public override void Use(Status attacker, Status target)
     {
-        if (attacker.SpawnedModel != null)
-        {
-            var visual = attacker.SpawnedModel.GetComponent<UnitVisual>();
-            if (visual != null) visual.PlayAttack();
-        }
-
         this.attacker = attacker;
         this.target = target;
         StartAttack(attacker, target);
@@ -74,9 +71,17 @@ public class PlayerAttack : AttackBase
 
     protected override IEnumerator Execute()
     {
+        // Nếu không cấu hình hits → dùng 1 hit mặc định (tránh attack không gây damage)
+        var effectiveHits = hits != null && hits.Count > 0
+            ? hits
+            : new System.Collections.Generic.List<PlayerAttackHit>
+              { new PlayerAttackHit { windUpTime = 0f, damageMultiplier = 1f, repeat = 1 } };
+
         // --- DAMAGE HITS ---
-        foreach (var hit in hits)
+        foreach (var hit in effectiveHits)
         {
+            PlayAttackerAnimation();
+
             if (hit.windUpTime > 0f)
                 yield return new WaitForSeconds(hit.windUpTime);
 
@@ -91,7 +96,11 @@ public class PlayerAttack : AttackBase
                 int dmg = Mathf.RoundToInt(player.Atk * hit.damageMultiplier);
                 enemy.TakeDamage(player, dmg);
 
-                Debug.Log($"[ATTACK] {player.entityName} → {enemy.entityName} : {dmg} dmg");
+                // Basic attack (apCost==0) luôn nạp ít nhất 1 AP
+                int gain = apRestore > 0 ? apRestore : (apCost == 0 ? 1 : 0);
+                if (gain > 0) player.RestoreAP(gain);
+
+                Debug.Log($"[ATTACK] {player.entityName} → {enemy.entityName} : {dmg} dmg | AP +{gain}");
 
                 if (i < hit.repeat - 1)
                 {
