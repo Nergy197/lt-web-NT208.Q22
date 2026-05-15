@@ -357,10 +357,10 @@ public class CopyTutorialUITool : EditorWindow
 
         // ── Buttons ──────────────────────────────────────────────────────────
         TryWireButton(so, "btnAttack", canvasGO, "Btn_Attack", "Attack", "BasicAttack");
-        TryWireButton(so, "btnSkill",  canvasGO, "Btn_Skill",  "Skill",  "SkillBtn", "Btn_Skill1");
-        TryWireButton(so, "btnFlee",   canvasGO, "Btn_Flee",   "Flee",   "BtnFlee");
-        TryWireButton(so, "btnParry",  canvasGO, "Btn_Parry",  "Parry",  "BtnParry");
-        TryWireButton(so, "btnSkillBack", canvasGO, "Btn_Back", "Back",  "BtnBack", "Btn_Cancel");
+        TryWireButton(so, "btnSkill",  canvasGO, "Btn_Skills", "Btn_Skill", "Skill", "SkillBtn", "Btn_Skill1");
+        TryWireButton(so, "btnFlee",   canvasGO, "Btn_Flee",   "Flee",   "BtnFlee",  "Btn_Items", "Btn_Run");
+        TryWireButton(so, "btnParry",  canvasGO, "Btn_Parry",  "Parry",  "BtnParry", "Btn_Energy", "Btn_Heal");
+        TryWireButton(so, "btnSkillBack", canvasGO, "Btn_Back", "Back", "BtnBack", "Btn_Cancel", "Btn_Cleanse");
 
         // ── Skill Buttons (list) ─────────────────────────────────────────────
         TryWireSkillButtonsList(so, canvasGO);
