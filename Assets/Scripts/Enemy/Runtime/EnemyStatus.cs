@@ -10,6 +10,15 @@ public class EnemyStatus : Status
     public GameObject battlePrefab;
     public EnemyAI ai;
 
+    public PlayerStatus PlannedTarget { get; private set; }
+    public EnemyAttackData PlannedAttack { get; private set; }
+
+    public void SetPlannedAction(PlayerStatus target, EnemyAttackData attack)
+    {
+        PlannedTarget = target;
+        PlannedAttack = attack;
+    }
+
     public EnemyStatus(
         string name,
         int baseHP,
