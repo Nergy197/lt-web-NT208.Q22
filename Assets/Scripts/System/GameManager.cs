@@ -121,6 +121,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
         transform.SetParent(null); // Fix error Destroy 
         DontDestroyOnLoad(gameObject);
+        EnsurePlayerDatabase();
 
         // Tự động chọn base URL:
         // - WebGL build: URL tương đối, không cần base
@@ -310,6 +311,7 @@ public class GameManager : MonoBehaviour
 
     void CreatePartyFromJson(string json)
     {
+        EnsurePlayerDatabase();
         PlayerSave save = JsonUtility.FromJson<PlayerSave>(json);
 
         if (save == null)
@@ -389,6 +391,34 @@ public class GameManager : MonoBehaviour
         if (qm != null && save.questProgress != null)
         {
             qm.LoadProgressFromData(save.questProgress);
+        }
+    }
+
+    /// <summary>
+    /// Đảm bảo playerDatabase có đủ PlayerData (Hero, v.v.).
+    /// Cần khi test MapScene trực tiếp — bootstrap tạo GameManager trống.
+    /// </summary>
+    public void EnsurePlayerDatabase()
+    {
+        if (playerDatabase == null)
+            playerDatabase = new List<PlayerData>();
+
+#if UNITY_EDITOR
+        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:PlayerData", new[] { "Assets/Data/Characters" });
+        foreach (string guid in guids)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            PlayerData data = UnityEditor.AssetDatabase.LoadAssetAtPath<PlayerData>(path);
+            if (data != null && !playerDatabase.Contains(data))
+                playerDatabase.Add(data);
+        }
+#endif
+
+        PlayerData[] fromResources = Resources.LoadAll<PlayerData>("Characters");
+        for (int i = 0; i < fromResources.Length; i++)
+        {
+            if (fromResources[i] != null && !playerDatabase.Contains(fromResources[i]))
+                playerDatabase.Add(fromResources[i]);
         }
     }
 

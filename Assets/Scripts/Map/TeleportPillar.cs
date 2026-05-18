@@ -1,12 +1,12 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// Trụ dịch chuyển kiểu Fast-Travel.
 /// Mỗi trụ VỪA LÀ điểm xuất hiện (spawn) VỪA LÀ nơi tương tác mở menu.
 /// Các trụ tự tìm nhau trong scene tạo thành mạng lưới dịch chuyển.
 ///
-/// Player đến gần trụ → nhấn F → menu hiện danh sách các trụ khác → chọn → teleport tới trụ đó.
+/// Player đến gần trụ → nhấn F → menu hiện các trụ khác → chọn trụ đích để dịch chuyển.
 /// </summary>
 [RequireComponent(typeof(BoxCollider2D))]
 public class TeleportPillar : MonoBehaviour
@@ -18,6 +18,13 @@ public class TeleportPillar : MonoBehaviour
     [Tooltip("Mô tả ngắn hiển thị khi hover trên menu.")]
     [TextArea(1, 3)]
     public string description = "";
+
+    [Header("Menu prefab (tùy chọn)")]
+    [Tooltip("Prefab có TeleportMenuBindings. Ưu tiên hơn Menu Layout Prefab trên TeleportMenuUI.")]
+    [SerializeField] private GameObject menuLayoutPrefab;
+
+    /// <summary>Prefab UI map menu (TeleportMenuBindings), nếu có.</summary>
+    public GameObject MenuLayoutPrefab => menuLayoutPrefab;
 
     [Header("Map Data (Tùy chọn)")]
     [Tooltip("Mapdata khu vực này. Khi teleport tới đây → MapManager sẽ đổi dữ liệu quái/encounter.")]
@@ -140,25 +147,22 @@ public class TeleportPillar : MonoBehaviour
             return;
         }
 
-        // Lấy danh sách trụ khác (loại trừ chính mình)
         List<TeleportPillar> destinations = new List<TeleportPillar>();
         foreach (var pillar in allPillars)
         {
-            if (pillar != this && pillar != null && pillar.gameObject.activeInHierarchy)
-            {
-                destinations.Add(pillar);
-            }
+            if (pillar == null || pillar == this || !pillar.gameObject.activeInHierarchy) continue;
+            destinations.Add(pillar);
         }
 
-        if (destinations.Count == 0)
+        if (destinations.Count > 0)
         {
-            // Không có trụ đích → mở menu chọn map thay thế
-            Debug.Log($"[TeleportPillar] {pillarName}: Không có trụ khác → mở menu chọn map.");
-            TeleportMenuUI.Instance.OpenMapMenu(this);
-            return;
+            TeleportMenuUI.Instance.Open(this, destinations);
         }
-
-        TeleportMenuUI.Instance.Open(this, destinations);
+        else
+        {
+            // Fallback: nếu chỉ có 1 trụ duy nhất thì mở danh sách map như cũ
+            TeleportMenuUI.Instance.OpenMapMenu(this);
+        }
     }
 
     // ================= GIZMO (EDITOR) =================
