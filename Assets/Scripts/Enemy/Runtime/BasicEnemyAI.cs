@@ -18,6 +18,7 @@ public class BasicEnemyAI : EnemyAI
         if (target == null)
         {
             Debug.Log($"[AI] {self.entityName}: No alive player target");
+            BattleEvents.RaiseAttackFinished();
             return;
         }
 
@@ -27,6 +28,7 @@ public class BasicEnemyAI : EnemyAI
         if (chosenAttack == null)
         {
             Debug.Log($"[AI] {self.entityName}: No attacks available");
+            BattleEvents.RaiseAttackFinished();
             return;
         }
 

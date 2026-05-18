@@ -37,20 +37,21 @@ public class CinemachinePlayerTarget : MonoBehaviour
     void AssignPlayer()
     {
         if (vcam == null) return;
-        if (vcam.Target.TrackingTarget != null) return; // Đã có target
+        if (vcam.Target.TrackingTarget != null) return;
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            vcam.Target.TrackingTarget = player.transform;
-            Debug.Log($"[CinemachinePlayerTarget] Đã gán Player cho {gameObject.name}");
+        if (player == null) return;
 
-            // Invalidate confiner cache để camera snap đúng vị trí
-            CinemachineConfiner2D confiner = GetComponent<CinemachineConfiner2D>();
-            if (confiner != null)
-            {
-                confiner.InvalidateBoundingShapeCache();
-            }
-        }
+        vcam.Target.TrackingTarget = player.transform;
+        Debug.Log($"[CinemachinePlayerTarget] Gán Player → {gameObject.name}");
+
+        // Snap camera ngay về vị trí player, không chờ damping
+        vcam.ForceCameraPosition(
+            new Vector3(player.transform.position.x, player.transform.position.y, vcam.transform.position.z),
+            vcam.transform.rotation
+        );
+
+        var confiner = GetComponent<CinemachineConfiner2D>();
+        if (confiner != null) confiner.InvalidateBoundingShapeCache();
     }
 }

@@ -27,16 +27,7 @@ public class BattleAction : MapAction
             return;
         }
 
-        MapManager.Instance
-            .currentEnemies.Clear();
-
-
-        foreach (var e in enemies)
-        {
-            if (e == null) continue;
-            MapManager.Instance
-                .currentEnemies.Add(e);
-        }
+        MapManager.Instance.SetupBattle(enemies, mapLevel);
 
         if (MapManager.Instance.currentEnemies.Count == 0)
         {
@@ -44,11 +35,6 @@ public class BattleAction : MapAction
             return;
         }
 
-        MapManager.Instance
-            .currentMapLevel = mapLevel;
-
-
-        MapManager.Instance
-            .StartBattle();
+        MapManager.Instance.StartBattle();
     }
 }

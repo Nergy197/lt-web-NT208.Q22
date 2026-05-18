@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class CutsceneTrongPhong : MonoBehaviour
@@ -6,8 +7,12 @@ public class CutsceneTrongPhong : MonoBehaviour
     [Header("Cấu Hình")]
     public PlayerMovement_Cutscene playerScript;
     public Transform diemCanhGiuong;
-    public float khoangCachTuongTac = 2.0f; // Khoảng cách để bấm F
+    public float khoangCachTuongTac = 2.0f;
     public GameObject khungThoaiUI;
+
+    [Header("Chuyển Scene sau khi xong")]
+    public string nextScene = "MapScene";
+    public float delayBeforeLoad = 1f;
 
     private bool dangTrongCuocThoai = false;
     private QuanLyHoiThoai heThongThoai;
@@ -62,6 +67,20 @@ public class CutsceneTrongPhong : MonoBehaviour
         dangTrongCuocThoai = false;
         if (khungThoaiUI != null) khungThoaiUI.SetActive(false);
         if (playerScript != null) playerScript.canMove = true;
+
+        Debug.Log("[CutsceneTrongPhong] Hội thoại phòng ngủ kết thúc.");
+
+        if (!string.IsNullOrEmpty(nextScene))
+        {
+            Debug.Log($"[CutsceneTrongPhong] Chờ {delayBeforeLoad}s → load '{nextScene}'");
+            StartCoroutine(LoadSceneDelayed());
+        }
+    }
+
+    IEnumerator LoadSceneDelayed()
+    {
+        yield return new WaitForSeconds(delayBeforeLoad);
+        SceneManager.LoadScene(nextScene);
     }
 
     // Vẽ vòng tròn để anh dễ thấy vùng bấm F trong Scene

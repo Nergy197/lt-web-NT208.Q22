@@ -36,6 +36,9 @@ public class PlayerAttack : AttackBase
         this.effects  = effects ?? new List<SkillEffectEntry>();
     }
 
+    // Buff-only (hits rỗng) không dash về phía mục tiêu
+    protected override bool DashesToTarget => hits != null && hits.Count > 0;
+
     // Bắt buộc implement từ AttackBase
     public override void Use(Status attacker, Status target)
     {
@@ -71,14 +74,8 @@ public class PlayerAttack : AttackBase
 
     protected override IEnumerator Execute()
     {
-        // Nếu không cấu hình hits → dùng 1 hit mặc định (tránh attack không gây damage)
-        var effectiveHits = hits != null && hits.Count > 0
-            ? hits
-            : new System.Collections.Generic.List<PlayerAttackHit>
-              { new PlayerAttackHit { windUpTime = 0f, damageMultiplier = 1f, repeat = 1 } };
-
         // --- DAMAGE HITS ---
-        foreach (var hit in effectiveHits)
+        foreach (var hit in hits ?? new System.Collections.Generic.List<PlayerAttackHit>())
         {
             PlayAttackerAnimation();
 

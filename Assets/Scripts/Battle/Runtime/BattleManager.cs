@@ -187,14 +187,17 @@ public class BattleManager : MonoBehaviour
         if (currentSelectedTarget != null && currentSelectedTarget.SpawnedModel != null)
         {
             if (!targetCursor.activeSelf) targetCursor.SetActive(true);
-            targetCursor.transform.position = currentSelectedTarget.SpawnedModel.transform.position + cursorOffset;
+            var tv = currentSelectedTarget.SpawnedModel.GetComponent<UnitVisual>();
+            Vector3 center = tv != null ? tv.SpriteCenter : currentSelectedTarget.SpawnedModel.transform.position;
+            // cursorOffset.x là khoảng cách trước mặt — tự đổi dấu theo hướng sprite
+            float facing = tv != null ? tv.FacingSign : 1f;
+            Vector3 offset = new Vector3(cursorOffset.x * facing, cursorOffset.y, cursorOffset.z);
+            targetCursor.transform.position = center + offset;
         }
         else
         {
             if (targetCursor.activeSelf) targetCursor.SetActive(false);
         }
-
-        // EnemyHPBar script tự update trong Update() của chính nó
 
         // Cursor chỉ vào player đang hành động
         if (playerTurnCursor != null)
@@ -202,7 +205,11 @@ public class BattleManager : MonoBehaviour
             if (waitingForPlayerAction && currentUnit != null && currentUnit.SpawnedModel != null)
             {
                 playerTurnCursor.SetActive(true);
-                playerTurnCursor.transform.position = currentUnit.SpawnedModel.transform.position + playerCursorOffset;
+                var pv = currentUnit.SpawnedModel.GetComponent<UnitVisual>();
+                Vector3 center = pv != null ? pv.SpriteCenter : currentUnit.SpawnedModel.transform.position;
+                float facing = pv != null ? pv.FacingSign : 1f;
+                Vector3 offset = new Vector3(playerCursorOffset.x * facing, playerCursorOffset.y, playerCursorOffset.z);
+                playerTurnCursor.transform.position = center + offset;
             }
             else
             {
@@ -397,6 +404,9 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator BattleLoop()
     {
+        // Đợi 1 frame để SpriteRenderer.bounds và các component khác được Unity khởi tạo sau spawn
+        yield return null;
+
         while (true)
         {
             if (CheckEndBattle()) break;
@@ -722,9 +732,14 @@ public class BattleManager : MonoBehaviour
         return alive[currentAllyTargetIndex];
     }
 
+    private float _lastTargetChangeTime = -1f;
+    private const float TargetChangeCooldown = 0.2f;
+
     public void ChangeTargetInput(int dir)
     {
         if (enemyParty == null || playerParty == null) return;
+        if (Time.unscaledTime - _lastTargetChangeTime < TargetChangeCooldown) return;
+        _lastTargetChangeTime = Time.unscaledTime;
 
         var aliveEnemies = new List<EnemyStatus>();
         foreach (var e in enemyParty.Members)

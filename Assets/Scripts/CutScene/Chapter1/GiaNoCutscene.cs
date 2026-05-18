@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class GiaNoCutscene : MonoBehaviour
@@ -19,6 +20,11 @@ public class GiaNoCutscene : MonoBehaviour
 
     [Header("Người Chơi")]
     public PlayerMovement_Cutscene playerScript;
+
+    [Header("Chuyển Scene")]
+    [Tooltip("Để trống nếu chưa load scene ở đây (load ở CutsceneTrongPhong sau).")]
+    public string nextScene = "";
+    public float delayBeforeLoad = 1f;
 
     void Start()
     {
@@ -85,5 +91,14 @@ public class GiaNoCutscene : MonoBehaviour
         // 6. ĐỨNG CẠNH GIƯỜNG
         giaNoBody.position = diemCanhGiuong.position;
         giaNoAnim.Play("GiaNo_IdleDown");
+
+        Debug.Log("[GiaNoCutscene] Kịch bản gia nô hoàn tất.");
+
+        if (!string.IsNullOrEmpty(nextScene))
+        {
+            Debug.Log($"[GiaNoCutscene] Chờ {delayBeforeLoad}s → load '{nextScene}'");
+            yield return new WaitForSeconds(delayBeforeLoad);
+            SceneManager.LoadScene(nextScene);
+        }
     }
 }

@@ -14,12 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackData
   attackName: "H\u1ED9 Th\u1EC3"
   apCost: 2
-  hits:
-  - windUpTime: 0
-    damageMultiplier: 0
-    repeat: 0
-    delayBetweenHits: 0
-    timingOffsets: []
+  apRestore: 0
+  hits: []
   effects:
   - effect:
       effectName: 

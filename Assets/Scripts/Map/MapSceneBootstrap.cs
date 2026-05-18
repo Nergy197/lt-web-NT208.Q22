@@ -1,11 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// Bootstrapper cho MapScene — khởi động QuestManager và GameManager
+/// Bootstrapper cho MapScene — khởi động các singleton cần thiết
 /// khi test trực tiếp từ MapScene (không đi qua StartScene).
-///
 /// Gắn vào một GameObject rỗng tên "Bootstrap" trong MapScene.
-/// Component này tự xóa mình trong build thực tế (khi GameManager đã tồn tại).
 /// </summary>
 public class MapSceneBootstrap : MonoBehaviour
 {
@@ -16,42 +14,48 @@ public class MapSceneBootstrap : MonoBehaviour
     [Tooltip("Kéo InputController prefab/GameObject vào đây")]
     public InputController inputControllerPrefab;
 
+    [Tooltip("Mapdata của vùng xuất phát để random encounter hoạt động ngay khi test")]
+    public Mapdata debugMapData;
+
     void Awake()
     {
-        // 1. Tự động tạo InputController nếu thiếu (cứu lỗi không di chuyển được)
+        // 1. InputController
         if (InputController.Instance == null)
         {
             if (inputControllerPrefab != null)
-            {
-                var ic = Instantiate(inputControllerPrefab);
-                ic.name = "InputController";
-            }
+                Instantiate(inputControllerPrefab).name = "InputController";
             else
-            {
-                // Tự động tạo GameObject kèm script nếu chưa có prefab
                 new GameObject("InputController").AddComponent<InputController>();
-            }
-            Debug.Log("[Bootstrap] Đã tạo InputController cứu hộ.");
+            Debug.Log("[MapBootstrap] Tạo InputController.");
         }
 
-        // 2. Nếu đã có QuestManager (từ StartScene), không làm gì thêm
-        if (QuestManager.Instance != null)
+        // 2. GameManager
+        if (GameManager.Instance == null)
         {
-            Destroy(gameObject);
-            return;
+            new GameObject("GameManager").AddComponent<GameManager>();
+            Debug.Log("[MapBootstrap] Tạo GameManager.");
         }
 
-        // Spawn QuestManager nếu chưa có (chỉ khi test trực tiếp)
-        if (questManagerPrefab != null)
+        // 3. MapManager
+        if (MapManager.Instance == null)
         {
-            var qm = Instantiate(questManagerPrefab);
-            qm.name = "QuestManager";
-            Debug.Log("[Bootstrap] Đã tạo QuestManager cho MapScene test.");
+            var mm = new GameObject("MapManager").AddComponent<MapManager>();
+            if (debugMapData != null)
+                mm.defaultMap = debugMapData;
+            Debug.Log("[MapBootstrap] Tạo MapManager.");
         }
-        else
+        else if (MapManager.Instance.currentMap == null && debugMapData != null)
         {
-            Debug.LogWarning("[Bootstrap] Không tìm thấy QuestManager prefab! " +
-                             "Kéo prefab vào field 'Quest Manager Prefab' của Bootstrap.");
+            MapManager.Instance.SetMap(debugMapData);
+        }
+
+        // 4. QuestManager
+        if (QuestManager.Instance == null)
+        {
+            if (questManagerPrefab != null)
+                Instantiate(questManagerPrefab).name = "QuestManager";
+            else
+                Debug.LogWarning("[MapBootstrap] Chưa gán questManagerPrefab.");
         }
     }
 

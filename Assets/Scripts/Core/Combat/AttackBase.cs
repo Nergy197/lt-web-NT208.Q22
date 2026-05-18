@@ -34,18 +34,17 @@ public abstract class AttackBase
 
         if (!cancelled && attacker != null && target != null)
         {
-            // Lướt tới mục tiêu trước khi ra đòn
             var visual = attacker.SpawnedModel?.GetComponent<UnitVisual>();
             var targetTransform = target.SpawnedModel?.transform;
-            if (visual != null && targetTransform != null)
+
+            // Chỉ dash khi chiêu có đòn tấn công trực tiếp
+            if (DashesToTarget && visual != null && targetTransform != null)
                 yield return visual.DashToward(targetTransform);
 
-            // Execute tự gọi PlayAttack() đúng thời điểm cho từng hit
             Phase = AttackPhase.Execute;
             yield return Execute();
 
-            // Lướt về sau khi đánh xong
-            if (visual != null)
+            if (DashesToTarget && visual != null)
                 yield return visual.ReturnToOrigin();
 
             Phase = AttackPhase.Recovery;
@@ -61,6 +60,9 @@ public abstract class AttackBase
     {
         attacker?.SpawnedModel?.GetComponent<UnitVisual>()?.PlayAttack();
     }
+
+    /// <summary>Override thành false để chiêu buff không dash về phía mục tiêu.</summary>
+    protected virtual bool DashesToTarget => true;
 
     protected virtual IEnumerator Prepare() { yield break; }
     protected abstract IEnumerator Execute();

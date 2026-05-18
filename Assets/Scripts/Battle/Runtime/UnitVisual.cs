@@ -13,13 +13,39 @@ public class UnitVisual : MonoBehaviour
     public float returnSpeed = 10f;
 
     private Animator animator;
+    [Header("Sprite Reference")]
+    [Tooltip("Kéo Body SpriteRenderer vào đây. Nếu để trống sẽ tự tìm child tên 'Body'.")]
+    public SpriteRenderer bodyRenderer;
+
     private Vector3 originPosition;
     private bool originRecorded;
 
     void Awake()
     {
         animator = GetComponent<Animator>();
+        if (bodyRenderer == null)
+            bodyRenderer = FindBodyRenderer();
     }
+
+    SpriteRenderer FindBodyRenderer()
+    {
+        // Tìm chính xác child tên "Body" để tránh nhầm Weapon/Shield
+        foreach (Transform child in transform)
+        {
+            if (child.name == "Body")
+            {
+                var sr = child.GetComponent<SpriteRenderer>();
+                if (sr != null) return sr;
+            }
+        }
+        return GetComponentInChildren<SpriteRenderer>();
+    }
+
+    /// <summary>Tâm sprite trong world space (dùng cho cursor và dash targeting).</summary>
+    public Vector3 SpriteCenter => bodyRenderer != null ? bodyRenderer.bounds.center : transform.position;
+
+    /// <summary>+1 nếu sprite mặt về phải, -1 nếu mặt về trái (dựa theo scale.x của root).</summary>
+    public float FacingSign => transform.lossyScale.x >= 0f ? 1f : -1f;
 
     // ── Animator triggers ─────────────────────────────────────────────────────
 
@@ -30,7 +56,7 @@ public class UnitVisual : MonoBehaviour
 
     // ── Dash movement ─────────────────────────────────────────────────────────
 
-    /// <summary>Dash về phía target, dừng cách target một khoảng dashStopDistance.</summary>
+    /// <summary>Dash về phía target, dừng khi cạnh sprite của attacker cách cạnh sprite của target một khoảng dashStopDistance.</summary>
     public IEnumerator DashToward(Transform target)
     {
         if (target == null) yield break;
@@ -41,13 +67,35 @@ public class UnitVisual : MonoBehaviour
             originRecorded = true;
         }
 
-        // Tắt root motion để animation không tranh chấp với code movement
         if (animator) animator.applyRootMotion = false;
 
-        while (Vector3.Distance(transform.position, target.position) > dashStopDistance)
+        // Yield 1 frame để SpriteRenderer.bounds được Unity tính sau khi spawn
+        yield return null;
+
+        var targetVisual = target.GetComponent<UnitVisual>();
+        Vector3 targetCenter = targetVisual != null ? targetVisual.SpriteCenter : target.position;
+
+        float myHalfX     = bodyRenderer  != null ? bodyRenderer.bounds.extents.x  : 0f;
+        float targetHalfX = targetVisual  != null && targetVisual.bodyRenderer != null
+                            ? targetVisual.bodyRenderer.bounds.extents.x : 0f;
+        float stopDist    = myHalfX + targetHalfX + dashStopDistance;
+
+        // Offset giữa transform pivot và sprite center — cố định suốt coroutine
+        // Dùng để tính đúng vị trí transform cần đến, tránh drift theo trục Y
+        Vector3 spriteOffset  = SpriteCenter - transform.position;
+        Vector3 direction     = (targetCenter - SpriteCenter).normalized;
+        // Vị trí sprite center khi dừng lại (cạnh sprite chạm cạnh target + gap)
+        Vector3 stopSpritePos = targetCenter - direction * stopDist;
+        // Vị trí transform tương ứng
+        Vector3 moveTarget    = stopSpritePos - spriteOffset;
+
+        while (true)
         {
+            if (Vector3.Distance(SpriteCenter, targetCenter) <= stopDist)
+                break;
+
             transform.position = Vector3.MoveTowards(
-                transform.position, target.position, dashSpeed * Time.deltaTime);
+                transform.position, moveTarget, dashSpeed * Time.deltaTime);
             yield return null;
         }
     }

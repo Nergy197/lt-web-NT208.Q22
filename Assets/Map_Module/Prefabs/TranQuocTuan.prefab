@@ -230,11 +230,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4834095417924837608}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7aabf1348fa266a4cbc28a4917c648af, type: 3}
-  m_Name: 
+  m_Script: {fileID: 11500000, guid: c14fdf5063146bd4da8f81949645df37, type: 3}
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 10
-  canMove: 1
+  speed: 5
 --- !u!50 &8103088044967351125
 Rigidbody2D:
   serializedVersion: 5

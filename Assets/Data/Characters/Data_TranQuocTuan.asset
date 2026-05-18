@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 177d1af869d55ee43a9784d24786a902, type: 3}
   m_Name: Data_TranQuocTuan
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
-  entityName: Hero
-  battlePrefab: {fileID: 0}
+  entityName: Trần Quốc Tuấn
+  battlePrefab: {fileID: 6757238513391220709, guid: 38dcaa828ede44bce97d232444fd2c79, type: 3}
   baseHP: 100
   baseAtk: 15
   baseDef: 10

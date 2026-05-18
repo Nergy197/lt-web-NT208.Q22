@@ -66,11 +66,7 @@ public class EnemyTrigger : MonoBehaviour
 
         triggered = true;
 
-        // Thiết lập enemy cố định cho trận này
-        MapManager.Instance.currentEnemies.Clear();
-        MapManager.Instance.currentEnemies.Add(enemyData);
-        MapManager.Instance.currentMapLevel = mapLevel;
-
+        MapManager.Instance.SetupBattle(new[] { enemyData }, mapLevel);
         Debug.Log($"[EnemyTrigger] Starting battle with {enemyData.entityName} (Lv {mapLevel})");
         MapManager.Instance.StartBattle();
     }

@@ -66,8 +66,7 @@ public class BattleSceneBootstrap : MonoBehaviour
         for (int i = 0; i < count; i++)
             picked.Add(debugMapData.GetRandomEnemy());
 
-        MapManager.Instance.currentEnemies = picked;
-        MapManager.Instance.currentMapLevel = Mathf.Max(1, debugMapData.enemyLevel);
+        MapManager.Instance.SetupBattle(picked, debugMapData.enemyLevel);
         MapManager.Instance.isInBattle = true;
         Debug.Log($"[BattleBootstrap] Spawn {count} enemy ngẫu nhiên từ '{debugMapData.mapName}' (level {debugMapData.enemyLevel}).");
     }

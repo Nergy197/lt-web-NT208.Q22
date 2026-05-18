@@ -11,11 +11,18 @@ public class MapManager : MonoBehaviour
 
     [Header("Current Map")]
     public Mapdata currentMap;
+    [Tooltip("Map mặc định khi bắt đầu game (chưa teleport lần nào). Gán Mapdata của vùng xuất phát.")]
+    public Mapdata defaultMap;
 
     [Header("Battle Data")]
     public List<EnemyData> currentEnemies = new List<EnemyData>();
-    public int currentMapLevel;
     public bool isInBattle = false;
+
+    // Level thực tế cho trận hiện tại: ưu tiên override (từ trigger/action),
+    // fallback về currentMap.enemyLevel khi dùng random encounter
+    private int _levelOverride;
+    private int EffectiveBattleLevel => _levelOverride > 0 ? _levelOverride : (currentMap?.enemyLevel ?? 1);
+    private bool _loggedNoMap;
 
     [Header("Random Encounter")]
     [Tooltip("Xác suất mỗi lần CheckForEncounter() (0–1). Nên gọi CheckForEncounter tối đa ~1 lần/FixedUpdate khi đang di chuyển — ví dụ 0.001 ≈ trung bình vài chục giây đi liên tục (50Hz).")]
@@ -34,12 +41,16 @@ public class MapManager : MonoBehaviour
         Instance = this;
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
+
+        if (currentMap == null && defaultMap != null)
+            SetMap(defaultMap);
     }
 
     public void SetMap(Mapdata map)
     {
         currentMap = map;
-        Debug.Log($"[MapManager] Loaded Map: {map.mapName}");
+        _loggedNoMap = false;
+        Debug.Log($"[MapManager] Loaded Map: {map.mapName} | lv={map.enemyLevel} | {map.possibleEnemies.Count} enemies");
 
         currentMap.GenerateRandomEnemyEffects();
         currentMap.GenerateRandomPlayerEffects();
@@ -55,7 +66,11 @@ public class MapManager : MonoBehaviour
     public void CheckForEncounter()
     {
         if (isInBattle) return;
-        if (currentMap == null) return;
+        if (currentMap == null)
+        {
+            if (!_loggedNoMap) { Debug.LogWarning("[Encounter] currentMap null — gán defaultMap vào MapManager hoặc gọi SetMap()"); _loggedNoMap = true; }
+            return;
+        }
         if (currentMap.possibleEnemies.Count == 0) return;
 
         stepsSinceLastEncounter++;
@@ -68,58 +83,65 @@ public class MapManager : MonoBehaviour
     {
         currentEnemies.Clear();
         int count = Random.Range(1, 4);
-
         for (int i = 0; i < count; i++)
         {
             EnemyData enemy = currentMap.GetRandomEnemy();
-            if (enemy == null) continue;
+            if (enemy == null) { Debug.LogWarning("[Encounter] GetRandomEnemy() trả về null — kiểm tra possibleEnemies"); continue; }
             currentEnemies.Add(enemy);
         }
 
-        // Nếu pool toàn null thì huỷ encounter để tránh load BattleScene rỗng.
         if (currentEnemies.Count == 0)
         {
-            Debug.LogWarning("[MapManager] Random encounter aborted: tất cả enemy data trả về null. Kiểm tra Mapdata.possibleEnemies.");
+            Debug.LogWarning("[Encounter] Huỷ — tất cả enemy data null");
             return;
         }
 
-        currentMapLevel = currentMap.enemyLevel;
-
-        Debug.Log("===== ENCOUNTER =====");
+        _levelOverride = 0;
+        Debug.Log($"[Encounter] {currentEnemies.Count} enemy | map='{currentMap.mapName}' | lv={EffectiveBattleLevel}");
         foreach (var e in currentEnemies)
-            Debug.Log($"Enemy: {e.entityName} | Attacks: {e.attacks.Count}");
+            Debug.Log($"  → {e.entityName} ({e.attacks.Count} attacks)");
 
         StartBattle();
     }
 
+    /// <summary>Thiết lập enemy và level cho trận scripted (EnemyTrigger, BattleAction, Bootstrap).</summary>
+    public void SetupBattle(IEnumerable<EnemyData> enemies, int level)
+    {
+        currentEnemies.Clear();
+        foreach (var e in enemies)
+            if (e != null) currentEnemies.Add(e);
+        _levelOverride = Mathf.Max(1, level);
+        Debug.Log($"[MapManager] SetupBattle: {currentEnemies.Count} enemy | lv={_levelOverride}");
+    }
+
     public void StartBattle()
     {
-        if (isInBattle) return;
-
-        if (currentEnemies == null || currentEnemies.Count == 0)
+        if (isInBattle)
         {
-            Debug.LogError("[MapManager] No enemies to battle");
+            Debug.LogWarning("[MapManager] StartBattle bị block — isInBattle=true. EndBattle() chưa được gọi?");
             return;
         }
 
-        // Loại bỏ entry null để BattleManager.LoadEnemy không phải gặp data lỗi.
+        if (currentEnemies == null || currentEnemies.Count == 0)
+        {
+            Debug.LogError("[MapManager] StartBattle thất bại — currentEnemies rỗng");
+            return;
+        }
+
         currentEnemies.RemoveAll(e => e == null);
         if (currentEnemies.Count == 0)
         {
-            Debug.LogError("[MapManager] Tất cả enemy data null sau khi clean — huỷ battle.");
+            Debug.LogError("[MapManager] StartBattle thất bại — tất cả enemy data null sau khi clean");
             return;
         }
 
         isInBattle = true;
 
-        // Lưu vị trí nhân vật để restore sau khi quay về MapScene.
         GameObject playerObj = GameObject.FindWithTag("Player");
         if (playerObj != null && GameManager.Instance != null)
-        {
             GameManager.Instance.SetLastMapPosition(playerObj.transform.position);
-            Debug.Log($"[MapManager] Saved player position: {playerObj.transform.position}");
-        }
 
+        Debug.Log($"[MapManager] → BattleScene | {currentEnemies.Count} enemy | lv={EffectiveBattleLevel} | map='{currentMap?.mapName ?? "none"}'");
         SceneManager.LoadScene("BattleScene");
     }
 
@@ -159,7 +181,7 @@ public class MapManager : MonoBehaviour
         {
             if (data == null) continue;
             EnemyStatus enemy = data.CreateStatus();
-            enemy.SetLevel(currentMapLevel);
+            enemy.SetLevel(EffectiveBattleLevel);
             ApplyEnemyEffects(enemy);
             list.Add(enemy);
         }

@@ -20,7 +20,8 @@ public class PlayerMovement : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>(); // THÊM
+        animator = GetComponent<Animator>();
+        Debug.Log($"[PlayerMovement] Awake — {gameObject.name}");
     }
 
     void Start()
@@ -29,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (input == null)
         {
-            Debug.LogError("InputController NULL");
+            Debug.LogError("[PlayerMovement] InputController.Instance == NULL — chưa có Bootstrap?");
             return;
         }
 
@@ -113,9 +114,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (animator == null) return;
 
+        bool isMoving = move.sqrMagnitude > 0.0001f;
         animator.SetFloat("MoveX", move.x);
         animator.SetFloat("MoveY", move.y);
-        animator.SetFloat("Speed", move.sqrMagnitude);
+        animator.speed = isMoving ? 1f : 0f;
     }
 
 

@@ -9,7 +9,7 @@ public class EnemyAttackHit
     public float windUpTime = 0.5f;
     public float parryWindowDuration = 1.5f;
     public float damageMultiplier = 1f;
-    public int apRestoreOnParry = 25;
+    public int apRestoreOnParry = 1;
     public int repeat = 1;
     public float delayBetweenHits = 0f;
     public List<float> timingOffsets = new List<float>();
@@ -29,6 +29,8 @@ public class EnemyAttack : AttackBase
         this.hits = hits;
         this.effects = effects ?? new List<SkillEffectEntry>();
     }
+
+    protected override bool DashesToTarget => hits != null && hits.Count > 0;
 
     public override void Use(Status attacker, Status target)
     {
@@ -50,7 +52,8 @@ public class EnemyAttack : AttackBase
             ? hits
             : new System.Collections.Generic.List<EnemyAttackHit>
               { new EnemyAttackHit { windUpTime = 0.3f, parryWindowDuration = 1.5f,
-                                     damageMultiplier = 1f, repeat = 1, canBeParried = true } };
+                                     damageMultiplier = 1f, repeat = 1, canBeParried = true,
+                                     apRestoreOnParry = 1 } };
 
         foreach (var hit in effectiveHits)
         {
