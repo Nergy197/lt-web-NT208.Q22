@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 82982105}
   - component: {fileID: 82982107}
   - component: {fileID: 82982106}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: ToggleHint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1393,7 +1393,7 @@ GameObject:
   - component: {fileID: 630256065}
   - component: {fileID: 630256067}
   - component: {fileID: 630256066}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MinimapContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3114,7 +3114,7 @@ GameObject:
   - component: {fileID: 1073381214}
   - component: {fileID: 1073381216}
   - component: {fileID: 1073381215}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MapNameLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3483,7 +3483,7 @@ GameObject:
   - component: {fileID: 1232895782}
   - component: {fileID: 1232895784}
   - component: {fileID: 1232895783}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MinimapBorder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3662,7 +3662,7 @@ GameObject:
   - component: {fileID: 1249872433}
   - component: {fileID: 1249872435}
   - component: {fileID: 1249872434}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MinimapImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3862,7 +3862,7 @@ GameObject:
   - component: {fileID: 1555944610}
   - component: {fileID: 1555944609}
   - component: {fileID: 1555944608}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: MinimapMask
   m_TagString: Untagged
   m_Icon: {fileID: 0}

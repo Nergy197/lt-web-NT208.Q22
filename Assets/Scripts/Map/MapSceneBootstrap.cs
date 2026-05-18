@@ -86,5 +86,8 @@ public class MapSceneBootstrap : MonoBehaviour
             qm.LoadProgress();
 
         qm.TryStartChapter1Quests();
+
+        var tracker = Object.FindAnyObjectByType<QuestTrackerUnderMinimapUI>();
+        if (tracker != null) tracker.RefreshUI();
     }
 }

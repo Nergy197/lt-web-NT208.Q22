@@ -318,6 +318,16 @@ public class SimpleTutorialManager : MonoBehaviour
         {
             tuanStatus.RestoreAP(20);
             int dmg = (basicAtk.hits.Count > 0) ? Mathf.RoundToInt(tuanStatus.Atk * basicAtk.hits[0].damageMultiplier) : tuanStatus.Atk;
+            var skipConfig = GetComponent("TutorialOneHitSkip");
+            if (skipConfig != null)
+            {
+                var skipType = skipConfig.GetType();
+                var enableField = skipType.GetField("enableOneHitBasicAttack");
+                var dmgField = skipType.GetField("oneHitDamage");
+                bool enabled = enableField != null && (bool)enableField.GetValue(skipConfig);
+                int oneHitDamage = dmgField != null ? (int)dmgField.GetValue(skipConfig) : 9999;
+                if (enabled) dmg = Mathf.Max(dmg, oneHitDamage);
+            }
             StartCoroutine(CombatSequence(dmg, 0, null, null));
         }
     }

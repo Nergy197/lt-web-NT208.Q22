@@ -37,7 +37,15 @@ public class QuestTrackerUnderMinimapUI : MonoBehaviour
         QuestManager qm = QuestManager.Instance;
         if (qm == null)
         {
-            SetVisible(false);
+            if (!showWhenNoQuest)
+            {
+                SetVisible(false);
+                return;
+            }
+
+            SetVisible(true);
+            if (questTitleText != null) questTitleText.text = "NHIEM VU";
+            if (objectivesText != null) objectivesText.text = "Dang khoi tao du lieu quest...";
             return;
         }
 

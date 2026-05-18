@@ -76,8 +76,9 @@ public static class QuestMapUIEnsurer
         tracker.panel = panelObj;
         tracker.questTitleText = titleText;
         tracker.objectivesText = objectivesText;
+        tracker.showWhenNoQuest = true;
 
-        panelObj.SetActive(false);
+        tracker.RefreshUI();
         Debug.Log("[QuestUI] Đã tạo QuestTrackerUnderMinimapUI trên MapScene.");
     }
 }
