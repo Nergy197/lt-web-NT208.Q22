@@ -24,6 +24,7 @@ public class BattleSceneBootstrap : MonoBehaviour
         EnsureGameManager();
         EnsureInputController();
         EnsureMapManager();
+        EnsureChapter1BattleQuest();
 
         if (MapManager.Instance != null &&
             (MapManager.Instance.currentEnemies == null || MapManager.Instance.currentEnemies.Count == 0))
@@ -51,6 +52,12 @@ public class BattleSceneBootstrap : MonoBehaviour
         if (MapManager.Instance != null) return;
         new GameObject("MapManager").AddComponent<MapManager>();
         Debug.Log("[BattleBootstrap] Tạo MapManager.");
+    }
+
+    void EnsureChapter1BattleQuest()
+    {
+        if (GetComponent<Chapter1BattleQuestSetup>() != null) return;
+        gameObject.AddComponent<Chapter1BattleQuestSetup>();
     }
 
     void LoadDebugEnemies()

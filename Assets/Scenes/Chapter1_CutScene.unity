@@ -8160,6 +8160,8 @@ MonoBehaviour:
   diemCanhGiuong: {fileID: 2130806401}
   khoangCachTuongTac: 6
   khungThoaiUI: {fileID: 932938606}
+  nextScene: Chapter1_Tutorial
+  delayBeforeLoad: 1
 --- !u!1 &1986665956
 GameObject:
   m_ObjectHideFlags: 0

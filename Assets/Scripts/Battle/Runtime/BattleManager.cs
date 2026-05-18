@@ -170,6 +170,15 @@ public class BattleManager : MonoBehaviour
     {
         waitingForAttackFinish = false;
         Log("[ATTACK] Finished");
+        
+        var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        if (dialog != null)
+        {
+            var p = GetAlivePlayer();
+            var e = GetEnemyTarget();
+            if (p != null) dialog.UpdateBuffDebuff(p);
+            if (e != null) dialog.UpdateEnemyCombo(e.PlannedAttack);
+        }
     }
 
     void Update()
@@ -346,6 +355,17 @@ public class BattleManager : MonoBehaviour
         SpawnParty(enemyParty, enemySpawnAnchor, spawnSpacing);
 
         Log("[BATTLE] Init Complete");
+        PlanEnemyActions(); // Lên kế hoạch ngay từ đầu trận
+
+        var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        if (dialog != null)
+        {
+            var p = GetAlivePlayer();
+            var e = GetEnemyTarget();
+            if (p != null) dialog.UpdateBuffDebuff(p);
+            if (e != null) dialog.UpdateEnemyCombo(e.PlannedAttack);
+        }
+
         EventManager.Publish(GameEvent.BattleStart);
         StartCoroutine(BattleLoop());
     }
@@ -450,11 +470,27 @@ public class BattleManager : MonoBehaviour
         EndBattle();
     }
 
+    public void PlanEnemyActions()
+    {
+        if (enemyParty == null || playerParty == null) return;
+        foreach (var e in enemyParty.Members)
+        {
+            var enemy = e as EnemyStatus;
+            if (enemy != null && enemy.IsAlive && enemy.PlannedAttack == null)
+            {
+                if (enemy.HasAI) enemy.ai.PlanAction(this, enemy, playerParty, enemyParty);
+                else enemy.SetPlannedAction(GetAlivePlayer(), enemy.GetRandomAttack());
+            }
+        }
+    }
+
     IEnumerator PlayerTurn()
     {
         waitingForPlayerAction = true;
         waitingForAttackFinish = false;
         Log("[TURN] Waiting Player Action");
+
+        PlanEnemyActions(); // Ensure all enemies have a plan before player decides
 
         var playerUnit = currentUnit as PlayerStatus;
         if (BattleUI.Instance != null && playerUnit != null)
@@ -463,6 +499,14 @@ public class BattleManager : MonoBehaviour
             BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
             var target = GetEnemyTarget();
             if (target != null) BattleUI.Instance.SetTargetName(target.entityName);
+            
+            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            if (dialog != null)
+            {
+                dialog.UpdateBuffDebuff(playerUnit);
+                if (target != null) dialog.UpdateEnemyCombo(target.PlannedAttack);
+                else dialog.UpdateEnemyCombo(null);
+            }
         }
 
         // Buoc 1: Doi player chon hanh dong (attack, skill, flee...).
@@ -515,7 +559,16 @@ public class BattleManager : MonoBehaviour
         BattleUI.Instance?.HideActionMenu();
         BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
         var t = GetEnemyTarget();
-        if (t != null) BattleUI.Instance?.SetTargetName(t.entityName);
+        if (t != null) 
+        {
+            BattleUI.Instance?.SetTargetName(t.entityName);
+            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            if (dialog != null)
+            {
+                dialog.UpdateBuffDebuff(currentUnit);
+                dialog.UpdateEnemyCombo(t.PlannedAttack);
+            }
+        }
         // Đảm bảo mode Battle để Confirm/Cancel hoạt động dù vào từ SkillMenu
         InputController.Instance?.SetMode(InputMode.Battle);
         Log("[TARGET] A/D: đổi mục tiêu | Enter: xác nhận | Esc: huỷ");
@@ -661,40 +714,34 @@ public class BattleManager : MonoBehaviour
             BattleUI.Instance.SetTurnIndicator($"Luot dich: {enemy.entityName}");
         }
 
-        // Neu enemy co AI, de AI quyet dinh hanh dong
-        if (enemy.HasAI)
+        // Neu chua co plan, lap tuc plan (truong hop enemy di truoc player turn)
+        if (enemy.PlannedAttack == null || enemy.PlannedTarget == null || !enemy.PlannedTarget.IsAlive)
         {
-            Log($"[AI] {enemy.entityName} thinking...");
-            waitingForAttackFinish = true;
-            enemy.ai.CalculateAction(this, enemy, playerParty, enemyParty);
-            yield return new WaitUntil(() => !waitingForAttackFinish);
+            if (enemy.HasAI) enemy.ai.PlanAction(this, enemy, playerParty, enemyParty);
+            else enemy.SetPlannedAction(GetAlivePlayer(), enemy.GetRandomAttack());
+        }
+
+        var attackData = enemy.PlannedAttack;
+        var target = enemy.PlannedTarget;
+
+        if (attackData == null || target == null || !target.IsAlive)
+        {
+            Log($"[ENEMY] {enemy.entityName} has no valid target or attack -- skipping turn.");
+            enemy.SetPlannedAction(null, null); // Clear plan
             yield break;
         }
 
-        // Fallback: random attack vao player dau tien con song
-        var player = GetAlivePlayer();
-
-        if (player == null)
-        {
-            Log("[ENEMY] No alive player target");
-            yield break;
-        }
-
-        var attackData = enemy.GetRandomAttack();
-        if (attackData == null)
-        {
-            Log($"[ENEMY] {enemy.entityName} has no attacks configured -- skipping turn.");
-            yield break;
-        }
-
-        Log("[ENEMY] Attack -> " + player.entityName);
+        Log("[ENEMY] Attack -> " + target.entityName);
 
         // Set co truoc khi Use() vi parry window chay ben trong EnemyAttack.Execute().
         waitingForAttackFinish = true;
-        attackData.CreateInstance().Use(enemy, player);
+        SetEnemyTarget(target); // for consistency
+        attackData.CreateInstance().Use(enemy, target);
 
         // Doi toan bo attack (wind-up + parry window + impact + recovery) hoan thanh.
         yield return new WaitUntil(() => !waitingForAttackFinish);
+        
+        enemy.SetPlannedAction(null, null); // Clear plan sau khi danh xong
     }
 
     EnemyStatus GetEnemyTarget()
@@ -761,6 +808,13 @@ public class BattleManager : MonoBehaviour
                 BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
                 BattleUI.Instance.SetTargetName(aliveEnemies[currentTargetIndex].entityName);
             }
+            
+            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            if (dialog != null)
+            {
+                dialog.UpdateBuffDebuff(currentUnit);
+                dialog.UpdateEnemyCombo(aliveEnemies[currentTargetIndex].PlannedAttack);
+            }
         }
         else if (isTargetingAlly && aliveAllies.Count > 0)
         {
@@ -769,6 +823,13 @@ public class BattleManager : MonoBehaviour
             
             if (BattleUI.Instance != null)
                 BattleUI.Instance.SetTargetName(aliveAllies[currentAllyTargetIndex].entityName);
+                
+            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            if (dialog != null)
+            {
+                dialog.UpdateBuffDebuff(aliveAllies[currentAllyTargetIndex]);
+                dialog.UpdateEnemyCombo(null); // Allies don't have PlannedAttack to show here
+            }
         }
     }
 

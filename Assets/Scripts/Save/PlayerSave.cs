@@ -15,4 +15,7 @@ public class PlayerSave
 
     // Tiến trình quest (lưu lên server)
     public AllQuestsSaveData questProgress;
+
+    // Đã hoàn thành tutorial combat Chapter 1
+    public bool chapter1TutorialCompleted;
 }

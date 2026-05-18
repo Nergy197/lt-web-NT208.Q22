@@ -77,20 +77,14 @@ public class MapSceneBootstrap : MonoBehaviour
 
     void Start()
     {
-        // Nếu không có quest nào active, bắt đầu quest mặc định
+        QuestMapUIEnsurer.EnsureTrackerUnderMinimap();
+
         if (QuestManager.Instance == null) return;
 
-        if (QuestManager.Instance.ActiveQuests.Count == 0 &&
-            QuestManager.Instance.CompletedQuests.Count == 0)
-        {
-            QuestManager.Instance.LoadProgress();   // load từ PlayerPrefs nếu có
+        var qm = QuestManager.Instance;
+        if (!qm.HasAnyProgress())
+            qm.LoadProgress();
 
-            // Nếu vẫn không có → start quest mặc định
-            if (QuestManager.Instance.ActiveQuests.Count == 0)
-            {
-                QuestManager.Instance.StartNewGame();
-                Debug.Log("[Bootstrap] Đã kích hoạt StartingQuests.");
-            }
-        }
+        qm.TryStartChapter1Quests();
     }
 }

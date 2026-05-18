@@ -326,9 +326,12 @@ public class QuestSetupTool
             
             if (qm.StartingQuests.Count == 0)
             {
-                report.Add("⚠️ CẢNH BÁO: StartingQuests trống — game sẽ không có quest nào khi bắt đầu!");
+                report.Add("⚠️ CẢNH BÁO: StartingQuests trống — TryStartChapter1Quests sẽ không start Q001!");
                 warnings++;
             }
+
+            if (GameManager.Instance != null && !GameManager.Instance.IsChapter1TutorialCompleted() && !qm.HasAnyProgress())
+                report.Add("ℹ️ Tutorial chưa xong — Q001 chưa start (đúng luồng New Game).");
 
             // Kiểm tra trùng ID
             HashSet<string> seenIds = new HashSet<string>();
@@ -451,5 +454,210 @@ public class QuestSetupTool
         }
 
         Debug.Log(string.Join("\n", report));
+    }
+
+    // ================================================================
+    //  TOOL 6: TẠO QUEST TRACKER DƯỚI MINIMAP
+    // ================================================================
+    [MenuItem("Tools/Quest System/6. Tạo Quest Tracker Dưới Minimap")]
+    public static void CreateQuestTrackerUnderMinimap()
+    {
+        QuestTrackerUnderMinimapUI existing = Object.FindFirstObjectByType<QuestTrackerUnderMinimapUI>();
+        if (existing != null)
+        {
+            Selection.activeGameObject = existing.gameObject;
+            Debug.Log("[QuestSetup] QuestTrackerUnderMinimapUI đã tồn tại.");
+            return;
+        }
+
+        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            GameObject canvasObj = new GameObject("Canvas");
+            canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 90;
+            var scaler = canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+            Undo.RegisterCreatedObjectUndo(canvasObj, "Create Canvas");
+        }
+
+        float posY = -285f;
+        Transform minimap = canvas.transform.Find("MinimapContainer");
+        if (minimap != null)
+        {
+            RectTransform miniRect = minimap as RectTransform;
+            if (miniRect != null)
+            {
+                posY = miniRect.anchoredPosition.y - miniRect.sizeDelta.y - 12f;
+            }
+        }
+
+        GameObject panelObj = new GameObject("QuestTrackerPanel");
+        panelObj.transform.SetParent(canvas.transform, false);
+        Undo.RegisterCreatedObjectUndo(panelObj, "Create QuestTrackerPanel");
+
+        var panelImage = panelObj.AddComponent<UnityEngine.UI.Image>();
+        panelImage.color = new Color(0.04f, 0.07f, 0.12f, 0.92f);
+        panelImage.raycastTarget = false;
+
+        RectTransform panelRect = panelObj.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(1, 1);
+        panelRect.anchorMax = new Vector2(1, 1);
+        panelRect.pivot = new Vector2(1, 1);
+        panelRect.anchoredPosition = new Vector2(-20, posY);
+        panelRect.sizeDelta = new Vector2(320, 140);
+
+        var panelOutline = panelObj.AddComponent<UnityEngine.UI.Outline>();
+        panelOutline.effectColor = new Color(0.3f, 0.5f, 0.8f, 0.45f);
+        panelOutline.effectDistance = new Vector2(1.5f, 1.5f);
+
+        GameObject titleObj = new GameObject("TitleText");
+        titleObj.transform.SetParent(panelObj.transform, false);
+        TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
+        titleText.text = "NHIEM VU";
+        titleText.fontSize = 18;
+        titleText.fontStyle = FontStyles.Bold;
+        titleText.color = new Color(0.72f, 0.9f, 1f, 1f);
+        titleText.raycastTarget = false;
+        RectTransform titleRect = titleObj.GetComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0, 1);
+        titleRect.anchorMax = new Vector2(1, 1);
+        titleRect.pivot = new Vector2(0.5f, 1);
+        titleRect.anchoredPosition = new Vector2(0, -8);
+        titleRect.sizeDelta = new Vector2(-16, 28);
+
+        GameObject objectivesObj = new GameObject("ObjectivesText");
+        objectivesObj.transform.SetParent(panelObj.transform, false);
+        TextMeshProUGUI objectivesText = objectivesObj.AddComponent<TextMeshProUGUI>();
+        objectivesText.text = "[ ] Objective";
+        objectivesText.fontSize = 14;
+        objectivesText.color = new Color(0.85f, 0.9f, 0.96f, 0.98f);
+        objectivesText.raycastTarget = false;
+        objectivesText.enableWordWrapping = true;
+        RectTransform objRect = objectivesObj.GetComponent<RectTransform>();
+        objRect.anchorMin = new Vector2(0, 0);
+        objRect.anchorMax = new Vector2(1, 1);
+        objRect.offsetMin = new Vector2(10, 8);
+        objRect.offsetMax = new Vector2(-10, -34);
+
+        QuestTrackerUnderMinimapUI tracker = panelObj.AddComponent<QuestTrackerUnderMinimapUI>();
+        SerializedObject so = new SerializedObject(tracker);
+        so.Update();
+        so.FindProperty("panel").objectReferenceValue = panelObj;
+        so.FindProperty("questTitleText").objectReferenceValue = titleText;
+        so.FindProperty("objectivesText").objectReferenceValue = objectivesText;
+        so.ApplyModifiedProperties();
+
+        panelObj.SetActive(false);
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        Selection.activeGameObject = panelObj;
+
+        Debug.Log("✅ [QuestSetup] Đã tạo Quest Tracker dưới minimap.");
+    }
+
+    // ================================================================
+    //  TOOL 7: TẠO ZONE MẪU CHAPTER 1 (Q001)
+    // ================================================================
+    [MenuItem("Tools/Quest System/7. Tạo Zone Mẫu Q001 (Chapter 1)")]
+    public static void CreateChapter1SampleZones()
+    {
+        QuestSO q001 = FindQuestById("Q001");
+        if (q001 == null)
+        {
+            Debug.LogError("[QuestSetup] Không tìm thấy QuestSO Q001 trong project.");
+            return;
+        }
+
+        Transform parent = null;
+        GameObject root = GameObject.Find("Chapter1_QuestZones");
+        if (root == null)
+        {
+            root = new GameObject("Chapter1_QuestZones");
+            Undo.RegisterCreatedObjectUndo(root, "Create Chapter1 Quest Zones");
+        }
+        parent = root.transform;
+
+        string[] objectives = { "O1", "O2", "O3", "O4" };
+        Vector3[] offsets = {
+            new Vector3(0, 0, 0),
+            new Vector3(6, 0, 0),
+            new Vector3(12, 0, 0),
+            new Vector3(18, 0, 0)
+        };
+
+        for (int i = 0; i < objectives.Length; i++)
+        {
+            string objId = objectives[i];
+            string zoneName = $"Q001_{objId}_Zone";
+            if (parent.Find(zoneName) != null) continue;
+
+            GameObject zoneObj = new GameObject(zoneName);
+            Undo.RegisterCreatedObjectUndo(zoneObj, "Create Q001 Zone");
+            zoneObj.transform.SetParent(parent);
+            zoneObj.transform.position = offsets[i];
+
+            var col = zoneObj.AddComponent<BoxCollider2D>();
+            col.isTrigger = true;
+            col.size = new Vector2(4f, 4f);
+
+            var zone = zoneObj.AddComponent<QuestZoneTrigger>();
+            zone.questActions = new List<QuestAction>
+            {
+                new QuestAction
+                {
+                    TriggerOn = QuestAction.When.OnEnterZone,
+                    Action = QuestAction.ActionType.CompleteObjective,
+                    Quest = q001,
+                    ObjectiveId = objId
+                }
+            };
+
+            var sr = zoneObj.AddComponent<SpriteRenderer>();
+            sr.color = new Color(1f, 0.8f, 0.2f, 0.15f);
+            Texture2D tex = new Texture2D(1, 1);
+            tex.SetPixel(0, 0, Color.white);
+            tex.Apply();
+            sr.sprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
+            zoneObj.transform.localScale = new Vector3(4f, 4f, 1f);
+        }
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        Selection.activeGameObject = root;
+        Debug.Log("[QuestSetup] Đã tạo 4 zone mẫu Q001_O1..O4 — kéo vào vị trí map thực tế.");
+    }
+
+    static QuestSO FindQuestById(string id)
+    {
+        string[] guids = AssetDatabase.FindAssets("t:QuestSO");
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            QuestSO q = AssetDatabase.LoadAssetAtPath<QuestSO>(path);
+            if (q != null && q.Id == id) return q;
+        }
+        return null;
+    }
+
+    [MenuItem("Tools/Quest System/8. Self-Test Checklist (Log)")]
+    public static void LogSelfTestChecklist()
+    {
+        var qm = Object.FindFirstObjectByType<QuestManager>();
+        var gm = GameManager.Instance;
+        Debug.Log(
+            "=== Quest Self-Test Checklist ===\n" +
+            "1. New Game: CutScene → Tutorial, KHÔNG có Q001 active\n" +
+            "2. Thắng tutorial: vào MapScene, Q001 active + tracker hiện\n" +
+            "3. Complete Q001 zone/NPC → chain Q002\n" +
+            "4. Battle Q002 thua → O4 + về Map\n" +
+            "5. Save/Continue giữ quest + tutorial flag\n" +
+            $"--- Trạng thái hiện tại ---\n" +
+            $"QuestManager: {(qm != null ? "OK" : "MISSING")}\n" +
+            $"Active quests: {(qm != null ? qm.ActiveQuests.Count : 0)}\n" +
+            $"Tutorial done: {(gm != null && gm.IsChapter1TutorialCompleted())}\n" +
+            $"Has progress: {(qm != null && qm.HasAnyProgress())}");
     }
 }

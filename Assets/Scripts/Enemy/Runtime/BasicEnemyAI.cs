@@ -10,7 +10,7 @@ using System.Linq;
 [CreateAssetMenu(fileName = "BasicEnemyAI", menuName = "Game/AI/BasicEnemyAI")]
 public class BasicEnemyAI : EnemyAI
 {
-    public override void CalculateAction(BattleManager bm, EnemyStatus self, Party playerParty, Party enemyParty)
+    public override void PlanAction(BattleManager bm, EnemyStatus self, Party playerParty, Party enemyParty)
     {
         // --- CHON TARGET ---
         PlayerStatus target = PickTarget(playerParty);
@@ -18,7 +18,7 @@ public class BasicEnemyAI : EnemyAI
         if (target == null)
         {
             Debug.Log($"[AI] {self.entityName}: No alive player target");
-            BattleEvents.RaiseAttackFinished();
+            self.SetPlannedAction(null, null);
             return;
         }
 
@@ -28,17 +28,12 @@ public class BasicEnemyAI : EnemyAI
         if (chosenAttack == null)
         {
             Debug.Log($"[AI] {self.entityName}: No attacks available");
-            BattleEvents.RaiseAttackFinished();
+            self.SetPlannedAction(null, null);
             return;
         }
 
-        Debug.Log($"[AI] {self.entityName} -> {target.entityName} using {chosenAttack.attackName}");
-
-        // Set target cho BattleManager
-        bm.SetEnemyTarget(target);
-
-        // Thuc hien attack
-        chosenAttack.CreateInstance().Use(self, target);
+        Debug.Log($"[AI] {self.entityName} plans to attack {target.entityName} using {chosenAttack.attackName}");
+        self.SetPlannedAction(target, chosenAttack);
     }
 
     /// <summary>

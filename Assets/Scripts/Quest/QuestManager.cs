@@ -31,7 +31,7 @@ public class QuestManager : MonoBehaviour
     public List<QuestSO> AllQuests = new();
 
     [Header("Starting Quests")]
-    [Tooltip("Các quest tự động bắt đầu khi vào game. Kéo SO asset vào đây.")]
+    [Tooltip("Quest khởi đầu chapter (Q001). Chỉ start qua TryStartChapter1Quests sau tutorial.")]
     public List<QuestSO> StartingQuests = new();
 
     public List<QuestSO> ActiveQuests    { get; private set; } = new();
@@ -53,11 +53,40 @@ public class QuestManager : MonoBehaviour
 
     // ─── New Game ────────────────────────────────────────────────────────
 
-    /// <summary>Bắt đầu game mới: start tất cả StartingQuests.</summary>
+    /// <summary>Bắt đầu quest trong StartingQuests (gọi sau tutorial chapter 1).</summary>
     public void StartNewGame()
     {
         foreach (var q in StartingQuests)
             if (q != null) StartQuest(q);
+    }
+
+    public bool HasAnyProgress() =>
+        ActiveQuests.Count > 0 || CompletedQuests.Count > 0;
+
+    /// <summary>Start Q001+ sau Chapter1_Tutorial; bỏ qua nếu đã có progress hoặc chưa xong tutorial.</summary>
+    public void TryStartChapter1Quests()
+    {
+        if (HasAnyProgress())
+        {
+            Debug.Log("[QUEST] TryStartChapter1Quests: đã có progress — bỏ qua.");
+            return;
+        }
+
+        if (GameManager.Instance == null || !GameManager.Instance.IsChapter1TutorialCompleted())
+        {
+            Debug.Log("[QUEST] TryStartChapter1Quests: tutorial chưa hoàn thành — bỏ qua.");
+            return;
+        }
+
+        if (StartingQuests == null || StartingQuests.Count == 0)
+        {
+            Debug.LogWarning("[QUEST] StartingQuests trống — không start được chapter 1.");
+            return;
+        }
+
+        StartNewGame();
+        SaveProgress();
+        Debug.Log("[QUEST] Chapter 1 quests started sau tutorial.");
     }
 
     // ─── Quest Lifecycle ─────────────────────────────────────────────────

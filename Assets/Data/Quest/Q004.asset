@@ -13,35 +13,31 @@ MonoBehaviour:
   m_Name: Q004
   m_EditorClassIdentifier: Assembly-CSharp::QuestSO
   Id: Q004
-  Title: "L\u1EC7nh r\u00FAt lui"
-  Description: "Sau th\u1EA3m b\u1EA1i: ch\u1EE9ng ki\u1EBFn th\u01B0\u01A1ng vong,
-    c\u1EE9u binh c\u00F2n s\u1ED1ng, truy\u1EC1n l\u1EC7nh r\u00FAt lui, t\u1EADp k\u1EBFt
-    t\u00E0n qu\u00E2n."
+  Title: "D\u1EA5u tro tr\u00EAn \u0111\u01B0\u1EDDng r\u00FAt"
+  Description: "Tr\u00EAn \u0111\u01B0\u1EDDng r\u00FAt: ch\u00E1y \u0111\u1ED5 n\u00E1t,
+    d\u00E2n s\u1ED1ng s\u00F3t, l\u00E0ng v\u1EAFng, \u0111i\u1EC3m d\u1EEBng ch\u00E2n."
   IsMainQuest: 1
   Objectives:
   - Id: O1
-    Description: "H\u1ED3i t\u1EC9nh / \u0111\u1EE9ng d\u1EADy sau h\u1ED7n lo\u1EA1n"
+    Description: "R\u1EDDi tr\u1EADn \u0111\u1ECBa, b\u01B0\u1EDBc v\u00E0o tuy\u1EBFn
+      \u0111\u01B0\u1EDDng r\u00FAt"
     IsCompleted: 0
   - Id: O2
-    Description: "\u0110i\u1EC3m quan s\u00E1t A \u2014 d\u00E2n b\u1ECB th\u01B0\u01A1ng
-      / tan hoang"
+    Description: "\u0110i qua \u0111o\u1EA1n \u0111\u01B0\u1EDDng ch\u00E1y / \u0111\u1ED5
+      n\u00E1t"
     IsCompleted: 0
   - Id: O3
-    Description: "\u0110i\u1EC3m quan s\u00E1t B \u2014 binh \u0111\u00E3 t\u1EED tr\u1EADn"
+    Description: "G\u1EB7p d\u00E2n s\u1ED1ng s\u00F3t (nh\u00F3m 1)"
     IsCompleted: 0
   - Id: O4
-    Description: "C\u1EE9u binh l\u00EDnh c\u00F2n s\u1ED1ng (nh\u00F3m 1)"
+    Description: "G\u1EB7p d\u00E2n s\u1ED1ng s\u00F3t (nh\u00F3m 2)"
     IsCompleted: 0
   - Id: O5
-    Description: "C\u1EE9u binh l\u00EDnh c\u00F2n s\u1ED1ng (nh\u00F3m 2)"
+    Description: "\u0110i qua l\u00E0ng v\u1EAFng"
     IsCompleted: 0
   - Id: O6
-    Description: "Truy\u1EC1n l\u1EC7nh r\u00FAt lui"
-    IsCompleted: 0
-  - Id: O7
-    Description: "D\u1EABn t\u00E0n qu\u00E2n t\u1EDBi \u0111i\u1EC3m t\u1EADp k\u1EBFt
-      r\u00FAt lui"
+    Description: "\u0110\u1EBFn \u0111i\u1EC3m d\u1EEBng ch\u00E2n / tr\u1EA1i t\u1EA1m"
     IsCompleted: 0
   BranchChoices: []
   NextQuests:
-  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd3, type: 2}
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd4, type: 2}
