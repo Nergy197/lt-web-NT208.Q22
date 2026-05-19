@@ -5,176 +5,192 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// Copy BattleScene → Chapter1_Tutorial, cấu hình BattleManager cho tutorial,
+/// rồi thêm TutorialController + TutorialPromptUI.
+/// Menu: Tools/Tutorial/Setup Tutorial Scene
+/// </summary>
 public class TutorialSceneSetupHelper : EditorWindow
 {
-    private const string BATTLE_SCENE_PATH = "Assets/Scenes/BattleScene.unity";
-    private const string TUTORIAL_SCENE_PATH = "Assets/Scenes/Chapter1_Tutorial.unity";
-    private const string PLAYER_DATA_PATH = "Assets/Data/Characters/Data_TranQuocTuan.asset";
-    private const string ENEMY_ATTACK_PATH = "Assets/Data/Tutorial/TutorialEnemyAttack.asset";
+    const string BATTLE_SCENE   = "Assets/Scenes/BattleScene.unity";
+    const string TUTORIAL_SCENE = "Assets/Scenes/Chapter1_Tutorial.unity";
+    const string PLAYER_DATA    = "Assets/Data/Characters/Data_TranQuocTuan.asset";
+    const string ENEMY_ATTACK   = "Assets/Data/Tutorial/TutorialEnemyAttack.asset";
+    const string ENEMY_PREFAB   = "Assets/Prefabs/BinhLinh_Combat.prefab";
+    const string FONT_PATH      = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
 
     [MenuItem("Tools/Tutorial/Setup Tutorial Scene")]
-    public static void Open()
+    static void Open()
     {
-        var window = GetWindow<TutorialSceneSetupHelper>("Setup Tutorial");
-        window.minSize = new Vector2(400, 200);
-        window.Show();
+        var w = GetWindow<TutorialSceneSetupHelper>("Setup Tutorial");
+        w.minSize = new Vector2(440, 260);
+        w.Show();
     }
 
-    private void OnGUI()
+    void OnGUI()
     {
-        EditorGUILayout.LabelField("Tutorial Scene Automator", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Tutorial Scene Setup", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Cong cu nay se tu dong thuc hien:\n" +
-            "1. Copy nguyen ban BattleScene.unity sang Chapter1_Tutorial.unity.\n" +
-            "2. Mo scene huong dan moi tao.\n" +
-            "3. Cau hinh BattleManager dung TutorialPlayerData va TutorialEnemyAttack o che do Demo.\n" +
-            "4. Them component TutorialController va TutorialPromptUI.\n" +
-            "5. Tu dong thiet lap Canvas UI cho prompt huong dan.",
+            "Tool này sẽ:\n" +
+            "1. Copy nguyên bản BattleScene → Chapter1_Tutorial (xóa bản cũ).\n" +
+            "2. Gán BattleManager: BinhLinh_Combat, TutorialEnemyAttack, TranQuocTuan data.\n" +
+            "3. Xóa BattleSceneBootstrap.debugMapData (buộc dùng demo mode).\n" +
+            "4. Thêm Tutorial root object với TutorialController.\n" +
+            "5. Thêm TutorialPromptPanel vào canvas, wire TutorialPromptUI.",
             MessageType.Info);
 
-        EditorGUILayout.Space(10);
-        GUI.backgroundColor = new Color(0.4f, 0.7f, 1f);
-        if (GUILayout.Button("Bat dau Setup", GUILayout.Height(40)))
-        {
-            SetupTutorial();
-        }
+        EditorGUILayout.Space(8);
+        GUI.backgroundColor = new Color(0.3f, 0.75f, 0.3f);
+        if (GUILayout.Button("Bắt đầu Setup", GUILayout.Height(44)))
+            Run();
         GUI.backgroundColor = Color.white;
     }
 
-    private void SetupTutorial()
+    void Run()
     {
-        if (!File.Exists(BATTLE_SCENE_PATH))
+        // ── Guard ────────────────────────────────────────────────────────────
+        if (!File.Exists(BATTLE_SCENE))
         {
-            EditorUtility.DisplayDialog("Loi", "Khong tim thay file BattleScene.unity goc tai " + BATTLE_SCENE_PATH, "OK");
+            EditorUtility.DisplayDialog("Lỗi", $"Không tìm thấy:\n{BATTLE_SCENE}", "OK");
             return;
         }
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-        {
-            return;
-        }
-
-        File.Copy(BATTLE_SCENE_PATH, TUTORIAL_SCENE_PATH, true);
+        // ── 1. Copy BattleScene → Tutorial ───────────────────────────────────
+        File.Copy(BATTLE_SCENE, TUTORIAL_SCENE, overwrite: true);
         AssetDatabase.Refresh();
-        Debug.Log("[TUTORIAL SETUP] Da copy BattleScene sang Chapter1_Tutorial.");
+        Log("Copy BattleScene → Chapter1_Tutorial.");
 
-        var scene = EditorSceneManager.OpenScene(TUTORIAL_SCENE_PATH, OpenSceneMode.Single);
+        var scene = EditorSceneManager.OpenScene(TUTORIAL_SCENE, OpenSceneMode.Single);
         if (!scene.IsValid())
         {
-            EditorUtility.DisplayDialog("Loi", "Khong the mo scene " + TUTORIAL_SCENE_PATH, "OK");
+            EditorUtility.DisplayDialog("Lỗi", "Không thể mở scene sau khi copy.", "OK");
             return;
         }
 
+        // ── 2. Cấu hình BattleManager ─────────────────────────────────────────
         var bm = Object.FindFirstObjectByType<BattleManager>();
-        if (bm == null)
-        {
-            EditorUtility.DisplayDialog("Loi", "Khong tim thay BattleManager trong scene!", "OK");
-            return;
-        }
+        if (bm == null) { Error("Không tìm thấy BattleManager!"); return; }
 
         var bmSO = new SerializedObject(bm);
         bmSO.FindProperty("useDemoModeIfMissingManager").boolValue = true;
 
-        var playerData = AssetDatabase.LoadAssetAtPath<PlayerData>(PLAYER_DATA_PATH);
-        var enemyAttack = AssetDatabase.LoadAssetAtPath<EnemyAttackData>(ENEMY_ATTACK_PATH);
-
-        if (playerData != null)
-        {
-            bmSO.FindProperty("debugPlayerData").objectReferenceValue = playerData;
-            Debug.Log("[TUTORIAL SETUP] Da gan debugPlayerData = " + playerData.name);
-        }
-        else
-        {
-            Debug.LogWarning("[TUTORIAL SETUP] Khong tim thay PlayerData tai " + PLAYER_DATA_PATH);
-        }
-
-        if (enemyAttack != null)
-        {
-            bmSO.FindProperty("debugEnemyAttack").objectReferenceValue = enemyAttack;
-            Debug.Log("[TUTORIAL SETUP] Da gan debugEnemyAttack = " + enemyAttack.name);
-        }
-        else
-        {
-            Debug.LogWarning("[TUTORIAL SETUP] Khong tim thay EnemyAttack tai " + ENEMY_ATTACK_PATH);
-        }
+        SetRef(bmSO, "debugPlayerData",  AssetDatabase.LoadAssetAtPath<PlayerData>(PLAYER_DATA),
+               "debugPlayerData", PLAYER_DATA);
+        SetRef(bmSO, "debugEnemyAttack", AssetDatabase.LoadAssetAtPath<EnemyAttackData>(ENEMY_ATTACK),
+               "debugEnemyAttack", ENEMY_ATTACK);
+        SetRef(bmSO, "debugEnemyPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(ENEMY_PREFAB),
+               "debugEnemyPrefab", ENEMY_PREFAB);
 
         bmSO.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(bm);
+        Log("BattleManager đã được cấu hình.");
 
-        var canvas = GameObject.Find("BattleUI_Canvas");
-        if (canvas == null)
+        // ── 3. BattleSceneBootstrap: xóa debugMapData ────────────────────────
+        var bootstrap = Object.FindFirstObjectByType<BattleSceneBootstrap>();
+        if (bootstrap != null)
         {
-            var canvasComp = Object.FindFirstObjectByType<Canvas>();
-            if (canvasComp != null) canvas = canvasComp.gameObject;
+            var bsSO = new SerializedObject(bootstrap);
+            bsSO.FindProperty("debugMapData").objectReferenceValue = null;
+            bsSO.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(bootstrap);
+            Log("BattleSceneBootstrap.debugMapData = null (dùng demo mode).");
         }
 
-        if (canvas == null)
-        {
-            EditorUtility.DisplayDialog("Loi", "Khong tim thay BattleUI_Canvas trong scene!", "OK");
-            return;
-        }
+        // ── 4. Tìm BattleUI_Canvas ────────────────────────────────────────────
+        Canvas uiCanvas = null;
+        var battleUI = Object.FindFirstObjectByType<BattleUI>();
+        if (battleUI != null)
+            uiCanvas = battleUI.GetComponent<Canvas>() ?? battleUI.GetComponentInParent<Canvas>();
+        if (uiCanvas == null)
+            uiCanvas = Object.FindFirstObjectByType<Canvas>();
+        if (uiCanvas == null) { Error("Không tìm thấy Canvas!"); return; }
 
-        var oldPrompt = canvas.transform.Find("TutorialPromptPanel");
-        if (oldPrompt != null)
-        {
-            DestroyImmediate(oldPrompt.gameObject);
-        }
+        // ── 5. Xóa Tutorial cũ nếu có ─────────────────────────────────────────
+        var oldCtrl = GameObject.Find("Tutorial");
+        if (oldCtrl != null) { Object.DestroyImmediate(oldCtrl); Log("Xóa Tutorial cũ."); }
 
-        var oldController = GameObject.Find("Tutorial");
-        if (oldController != null)
-        {
-            DestroyImmediate(oldController);
-        }
+        var oldPanel = uiCanvas.transform.Find("TutorialPromptPanel");
+        if (oldPanel != null) { Object.DestroyImmediate(oldPanel.gameObject); Log("Xóa TutorialPromptPanel cũ."); }
 
-        var promptPanel = new GameObject("TutorialPromptPanel", typeof(RectTransform), typeof(Image));
-        promptPanel.transform.SetParent(canvas.transform, false);
-        
-        var panelRect = promptPanel.GetComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.5f, 0f);
-        panelRect.anchorMax = new Vector2(0.5f, 0f);
-        panelRect.pivot = new Vector2(0.5f, 0f);
-        panelRect.sizeDelta = new Vector2(700f, 90f);
-        panelRect.anchoredPosition = new Vector2(0f, 150f);
+        // ── 6. Tạo TutorialPromptPanel ────────────────────────────────────────
+        var panel = new GameObject("TutorialPromptPanel", typeof(RectTransform), typeof(Image));
+        panel.transform.SetParent(uiCanvas.transform, false);
 
-        var panelImg = promptPanel.GetComponent<Image>();
-        panelImg.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
+        var panelRT = panel.GetComponent<RectTransform>();
+        panelRT.anchorMin        = new Vector2(0.5f, 0f);
+        panelRT.anchorMax        = new Vector2(0.5f, 0f);
+        panelRT.pivot            = new Vector2(0.5f, 0f);
+        panelRT.sizeDelta        = new Vector2(720f, 90f);
+        panelRT.anchoredPosition = new Vector2(0f, 160f);
 
+        var panelImg = panel.GetComponent<Image>();
+        panelImg.color = new Color(0.06f, 0.06f, 0.10f, 0.90f);
+
+        // Text
         var textGO = new GameObject("PromptText", typeof(RectTransform), typeof(TextMeshProUGUI));
-        textGO.transform.SetParent(promptPanel.transform, false);
+        textGO.transform.SetParent(panel.transform, false);
+        var textRT = textGO.GetComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = new Vector2(16f, 8f);
+        textRT.offsetMax = new Vector2(-16f, -8f);
 
-        var textRect = textGO.GetComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(10f, 10f);
-        textRect.offsetMax = new Vector2(-10f, -10f);
+        var tmp = textGO.GetComponent<TextMeshProUGUI>();
+        tmp.fontSize  = 22f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color     = Color.white;
+        tmp.enableWordWrapping = true;
 
-        var textComp = textGO.GetComponent<TextMeshProUGUI>();
-        textComp.fontSize = 24f;
-        textComp.alignment = TextAlignmentOptions.Center;
-        textComp.color = Color.white;
-        textComp.font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
+        var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FONT_PATH);
+        if (font != null) tmp.font = font;
+        else Debug.LogWarning("[TutorialSetup] Không tìm thấy font tại " + FONT_PATH);
 
-        var promptUI = promptPanel.AddComponent<TutorialPromptUI>();
-        var promptSO = new SerializedObject(promptUI);
-        promptSO.FindProperty("promptText").objectReferenceValue = textComp;
-        promptSO.FindProperty("panelObject").objectReferenceValue = promptPanel;
-        promptSO.FindProperty("panelBackground").objectReferenceValue = panelImg;
-        promptSO.ApplyModifiedPropertiesWithoutUndo();
+        // TutorialPromptUI component
+        var promptUI = panel.AddComponent<TutorialPromptUI>();
+        var pSO = new SerializedObject(promptUI);
+        pSO.FindProperty("promptText").objectReferenceValue      = tmp;
+        pSO.FindProperty("panelObject").objectReferenceValue     = panel;
+        pSO.FindProperty("panelBackground").objectReferenceValue = panelImg;
+        pSO.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(promptUI);
+        Log("TutorialPromptPanel đã tạo và wire.");
 
-        var tutorialGO = new GameObject("Tutorial");
-        var controller = tutorialGO.AddComponent<TutorialController>();
-        var controllerSO = new SerializedObject(controller);
-        controllerSO.FindProperty("promptUI").objectReferenceValue = promptUI;
-        controllerSO.ApplyModifiedPropertiesWithoutUndo();
-        EditorUtility.SetDirty(controller);
+        // ── 7. Tạo Tutorial root object + TutorialController ──────────────────
+        var tutGO = new GameObject("Tutorial");
+        var ctrl  = tutGO.AddComponent<TutorialController>();
+        var ctrlSO = new SerializedObject(ctrl);
+        ctrlSO.FindProperty("promptUI").objectReferenceValue = promptUI;
+        ctrlSO.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(ctrl);
+        Log("TutorialController đã tạo và wire.");
 
+        // ── 8. Save ───────────────────────────────────────────────────────────
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
+        Log("Scene đã lưu.");
 
-        Debug.Log("[TUTORIAL SETUP] Da setup hoan tat Chapter1_Tutorial scene.");
-        EditorUtility.DisplayDialog("Thanh Cong", "Da setup Chapter1_Tutorial hoan tat!\n\n" +
-            "- BattleManager da duoc cau hinh dung.\n" +
-            "- TutorialController va TutorialPromptUI da duoc tao va wire thanh cong.", "OK");
+        EditorUtility.DisplayDialog("Hoàn tất",
+            "Chapter1_Tutorial đã được setup từ BattleScene!\n\n" +
+            "✓ BattleManager: BinhLinh + TutorialEnemyAttack + TranQuocTuan\n" +
+            "✓ TutorialController + TutorialPromptUI đã wire\n" +
+            "✓ Demo mode bật (không cần MapManager)",
+            "OK");
     }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    static void SetRef(SerializedObject so, string prop, Object value, string label, string path)
+    {
+        if (value != null)
+        {
+            so.FindProperty(prop).objectReferenceValue = value;
+            Log($"Gán {label} = {value.name}");
+        }
+        else
+            Debug.LogWarning($"[TutorialSetup] Không tìm thấy asset tại {path}");
+    }
+
+    static void Log(string msg)   => Debug.Log($"[TutorialSetup] {msg}");
+    static void Error(string msg) => EditorUtility.DisplayDialog("Lỗi", msg, "OK");
 }

@@ -166,6 +166,22 @@ public class BattleManager : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    IEnumerator WaitForAttack(float timeout)
+    {
+        float elapsed = 0f;
+        while (waitingForAttackFinish)
+        {
+            elapsed += Time.deltaTime;
+            if (elapsed >= timeout)
+            {
+                Debug.LogWarning($"[BATTLE] Attack coroutine không kết thúc sau {timeout}s — ép tiếp tục.");
+                waitingForAttackFinish = false;
+                break;
+            }
+            yield return null;
+        }
+    }
+
     void OnAttackFinished()
     {
         waitingForAttackFinish = false;
@@ -243,16 +259,16 @@ public class BattleManager : MonoBehaviour
         var root  = new GameObject("EnemyHPBar", typeof(RectTransform));
         root.transform.SetParent(uiCanvas.transform, false);
         var rt    = root.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(80f, 10f);
+        rt.sizeDelta = new Vector2(160f, 16f);
         rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
 
         // Background tối
         var bg = new GameObject("BG", typeof(RectTransform), typeof(UnityEngine.UI.Image));
         bg.transform.SetParent(root.transform, false);
-        bg.GetComponent<UnityEngine.UI.Image>().color = new Color(0.08f, 0.08f, 0.08f, 0.85f);
+        bg.GetComponent<UnityEngine.UI.Image>().color = new Color(0.08f, 0.08f, 0.08f, 0.90f);
         FillRect(bg.GetComponent<RectTransform>());
 
-        // Fill đỏ — dùng anchorMax.x để co dãn, không cần sprite hay fillAmount
+        // Fill đỏ — dùng anchorMax.x để co dãn
         float initRatio = enemy.MaxHP > 0 ? (float)enemy.currentHP / enemy.MaxHP : 1f;
         var fillGO  = new GameObject("Fill", typeof(RectTransform), typeof(UnityEngine.UI.Image));
         fillGO.transform.SetParent(root.transform, false);
@@ -260,8 +276,8 @@ public class BattleManager : MonoBehaviour
         var fillRt       = fillGO.GetComponent<RectTransform>();
         fillRt.anchorMin = new Vector2(0f, 0f);
         fillRt.anchorMax = new Vector2(initRatio, 1f);
-        fillRt.offsetMin = new Vector2(2f, 2f);
-        fillRt.offsetMax = new Vector2(-2f, -2f);
+        fillRt.offsetMin = new Vector2(3f, 3f);
+        fillRt.offsetMax = new Vector2(-3f, -3f);
 
         var bar          = root.AddComponent<EnemyHPBar>();
         bar.trackedEnemy = enemy;
@@ -322,7 +338,7 @@ public class BattleManager : MonoBehaviour
     void LoadDemoEnemy()
     {
         enemyParty = new Party(PartyType.Enemy);
-        var e1 = new EnemyStatus("Enemy Demo", 50, 15, 5, 10);
+        var e1 = new EnemyStatus("Enemy Demo", 50, 15, 5, 4);
         e1.battlePrefab = debugEnemyPrefab;
         if (debugEnemyAttack != null) e1.AddAttack(debugEnemyAttack);
         enemyParty.AddMember(e1);
@@ -493,6 +509,8 @@ public class BattleManager : MonoBehaviour
         PlanEnemyActions(); // Ensure all enemies have a plan before player decides
 
         var playerUnit = currentUnit as PlayerStatus;
+        BattleEvents.RaisePlayerTurnStart(playerUnit);
+
         if (BattleUI.Instance != null && playerUnit != null)
         {
             BattleUI.Instance.ShowActionMenu(playerUnit);
@@ -524,7 +542,7 @@ public class BattleManager : MonoBehaviour
         if (waitingForAttackFinish)
         {
             Log("[TURN] Waiting for attack to finish...");
-            yield return new WaitUntil(() => !waitingForAttackFinish);
+            yield return WaitForAttack(20f);
         }
     }
 
@@ -705,6 +723,8 @@ public class BattleManager : MonoBehaviour
             yield break;
         }
 
+        BattleEvents.RaiseEnemyTurnStart(enemy);
+
         // Tat highlight player + cap nhat turn indicator hien thi luot enemy
         if (BattleUI.Instance != null)
         {
@@ -741,9 +761,9 @@ public class BattleManager : MonoBehaviour
         SetEnemyTarget(target); // for consistency
         attackData.CreateInstance().Use(enemy, target);
 
-        // Doi toan bo attack (wind-up + parry window + impact + recovery) hoan thanh.
-        yield return new WaitUntil(() => !waitingForAttackFinish);
-        
+        // Doi toan bo attack hoan thanh — timeout 15s de tranh block vinh vien.
+        yield return WaitForAttack(15f);
+
         enemy.SetPlannedAction(null, null); // Clear plan sau khi danh xong
     }
 

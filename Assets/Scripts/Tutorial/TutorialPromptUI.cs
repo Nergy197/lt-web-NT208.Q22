@@ -39,7 +39,9 @@ public class TutorialPromptUI : MonoBehaviour
     {
         StopActiveCoroutine();
         if (panelObject != null) panelObject.SetActive(true);
-        activeFlashCoroutine = StartCoroutine(FlashParryRoutine());
+        activeFlashCoroutine = StartCoroutine(FlashRoutine(
+            ">>> NHẤN [SPACE] ĐỂ ĐỠ ĐÒN! <<<",
+            Color.yellow, new Color(1f, 0.4f, 0f), duration: 1.6f));
     }
 
     private void StopActiveCoroutine()
@@ -51,27 +53,23 @@ public class TutorialPromptUI : MonoBehaviour
         }
     }
 
-    private IEnumerator FlashParryRoutine()
+    private IEnumerator FlashRoutine(string text, Color colorA, Color colorB, float duration = 1.6f)
     {
         if (promptText == null) yield break;
 
-        promptText.text = "BAM SPACE DE DO DON (PARRY)!";
-        float duration = 1.6f;
+        promptText.text = text;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
-            float speed = 15f;
-            float factor = (Mathf.Sin(elapsed * speed) + 1f) / 2f;
-            
-            promptText.color = Color.Lerp(Color.yellow, Color.red, factor);
-            promptText.fontSize = Mathf.Lerp(24f, 30f, factor);
-
+            float factor = (Mathf.Sin(elapsed * 12f) + 1f) / 2f;
+            promptText.color    = Color.Lerp(colorA, colorB, factor);
+            promptText.fontSize = Mathf.Lerp(22f, 28f, factor);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        promptText.color = Color.white;
-        promptText.fontSize = 24f;
+        promptText.color    = Color.white;
+        promptText.fontSize = 22f;
     }
 }

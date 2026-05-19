@@ -1,153 +1,217 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Đồng bộ hướng dẫn với trạng thái thực tế của trận đấu.
+///
+/// Bước 1 — Tấn công thường  : chỉ hiện "LƯỢT CỦA BẠN" khi OnPlayerTurnStart bắn.
+/// Bước 2 — Đỡ đòn Parry    : chỉ advance khi địch đánh xong (OnAttackFinished sau OnEnemyTurnStart).
+/// Bước 3 — Dùng Kỹ Năng    : chỉ advance khi người chơi đánh (không phải địch).
+/// Bước 4 — Hoàn thành       : ẩn sau delay.
+/// </summary>
 public class TutorialController : MonoBehaviour
 {
-    [Header("UI Reference")]
     [SerializeField] private TutorialPromptUI promptUI;
 
-    private int currentStep = 1; // Step 1: Basic Attack, Step 2: Parry, Step 3: Skill, Step 4: Done
-    private bool parrySuccess = false;
+    // ── State ─────────────────────────────────────────────────────────────────
+    int  step          = 0;     // 0 = chờ khởi động
+    bool isEnemyTurn   = false; // true khi đang trong lượt địch
+    bool parryDone     = false;
+
+    // ── Nội dung hướng dẫn ───────────────────────────────────────────────────
+
+    // Khi đến lượt NGƯỜI CHƠI
+    const string PLAYER_TURN_1 =
+        "LƯỢT CỦA BẠN!\n" +
+        "Nhấn [E] hoặc click 'Đánh Thường' để tấn công.";
+
+    const string PLAYER_TURN_3 =
+        "LƯỢT CỦA BẠN!\n" +
+        "Nhấn [W] hoặc click 'Kỹ Năng' → chọn kỹ năng bằng [Q] / [W] / [E].";
+
+    // Khi đến lượt ĐỊCH
+    const string ENEMY_TURN_GENERIC =
+        "Lượt địch đang hành động...\n" +
+        "Nhấn [SPACE] khi thấy nhấp nháy để đỡ đòn!";
+
+    const string ENEMY_TURN_STEP2 =
+        "Lượt địch! Hãy sẵn sàng đỡ đòn.\n" +
+        "Nhấn [SPACE] ngay khi cửa sổ đỡ đòn xuất hiện!";
+
+    // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     void Start()
     {
         if (promptUI == null)
-        {
             promptUI = Object.FindFirstObjectByType<TutorialPromptUI>();
-        }
 
-        StartCoroutine(StartTutorialWithDelay());
-    }
-
-    private IEnumerator StartTutorialWithDelay()
-    {
-        yield return null;
-        UpdatePromptForStep();
+        // step = 0, chờ BattleManager bắn OnPlayerTurnStart lần đầu tiên.
+        promptUI?.Hide();
     }
 
     void OnEnable()
     {
-        BattleEvents.OnAttackFinished       += HandleAttackFinished;
+        BattleEvents.OnPlayerTurnStart      += HandlePlayerTurnStart;
+        BattleEvents.OnEnemyTurnStart       += HandleEnemyTurnStart;
         BattleEvents.OnEnemyAttackAnnounced += HandleEnemyAttackAnnounced;
         BattleEvents.OnEnemyHitIncoming     += HandleEnemyHitIncoming;
         BattleEvents.OnParryWindowOpened    += HandleParryWindowOpened;
         BattleEvents.OnParrySuccess         += HandleParrySuccess;
+        BattleEvents.OnAttackFinished       += HandleAttackFinished;
     }
 
     void OnDisable()
     {
-        BattleEvents.OnAttackFinished       -= HandleAttackFinished;
+        BattleEvents.OnPlayerTurnStart      -= HandlePlayerTurnStart;
+        BattleEvents.OnEnemyTurnStart       -= HandleEnemyTurnStart;
         BattleEvents.OnEnemyAttackAnnounced -= HandleEnemyAttackAnnounced;
         BattleEvents.OnEnemyHitIncoming     -= HandleEnemyHitIncoming;
         BattleEvents.OnParryWindowOpened    -= HandleParryWindowOpened;
         BattleEvents.OnParrySuccess         -= HandleParrySuccess;
+        BattleEvents.OnAttackFinished       -= HandleAttackFinished;
     }
 
-    private void HandleAttackFinished()
-    {
-        if (currentStep == 1)
-        {
-            AdvanceStep();
-        }
-        else if (currentStep == 2)
-        {
-            if (!parrySuccess)
-            {
-                AdvanceStep();
-            }
-        }
-        else if (currentStep == 3)
-        {
-            AdvanceStep();
-        }
-    }
+    // ── Turn events (đồng bộ với BattleManager) ───────────────────────────────
 
-    private void HandleEnemyAttackAnnounced(EnemyAttackData attack, EnemyStatus enemy, PlayerStatus target)
+    void HandlePlayerTurnStart(PlayerStatus player)
     {
-        if (currentStep == 2)
-        {
-            promptUI.Show("Ke dich chuan bi tan cong! Hay chu y!");
-        }
-    }
+        isEnemyTurn = false;
 
-    private void HandleEnemyHitIncoming(EnemyAttackHit hit, int hitIndex, EnemyStatus enemy)
-    {
-        if (currentStep == 2)
+        if (step == 0)
         {
-            promptUI.Show("Sap toi roi...");
+            // Lần đầu tiên đến lượt người chơi → bắt đầu bước 1
+            step = 1;
+        }
+
+        switch (step)
+        {
+            case 1: promptUI.Show(PLAYER_TURN_1);  break;
+            case 2:
+                // Nếu địch đã đánh ít nhất 1 lần → advance sang bước 3
+                // (OnAttackFinished sẽ xử lý; ở đây chỉ nhắc chờ địch)
+                promptUI.Show(
+                    "Tốt! Bây giờ hãy chờ lượt địch để luyện đỡ đòn.\n" +
+                    "Khi thấy nhấp nháy → nhấn ngay [SPACE]!");
+                break;
+            case 3: promptUI.Show(PLAYER_TURN_3);  break;
         }
     }
 
-    private void HandleParryWindowOpened(PlayerStatus player)
+    void HandleEnemyTurnStart(EnemyStatus enemy)
     {
-        if (currentStep == 2)
-        {
-            promptUI.FlashParry();
-        }
-    }
+        isEnemyTurn = true;
 
-    private void HandleParrySuccess(PlayerStatus player)
-    {
-        if (currentStep == 2)
-        {
-            parrySuccess = true;
-            StartCoroutine(ShowParrySuccessPrompt());
-        }
-    }
-
-    private IEnumerator ShowParrySuccessPrompt()
-    {
-        promptUI.Show("Do don thanh cong! Ban da duoc tang AP!");
-        yield return new WaitForSeconds(1.5f);
-        AdvanceStep();
-    }
-
-    private void AdvanceStep()
-    {
-        currentStep++;
-        UpdatePromptForStep();
-
-        if (currentStep == 4)
-        {
-            SetTutorialComplete();
-        }
-    }
-
-    private void UpdatePromptForStep()
-    {
-        if (promptUI == null) return;
-
-        switch (currentStep)
+        switch (step)
         {
             case 1:
-                promptUI.Show("Nhan key Q (hoac click nut Tan Cong) de thuc hien tan cong thuong!");
+                promptUI.Show(
+                    "Lượt địch!\n" +
+                    "Nhấn [SPACE] khi thấy nhấp nháy để đỡ đòn — sau đó nhớ tấn công.");
                 break;
             case 2:
-                promptUI.Show("Cho luot cua ke dich de thuc hien do don (Parry).");
+                promptUI.Show(ENEMY_TURN_STEP2);
                 break;
             case 3:
-                promptUI.Show("Dung chieu thuc: Mo Menu chieu thuc [W] va chon mot ky nang de tan cong!");
-                break;
-            case 4:
-                promptUI.Show("Hoan thanh huong dan! Hay tieu diet ke dich de ket thuc tran dau!");
-                StartCoroutine(HidePromptAfterDelay(4.0f));
+                promptUI.Show(
+                    "Lượt địch — hãy đỡ đòn [SPACE] nếu kịp!\n" +
+                    "Sau đó dùng Kỹ Năng khi đến lượt bạn.");
                 break;
         }
     }
 
-    private IEnumerator HidePromptAfterDelay(float delay)
+    // ── Attack events ─────────────────────────────────────────────────────────
+
+    void HandleEnemyAttackAnnounced(EnemyAttackData attack, EnemyStatus enemy, PlayerStatus target)
+    {
+        if (step == 1 || step == 2)
+        {
+            promptUI.Show(
+                "⚔ Địch đang tấn công!\n" +
+                "Sẵn sàng nhấn [SPACE] khi cửa sổ đỡ đòn mở!");
+        }
+    }
+
+    void HandleEnemyHitIncoming(EnemyAttackHit hit, int hitIndex, EnemyStatus enemy)
+    {
+        if ((step == 1 || step == 2) && hit.canBeParried)
+            promptUI.Show("Đòn đánh sắp tới! Nhấn [SPACE] ngay!");
+    }
+
+    void HandleParryWindowOpened(PlayerStatus player)
+    {
+        if (step == 1 || step == 2 || step == 3)
+            promptUI.FlashParry();
+    }
+
+    void HandleParrySuccess(PlayerStatus player)
+    {
+        parryDone = true;
+        StopAllCoroutines();
+        StartCoroutine(ShowParrySuccessAndRestore());
+    }
+
+    IEnumerator ShowParrySuccessAndRestore()
+    {
+        string next = step == 1
+            ? "Đỡ đòn thành công! (+AP)\nBây giờ hãy tấn công: nhấn [E]."
+            : "Đỡ đòn thành công! Xuất sắc!";
+        promptUI.Show(next);
+        yield return new WaitForSeconds(2f);
+
+        // Khôi phục nội dung phù hợp với trạng thái hiện tại
+        if (!isEnemyTurn) HandlePlayerTurnStart(null);
+        else              HandleEnemyTurnStart(null);
+    }
+
+    void HandleAttackFinished()
+    {
+        bool wasEnemy = isEnemyTurn;
+        // isEnemyTurn sẽ được reset bởi HandlePlayerTurnStart ở lượt tiếp
+
+        switch (step)
+        {
+            case 1:
+                if (!wasEnemy)
+                {
+                    // Người chơi vừa tấn công → sang bước 2
+                    step = 2;
+                    parryDone = false;
+                    promptUI.Show(
+                        "Tốt! Đòn đánh đầu tiên thành công.\n" +
+                        "Bây giờ chờ địch tấn công để luyện đỡ đòn [SPACE].");
+                }
+                break;
+
+            case 2:
+                if (wasEnemy)
+                {
+                    // Địch đánh xong → sang bước 3
+                    step = 3;
+                    promptUI.Show(
+                        "Hoàn thành bước đỡ đòn!\n" +
+                        "Khi đến lượt bạn: nhấn [W] → chọn Kỹ Năng → Q/W/E.");
+                }
+                break;
+
+            case 3:
+                if (!wasEnemy)
+                {
+                    // Người chơi hành động (skill hoặc đánh thường) → hoàn thành
+                    step = 4;
+                    PlayerPrefs.SetInt("tutorialCompleted", 1);
+                    PlayerPrefs.Save();
+                    promptUI.Show(
+                        "Xuất sắc! Bạn đã nắm được các thao tác cơ bản!\n" +
+                        "Hãy tiếp tục chiến đấu và hạ gục kẻ địch!");
+                    StartCoroutine(HideAfter(6f));
+                }
+                break;
+        }
+    }
+
+    IEnumerator HideAfter(float delay)
     {
         yield return new WaitForSeconds(delay);
-        if (promptUI != null)
-        {
-            promptUI.Hide();
-        }
-    }
-
-    private void SetTutorialComplete()
-    {
-        PlayerPrefs.SetInt("tutorialCompleted", 1);
-        PlayerPrefs.Save();
-        Debug.Log("[TUTORIAL] Completed! PlayerPrefs updated.");
+        promptUI?.Hide();
     }
 }

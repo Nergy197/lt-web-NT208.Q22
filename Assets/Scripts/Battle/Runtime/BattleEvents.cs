@@ -20,6 +20,12 @@ public static class BattleEvents
     /// <summary>Fire khi parry window mở — player bắt đầu có thể bấm parry.</summary>
     public static event Action<PlayerStatus> OnParryWindowOpened;
 
+    /// <summary>Fire ngay khi bắt đầu lượt của người chơi (action menu sắp hiện).</summary>
+    public static event System.Action<PlayerStatus> OnPlayerTurnStart;
+
+    /// <summary>Fire ngay khi bắt đầu lượt của địch (trước khi địch ra đòn).</summary>
+    public static event System.Action<EnemyStatus> OnEnemyTurnStart;
+
     // Tự động clear delegates khi Play mode bắt đầu (tránh stale callbacks)
     [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetStatics()
@@ -29,6 +35,8 @@ public static class BattleEvents
         OnEnemyHitIncoming     = null;
         OnParrySuccess         = null;
         OnParryWindowOpened    = null;
+        OnPlayerTurnStart      = null;
+        OnEnemyTurnStart       = null;
     }
 
     /// <summary>
@@ -52,4 +60,10 @@ public static class BattleEvents
 
     public static void RaiseParryWindowOpened(PlayerStatus player)
         => OnParryWindowOpened?.Invoke(player);
+
+    public static void RaisePlayerTurnStart(PlayerStatus player)
+        => OnPlayerTurnStart?.Invoke(player);
+
+    public static void RaiseEnemyTurnStart(EnemyStatus enemy)
+        => OnEnemyTurnStart?.Invoke(enemy);
 }
