@@ -482,6 +482,15 @@ public class GameManager : MonoBehaviour
         // Bật cảnh báo trình duyệt khi đang chơi game
         ActivateBrowserWarning();
 
+        // Định tuyến vào Tutorial nếu chưa hoàn thành hướng dẫn và không có điểm lưu (save point)
+        bool tutorialDone = PlayerPrefs.GetInt("tutorialCompleted", 0) == 1;
+        if (!tutorialDone && string.IsNullOrEmpty(pendingSaveScene))
+        {
+            Debug.Log("[GameManager] Hướng dẫn chưa hoàn thành -> Chuyển hướng vào Chapter1_Tutorial");
+            SceneManager.LoadScene("Chapter1_Tutorial");
+            return;
+        }
+
         if (!string.IsNullOrEmpty(pendingSaveScene))
         {
             Debug.Log($"[GameManager] Load Scene: {pendingSaveScene} (Điểm Save: {pendingSavePointId})");

@@ -34,7 +34,20 @@ public class EnemyHPBar : MonoBehaviour
         // Theo vị trí world của enemy
         if (cam != null && trackedEnemy.SpawnedModel != null)
         {
-            Vector3 world  = trackedEnemy.SpawnedModel.transform.position + worldOffset;
+            Vector3 world;
+            var visual = trackedEnemy.SpawnedModel.GetComponent<UnitVisual>();
+            if (visual != null && visual.bodyRenderer != null)
+            {
+                world = new Vector3(
+                    visual.SpriteCenter.x,
+                    visual.bodyRenderer.bounds.max.y + 0.35f,
+                    visual.SpriteCenter.z
+                );
+            }
+            else
+            {
+                world = trackedEnemy.SpawnedModel.transform.position + worldOffset;
+            }
             Vector2 screen = RectTransformUtility.WorldToScreenPoint(cam, world);
             rt.position    = screen;
         }

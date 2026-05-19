@@ -180,8 +180,7 @@ public class BattleSceneRebuildTool : EditorWindow
 
             // Xoá tutorial junk
             if (root.name.StartsWith("TutorialCopy_") ||
-                root.name == "Chapter1_Tutorial" ||
-                root.GetComponentInChildren<SimpleTutorialManager>(true) != null)
+                root.name == "Chapter1_Tutorial")
             {
                 Undo.DestroyObjectImmediate(root);
                 continue;

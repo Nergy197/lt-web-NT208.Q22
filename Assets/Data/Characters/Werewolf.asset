@@ -19,5 +19,7 @@ MonoBehaviour:
   baseDef: 1
   baseSpd: 109
   attacks:
-  - {fileID: 11400000, guid: fccb9d5571e52c8408e7691c696a2995, type: 2}
+  - {fileID: 11400000, guid: 7135f5eb7e5241d7978bbd7e0d9ffbc4, type: 2}
+  - {fileID: 11400000, guid: 160e3610fecb4c129eb109015cd81a93, type: 2}
+  - {fileID: 11400000, guid: 4f426242aeec4b9ca5acd09a8b091b67, type: 2}
   ai: {fileID: 0}

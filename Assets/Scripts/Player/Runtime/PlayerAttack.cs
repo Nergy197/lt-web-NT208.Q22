@@ -77,7 +77,7 @@ public class PlayerAttack : AttackBase
         // --- DAMAGE HITS ---
         foreach (var hit in hits ?? new System.Collections.Generic.List<PlayerAttackHit>())
         {
-            PlayAttackerAnimation(hit.windUpTime);
+            PlayAttackerAnimation();
 
             if (hit.windUpTime > 0f)
                 yield return new WaitForSeconds(hit.windUpTime);

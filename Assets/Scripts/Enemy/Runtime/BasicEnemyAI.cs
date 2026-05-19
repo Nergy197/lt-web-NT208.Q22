@@ -87,7 +87,7 @@ public class BasicEnemyAI : EnemyAI
             {
                 float totalDmg = 0f;
                 foreach (var hit in atk.hits)
-                    totalDmg += hit.damageMultiplier * Mathf.Max(1, hit.repeat);
+                    totalDmg += hit.damageMultiplier;
 
                 if (totalDmg > bestMultiplier)
                 {

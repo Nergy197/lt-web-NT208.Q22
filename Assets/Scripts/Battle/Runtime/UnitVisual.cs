@@ -44,8 +44,16 @@ public class UnitVisual : MonoBehaviour
     /// <summary>Tâm sprite trong world space (dùng cho cursor và dash targeting).</summary>
     public Vector3 SpriteCenter => bodyRenderer != null ? bodyRenderer.bounds.center : transform.position;
 
-    /// <summary>+1 nếu sprite mặt về phải, -1 nếu mặt về trái (dựa theo scale.x của root).</summary>
-    public float FacingSign => transform.lossyScale.x >= 0f ? 1f : -1f;
+    /// <summary>+1 nếu sprite mặt về phải, -1 nếu mặt về trái (tự động dựa theo vị trí sân đấu).</summary>
+    public float FacingSign
+    {
+        get
+        {
+            float baseFace = transform.position.x > 0f ? -1f : 1f;
+            float scaleSign = transform.localScale.x >= 0f ? 1f : -1f;
+            return baseFace * scaleSign;
+        }
+    }
 
     // ── Animator triggers ─────────────────────────────────────────────────────
 
