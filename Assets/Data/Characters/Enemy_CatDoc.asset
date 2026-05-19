@@ -10,22 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35a6e52a2b417844f9089fad3be940fc, type: 3}
-  m_Name: EnemyAttackData
+  m_Name: Enemy_CatDoc
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackData
-  attackName: New Enemy Attack
+  attackName: "Cắt Độc"
   hits:
   - canBeParried: 1
-    animDuration: 1.1
+    animDuration: 1.4
     parryOpenTime: 0.6
     damageMultiplier: 0.8
     apRestoreOnParry: 1
-  - canBeParried: 1
-    animDuration: 0.9
-    parryOpenTime: 0.5
-    damageMultiplier: 0.8
-    apRestoreOnParry: 1
-  - canBeParried: 1
-    animDuration: 0.9
-    parryOpenTime: 0.5
-    damageMultiplier: 1.5
-    apRestoreOnParry: 1
+  effects:
+  - effect:
+      effectName: "Độc"
+      effectType: 8
+      value: 8
+      duration: 3
+    target: 1

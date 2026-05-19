@@ -72,6 +72,7 @@ public class PlayerStatus : Status
         parryWindowOpen = true;
         parryRequested  = false;
         WasParried      = false;
+        BattleEvents.RaiseParryWindowOpened(this);
     }
 
     public void CloseParryWindow()
@@ -112,6 +113,7 @@ public class PlayerStatus : Status
             if (visual != null) visual.PlayParry();
         }
 
+        BattleEvents.RaiseParrySuccess(this);
         return true;
     }
 

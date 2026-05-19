@@ -73,7 +73,7 @@ public class NpcTrigger : MonoBehaviour
         // Chỉ xử lý khi đang ở chế độ Map (tránh xung đột với UI/Battle)
         if (InputController.Instance.Mode != InputMode.Map) return;
 
-        if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
+        if (InputController.Instance.IsInteractPressed())
         {
             if (!_isTalking) StartDialogue();
             else             AdvanceDialogue();

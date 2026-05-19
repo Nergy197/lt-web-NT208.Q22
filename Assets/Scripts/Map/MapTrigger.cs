@@ -39,7 +39,7 @@ public class MapTrigger : MonoBehaviour
 
         if (requireInteract && isPlayerInRange && InputController.Instance != null)
         {
-            if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
+            if (InputController.Instance.IsInteractPressed())
             {
                 ExecuteTrigger();
             }

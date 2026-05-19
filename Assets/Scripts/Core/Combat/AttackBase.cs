@@ -44,6 +44,9 @@ public abstract class AttackBase
             Phase = AttackPhase.Execute;
             yield return Execute();
 
+            // Reset tốc độ animation về bình thường sau khi execute xong
+            visual?.SetAnimatorSpeed(1f);
+
             if (DashesToTarget && visual != null)
                 yield return visual.ReturnToOrigin();
 
@@ -55,7 +58,22 @@ public abstract class AttackBase
         BattleEvents.RaiseAttackFinished();
     }
 
-    /// <summary>Gọi animation tấn công trên model của attacker.</summary>
+    // Thời lượng tự nhiên của clip tấn công (giây). Chỉnh cho khớp với clip thực tế.
+    private const float ReferenceAnimDuration = 0.5f;
+
+    /// <summary>Gọi animation tấn công, tự điều chỉnh tốc độ để clip phát đúng animDuration giây.</summary>
+    protected void PlayAttackerAnimation(float animDuration)
+    {
+        var visual = attacker?.SpawnedModel?.GetComponent<UnitVisual>();
+        if (visual == null) return;
+        float speed = animDuration > 0f
+            ? Mathf.Clamp(ReferenceAnimDuration / animDuration, 0.1f, 4f)
+            : 1f;
+        visual.SetAnimatorSpeed(speed);
+        visual.PlayAttack();
+    }
+
+    /// <summary>Gọi animation tấn công ở tốc độ bình thường (dùng khi không có windUpTime cụ thể).</summary>
     protected void PlayAttackerAnimation()
     {
         attacker?.SpawnedModel?.GetComponent<UnitVisual>()?.PlayAttack();

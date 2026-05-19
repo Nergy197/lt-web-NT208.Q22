@@ -8,6 +8,22 @@ public class BattleInfoDialogUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI debuffText;
     [SerializeField] private TextMeshProUGUI enemyComboText;
 
+    private void OnEnable()
+    {
+        BattleEvents.OnEnemyAttackAnnounced += HandleAttackAnnounced;
+        BattleEvents.OnEnemyHitIncoming     += HandleHitIncoming;
+        BattleEvents.OnParryWindowOpened    += HandleParryWindowOpened;
+        BattleEvents.OnAttackFinished       += HandleAttackFinished;
+    }
+
+    private void OnDisable()
+    {
+        BattleEvents.OnEnemyAttackAnnounced -= HandleAttackAnnounced;
+        BattleEvents.OnEnemyHitIncoming     -= HandleHitIncoming;
+        BattleEvents.OnParryWindowOpened    -= HandleParryWindowOpened;
+        BattleEvents.OnAttackFinished       -= HandleAttackFinished;
+    }
+
     private void Start()
     {
         Clear();
@@ -76,6 +92,34 @@ public class BattleInfoDialogUI : MonoBehaviour
         if (debuffText != null) debuffText.text = hasDebuff ? debuffs.TrimEnd() : "<b><color=#FF5555>DEBUFFS:</color></b> Trống";
     }
 
+    private void HandleAttackAnnounced(EnemyAttackData attack, EnemyStatus enemy, PlayerStatus target)
+    {
+        if (enemyComboText == null) return;
+        int totalHits = attack.hits.Count;
+        enemyComboText.text = $"Dang danh: <color=#FF4444>{attack.attackName}</color> ({totalHits} Hits)";
+    }
+
+    private void HandleHitIncoming(EnemyAttackHit hit, int hitIndex, EnemyStatus enemy)
+    {
+        if (enemyComboText == null) return;
+        if (hit.canBeParried)
+            enemyComboText.text = $"Don {hitIndex + 1} sap toi...";
+        else
+            enemyComboText.text = $"Don {hitIndex + 1} sap toi (khong parry)";
+    }
+
+    private void HandleParryWindowOpened(PlayerStatus player)
+    {
+        if (enemyComboText == null) return;
+        enemyComboText.text = "<color=#FFE040>>>> PARRY! <<<</color>";
+    }
+
+    private void HandleAttackFinished()
+    {
+        // BattleManager.OnAttackFinished se goi UpdateEnemyCombo ngay sau — reset tam thoi
+        if (enemyComboText != null) enemyComboText.text = "Sap toi: ???";
+    }
+
     public void UpdateEnemyCombo(EnemyAttackData attack)
     {
         if (enemyComboText == null) return;
@@ -86,13 +130,7 @@ public class BattleInfoDialogUI : MonoBehaviour
             return;
         }
 
-        int totalHits = 0;
-        foreach (var hit in attack.hits)
-        {
-            totalHits += Mathf.Max(1, hit.repeat);
-        }
-
-        // Show attack name and number of hits
+        int totalHits = attack.hits.Count;
         enemyComboText.text = $"Sắp tới: <color=orange>{attack.attackName}</color> ({totalHits} Hits)";
     }
 }

@@ -83,7 +83,11 @@ public abstract class Status
         if (SpawnedModel != null)
         {
             var visual = SpawnedModel.GetComponent<UnitVisual>();
-            if (visual != null) visual.PlayHit();
+            if (visual != null)
+            {
+                visual.SetAnimatorSpeed(1f);
+                visual.PlayHit();
+            }
         }
 
         if (currentHP <= 0)

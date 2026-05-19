@@ -88,7 +88,7 @@ public class TeleportPortal : MonoBehaviour
         if (IsInputBlocked()) return;
         if (InputController.Instance == null) return;
 
-        if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
+        if (InputController.Instance.IsInteractPressed())
         {
             // Nếu có SavePoint chồng lên vùng này → nhường phím F cho SavePoint, không teleport.
             GameObject player = GameObject.FindGameObjectWithTag("Player");

@@ -124,7 +124,7 @@ public class TeleportPillar : MonoBehaviour
         
         if (InputController.Instance.Mode != InputMode.Map) return;
 
-        if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
+        if (InputController.Instance.IsInteractPressed())
         {
             Debug.Log("[TeleportPillar] ✅ Phím F được nhấn → mở menu!");
             OpenMenu();

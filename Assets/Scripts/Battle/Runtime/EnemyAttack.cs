@@ -6,13 +6,10 @@ using UnityEngine;
 public class EnemyAttackHit
 {
     public bool canBeParried = true;
-    public float windUpTime = 0.5f;
-    public float parryWindowDuration = 1.5f;
+    public float animDuration = 0.8f;
+    public float parryOpenTime = 0.4f;
     public float damageMultiplier = 1f;
     public int apRestoreOnParry = 1;
-    public int repeat = 1;
-    public float delayBetweenHits = 0f;
-    public List<float> timingOffsets = new List<float>();
 }
 
 public class EnemyAttack : AttackBase
@@ -50,27 +47,33 @@ public class EnemyAttack : AttackBase
     {
         var effectiveHits = hits != null && hits.Count > 0
             ? hits
-            : new System.Collections.Generic.List<EnemyAttackHit>
-              { new EnemyAttackHit { windUpTime = 0.3f, parryWindowDuration = 1.5f,
-                                     damageMultiplier = 1f, repeat = 1, canBeParried = true,
+            : new List<EnemyAttackHit>
+              { new EnemyAttackHit { animDuration = 0.8f, parryOpenTime = 0.4f,
+                                     damageMultiplier = 1f, canBeParried = true,
                                      apRestoreOnParry = 1 } };
+
+        bool anyHitParried = false;
+        int hitIndex = 0;
 
         foreach (var hit in effectiveHits)
         {
-            PlayAttackerAnimation();
+            BattleEvents.RaiseEnemyHitIncoming(hit, hitIndex, enemy);
+            hitIndex++;
 
-            if (hit.windUpTime > 0f)
-                yield return new WaitForSeconds(hit.windUpTime);
-
-            bool parried = false;
+            PlayAttackerAnimation(hit.animDuration);
 
             if (hit.canBeParried)
             {
-                player.OpenParryWindow();
-                Debug.Log("PARRY WINDOW OPEN for " + hit.parryWindowDuration + " seconds");
+                if (hit.parryOpenTime > 0f)
+                    yield return new WaitForSeconds(hit.parryOpenTime);
 
-                float timer = 0;
-                while (timer < hit.parryWindowDuration)
+                player.OpenParryWindow();
+                Debug.Log($"PARRY WINDOW OPEN at {hit.parryOpenTime}s/{hit.animDuration}s");
+
+                float parryDuration = hit.animDuration - hit.parryOpenTime;
+                float timer = 0f;
+                bool parried = false;
+                while (timer < parryDuration)
                 {
                     if (player.ConsumeParry()) { parried = true; break; }
                     timer += Time.deltaTime;
@@ -78,53 +81,51 @@ public class EnemyAttack : AttackBase
                 }
 
                 player.CloseParryWindow();
-                Debug.Log("PARRY WINDOW CLOSED");
-            }
 
-            for (int i = 0; i < Mathf.Max(1, hit.repeat); i++)
-            {
                 if (!player.IsAlive) yield break;
 
-                if (parried && i == 0)
+                if (parried)
                 {
-                    // Parry thành công → counter + cộng AP
+                    anyHitParried = true;
                     player.RestoreAP(hit.apRestoreOnParry);
-                    int counter = player.Atk / 2;
+                    int counter = Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier * 1.5f);
                     enemy.TakeDamage(player, counter);
                     Debug.Log($"PARRY SUCCESS → counter {counter} dmg | AP +{hit.apRestoreOnParry}");
                 }
                 else
                 {
-                    // Don binh thuong HOAC cac don repeat sau parry van gay damage.
                     int damage = Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier);
                     player.TakeDamage(enemy, damage);
-                    Debug.Log($"PLAYER HIT [{i + 1}/{hit.repeat}]: " + damage);
+                    Debug.Log($"PLAYER HIT: {damage}");
                 }
+            }
+            else
+            {
+                if (hit.animDuration > 0f)
+                    yield return new WaitForSeconds(hit.animDuration);
 
-                if (i < hit.repeat - 1)
-                {
-                    float delay = hit.delayBetweenHits;
-                    if (hit.timingOffsets != null && i < hit.timingOffsets.Count)
-                        delay = hit.timingOffsets[i];
-                    if (delay > 0f)
-                        yield return new WaitForSeconds(delay);
-                }
+                if (!player.IsAlive) yield break;
+
+                int damage = Mathf.RoundToInt(enemy.Atk * hit.damageMultiplier);
+                player.TakeDamage(enemy, damage);
+                Debug.Log($"PLAYER HIT (no parry): {damage}");
             }
         }
 
-        // --- SKILL EFFECTS (Buff / Debuff) ---
+        // --- SKILL EFFECTS ---
+        // Effect nhắm vào player (SkillEffectTarget.Enemy) bị bỏ qua nếu player parry.
         if (effects != null && effects.Count > 0)
         {
             foreach (var entry in effects)
             {
                 if (entry?.effect == null) continue;
+                if (anyHitParried && entry.target == SkillEffectTarget.Enemy) continue;
 
                 Status targetStatus = ResolveEffectTarget(entry.target);
                 if (targetStatus == null) continue;
 
                 targetStatus.ApplyStatusEffect(entry.effect);
-                Debug.Log($"[ENEMY EFFECT] {entry.effect.effectName} -> {targetStatus.entityName} " +
-                          $"({entry.target}) dur:{entry.effect.duration}");
+                Debug.Log($"[ENEMY EFFECT] {entry.effect.effectName} -> {targetStatus.entityName} ({entry.target})");
             }
         }
     }
@@ -134,21 +135,14 @@ public class EnemyAttack : AttackBase
         yield return new WaitForSeconds(0.5f);
     }
 
-    // ================= HELPERS =================
-
-    /// <summary>
-    /// Doi voi enemy: Self = enemy, Enemy = player (nguoc lai voi PlayerAttack).
-    /// </summary>
+    /// <summary>Đối với enemy: Self = enemy, Enemy = player.</summary>
     Status ResolveEffectTarget(SkillEffectTarget targetType)
     {
         switch (targetType)
         {
-            case SkillEffectTarget.Self:
-                return enemy;
-            case SkillEffectTarget.Enemy:
-                return player;
-            default:
-                return player;
+            case SkillEffectTarget.Self:  return enemy;
+            case SkillEffectTarget.Enemy: return player;
+            default:                      return player;
         }
     }
 }

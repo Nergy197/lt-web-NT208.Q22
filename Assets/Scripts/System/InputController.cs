@@ -12,6 +12,7 @@ public class InputController : MonoBehaviour
     public InputMode Mode;
 
     private BattleManager battle;
+    private bool mobileInteractQueued;
 
     void Awake()
     {
@@ -96,6 +97,17 @@ public class InputController : MonoBehaviour
         Input.SkillMenu.Skill2.performed += _ => { battle?.UseSkill(1); };
         Input.SkillMenu.Skill3.performed += _ => { battle?.UseSkill(2); };
         Input.SkillMenu.Cancel.performed += _ => battle?.BackToActionMenu();
+    }
+
+    /// <summary>Gọi từ nút "Tương tác" trên mobile UI để kích hoạt Interact trong 1 frame.</summary>
+    public void QueueMobileInteract() => mobileInteractQueued = true;
+
+    /// <summary>Kiểm tra Interact từ cả bàn phím lẫn nút mobile (tự reset sau khi đọc).</summary>
+    public bool IsInteractPressed()
+    {
+        bool pressed = Input.Map.Interact.WasPressedThisFrame() || mobileInteractQueued;
+        mobileInteractQueued = false;
+        return pressed;
     }
 
     void BindSavePointMenuInput()

@@ -108,6 +108,13 @@ public class PlayerMovement : MonoBehaviour
             TryEncounter();
     }
 
+    /// <summary>Gọi từ MobileInputUI để feed joystick vào hệ thống di chuyển.</summary>
+    public void SetMobileInput(Vector2 v)
+    {
+        move = v;
+        UpdateAnimation();
+    }
+
     // ================= ANIMATION =================
 
     void UpdateAnimation()

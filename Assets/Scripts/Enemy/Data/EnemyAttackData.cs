@@ -5,15 +5,13 @@ using UnityEngine;
 public class EnemyAttackHitData
 {
     public bool canBeParried = true;
-    public float windUpTime = 0.5f;
-    public float parryWindowDuration = 1.5f;
+    [Tooltip("Tổng thời gian animation của hit này (giây). Xác định tốc độ phát clip.")]
+    public float animDuration = 0.8f;
+    [Tooltip("Thời điểm trong animation parry window mở (giây). Window đóng khi animation kết thúc.")]
+    public float parryOpenTime = 0.4f;
     public float damageMultiplier = 1f;
-    [Tooltip("AP cộng cho player khi parry thành công đòn này.")]
+    [Tooltip("AP trả lại cho player khi parry thành công đòn này.")]
     public int apRestoreOnParry = 1;
-    public int repeat = 1;
-    public float delayBetweenHits = 0f; // default delay if timingOffsets is empty
-    [Tooltip("Custom delay before each repeat (overrides delayBetweenHits). Leave empty to use delayBetweenHits for all. Example: [0, 0.2, 0.15] for 3 repeats.")]
-    public List<float> timingOffsets = new List<float>(); // custom timing for each repeat
 }
 
 [CreateAssetMenu(fileName = "EnemyAttackData", menuName = "Game/EnemyAttack")]
@@ -23,7 +21,7 @@ public class EnemyAttackData : ScriptableObject
     public List<EnemyAttackHitData> hits = new List<EnemyAttackHitData>();
 
     [Header("Skill Effects (Buff / Debuff)")]
-    [Tooltip("Effects applied after damage hits. Self = enemy, Enemy = player.")]
+    [Tooltip("Effects applied after all hits. Self = enemy, Enemy = player. Bị bỏ qua nếu player parry.")]
     public List<SkillEffectEntry> effects = new List<SkillEffectEntry>();
 
     public EnemyAttack CreateInstance()
@@ -31,24 +29,17 @@ public class EnemyAttackData : ScriptableObject
         var hitObjs = new List<EnemyAttackHit>();
         foreach (var h in hits)
         {
-            var hit = new EnemyAttackHit
+            hitObjs.Add(new EnemyAttackHit
             {
-                canBeParried        = h.canBeParried,
-                windUpTime          = h.windUpTime,
-                parryWindowDuration = h.parryWindowDuration,
-                damageMultiplier    = h.damageMultiplier,
-                apRestoreOnParry    = h.apRestoreOnParry,
-                repeat              = Mathf.Max(1, h.repeat),
-                delayBetweenHits    = h.delayBetweenHits,
-                timingOffsets       = new List<float>(h.timingOffsets)
-            };
-            hitObjs.Add(hit);
+                canBeParried     = h.canBeParried,
+                animDuration     = h.animDuration,
+                parryOpenTime    = h.parryOpenTime,
+                damageMultiplier = h.damageMultiplier,
+                apRestoreOnParry = h.apRestoreOnParry,
+            });
         }
 
-        // Clone effects list
         var effectObjs = new List<SkillEffectEntry>(effects);
-
         return new EnemyAttack(attackName, hitObjs, effectObjs);
     }
 }
-

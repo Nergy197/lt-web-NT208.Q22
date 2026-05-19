@@ -54,6 +54,9 @@ public class UnitVisual : MonoBehaviour
     public void PlayHit()    { if (animator) animator.SetTrigger("takeHit");  }
     public void PlayDie()    { if (animator) animator.SetTrigger("die");      }
 
+    /// <summary>Đặt tốc độ phát toàn bộ animation. Dùng để căn clip với animDuration của hit.</summary>
+    public void SetAnimatorSpeed(float speed) { if (animator) animator.speed = speed; }
+
     // ── Dash movement ─────────────────────────────────────────────────────────
 
     /// <summary>Dash về phía target, dừng khi cạnh sprite của attacker cách cạnh sprite của target một khoảng dashStopDistance.</summary>

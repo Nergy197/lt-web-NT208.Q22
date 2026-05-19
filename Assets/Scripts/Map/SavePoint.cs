@@ -40,7 +40,7 @@ public class SavePoint : MonoBehaviour
         if (InputController.Instance.Mode != InputMode.Map) return;
 
         // Nhấn phím F (Interact) để mở Menu Party
-        if (InputController.Instance.Input.Map.Interact.WasPressedThisFrame())
+        if (InputController.Instance.IsInteractPressed())
         {
             SavePointUI.Instance?.Open(this);
         }

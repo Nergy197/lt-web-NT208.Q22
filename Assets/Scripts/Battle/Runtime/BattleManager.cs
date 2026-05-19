@@ -733,6 +733,9 @@ public class BattleManager : MonoBehaviour
 
         Log("[ENEMY] Attack -> " + target.entityName);
 
+        // Thông báo đòn đánh lên dialog trước khi execute
+        BattleEvents.RaiseEnemyAttackAnnounced(attackData, enemy, target);
+
         // Set co truoc khi Use() vi parry window chay ben trong EnemyAttack.Execute().
         waitingForAttackFinish = true;
         SetEnemyTarget(target); // for consistency
