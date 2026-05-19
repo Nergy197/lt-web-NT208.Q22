@@ -58,6 +58,8 @@ public class GameManager : MonoBehaviour
     public int currentSaveSlot = 0;
     private bool startAsNewGame = false; // Cờ báo hiệu bắt đầu New Game
 
+    bool chapter1TutorialCompleted;
+
     [Header("Database")]
     public List<PlayerData> playerDatabase = new();
 
@@ -121,6 +123,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
         transform.SetParent(null); // Fix error Destroy 
         DontDestroyOnLoad(gameObject);
+        EnsurePlayerDatabase();
 
         // Tự động chọn base URL:
         // - WebGL build: URL tương đối, không cần base
@@ -189,6 +192,7 @@ public class GameManager : MonoBehaviour
 
         var qm = questManager != null ? questManager : QuestManager.Instance;
         if (qm != null) save.questProgress = qm.BuildSaveData();
+        save.chapter1TutorialCompleted = chapter1TutorialCompleted;
 
         PlayerPrefs.SetString("PlayerSave_" + currentSaveSlot, JsonUtility.ToJson(save));
         PlayerPrefs.Save();
@@ -290,26 +294,35 @@ public class GameManager : MonoBehaviour
         isLoaded = true;
         Debug.Log("PLAYER READY");
 
-        // Khởi động quest đầu tiên CHỈ KHI chưa có save data (từ server hoặc PlayerPrefs)
+        // Quest: chỉ load progress — Q001 start sau Chapter1_Tutorial (TryStartChapter1Quests)
         var qm = questManager != null ? questManager : QuestManager.Instance;
-        if (qm != null)
-        {
-            // Nếu server không trả về quest data → thử load từ PlayerPrefs
-            if (qm.ActiveQuests.Count == 0 && qm.CompletedQuests.Count == 0)
-            {
-                qm.LoadProgress(); // PlayerPrefs fallback
-            }
+        if (qm != null && !qm.HasAnyProgress())
+            qm.LoadProgress();
+    }
 
-            // Nếu vẫn không có gì → bắt đầu quest đầu tiên
-            if (qm.ActiveQuests.Count == 0 && qm.CompletedQuests.Count == 0)
-            {
-                qm.StartQuest("Q001");
-            }
-        }
+    public static string Chapter1TutorialPrefsKey(int slot) => "Chapter1TutorialDone_" + slot;
+
+    public bool IsChapter1TutorialCompleted()
+    {
+        if (chapter1TutorialCompleted) return true;
+
+        var qm = questManager != null ? questManager : QuestManager.Instance;
+        if (qm != null && qm.HasAnyProgress()) return true;
+
+        return PlayerPrefs.GetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 0) == 1;
+    }
+
+    public void MarkChapter1TutorialCompleted()
+    {
+        chapter1TutorialCompleted = true;
+        PlayerPrefs.SetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 1);
+        PlayerPrefs.Save();
+        Debug.Log("[GM] Chapter1 tutorial completed.");
     }
 
     void CreatePartyFromJson(string json)
     {
+        EnsurePlayerDatabase();
         PlayerSave save = JsonUtility.FromJson<PlayerSave>(json);
 
         if (save == null)
@@ -384,11 +397,43 @@ public class GameManager : MonoBehaviour
             Debug.Log($"[LOAD] Save Point: {pendingSaveScene} → {pendingSavePointId}");
         }
 
+        chapter1TutorialCompleted = save.chapter1TutorialCompleted;
+        if (!chapter1TutorialCompleted)
+            chapter1TutorialCompleted = PlayerPrefs.GetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 0) == 1;
+
         // Tải tiến trình quest từ server
         var qm = questManager != null ? questManager : QuestManager.Instance;
         if (qm != null && save.questProgress != null)
         {
             qm.LoadProgressFromData(save.questProgress);
+        }
+    }
+
+    /// <summary>
+    /// Đảm bảo playerDatabase có đủ PlayerData (Hero, v.v.).
+    /// Cần khi test MapScene trực tiếp — bootstrap tạo GameManager trống.
+    /// </summary>
+    public void EnsurePlayerDatabase()
+    {
+        if (playerDatabase == null)
+            playerDatabase = new List<PlayerData>();
+
+#if UNITY_EDITOR
+        string[] guids = UnityEditor.AssetDatabase.FindAssets("t:PlayerData", new[] { "Assets/Data/Characters" });
+        foreach (string guid in guids)
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+            PlayerData data = UnityEditor.AssetDatabase.LoadAssetAtPath<PlayerData>(path);
+            if (data != null && !playerDatabase.Contains(data))
+                playerDatabase.Add(data);
+        }
+#endif
+
+        PlayerData[] fromResources = Resources.LoadAll<PlayerData>("Characters");
+        for (int i = 0; i < fromResources.Length; i++)
+        {
+            if (fromResources[i] != null && !playerDatabase.Contains(fromResources[i]))
+                playerDatabase.Add(fromResources[i]);
         }
     }
 
@@ -564,6 +609,7 @@ public class GameManager : MonoBehaviour
             save.questProgress = qm.BuildSaveData();
             qm.SaveProgress(); // Lưu PlayerPrefs làm fallback
         }
+        save.chapter1TutorialCompleted = chapter1TutorialCompleted;
 
         string json = JsonUtility.ToJson(save);
 
@@ -643,7 +689,9 @@ public class GameManager : MonoBehaviour
     public void PrepareNewGame()
     {
         startAsNewGame = true;
-        // Xóa tạm thời quest data nếu có trong session hiện tại để khởi tạo mới
+        chapter1TutorialCompleted = false;
+        PlayerPrefs.DeleteKey(Chapter1TutorialPrefsKey(currentSaveSlot));
+
         var qm = questManager != null ? questManager : QuestManager.Instance;
         if (qm != null)
         {

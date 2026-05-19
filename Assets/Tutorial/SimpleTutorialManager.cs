@@ -41,6 +41,13 @@ public class SimpleTutorialManager : MonoBehaviour
     public GameObject buffHoTheIconPrefab;   // Icon kiếm xanh dưới chân
     public float debuffYOffset = -1.2f;      // Offset icon dưới chân
 
+    [Header("Khi player chết trong tutorial")]
+    [Tooltip("Tự hồi sinh sau vài giây để tiếp tục luyện tập.")]
+    public bool autoReviveAfterDefeat = true;
+    public float reviveDelay = 2f;
+    [Tooltip("HP sau khi hồi sinh (0 = full HP).")]
+    public int reviveHP = 0;
+
     private GameObject activeDebuffIcon;
     private int debuffTurnsLeft = 0;
     private GameObject activeBuffIcon;
@@ -55,6 +62,8 @@ public class SimpleTutorialManager : MonoBehaviour
     private Vector3 linhHomePos;
 
     private bool canInput = true;
+    private bool _playerDefeated;
+    private bool _tutorialExitTriggered;
     private enum MenuState { Main, Skill, Item }
     private MenuState currentState = MenuState.Main;
 
@@ -91,35 +100,40 @@ public class SimpleTutorialManager : MonoBehaviour
     void SetupInputs()
     {
         inputActions.Battle.BasicAttack.performed += ctx => {
-            if (!canInput || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
+            if (!CanPlayerAct() || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
             if (currentState == MenuState.Main) ExecuteBasicAttack();
             else if (currentState == MenuState.Skill) ExecuteSkillByIndex(0);
             else if (currentState == MenuState.Item) ExecuteItemByIndex(0);
         };
 
         inputActions.Battle.OpenSkillMenu.performed += ctx => {
-            if (!canInput || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
+            if (!CanPlayerAct() || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
             if (currentState == MenuState.Main) OpenSkillMenu();
             else if (currentState == MenuState.Skill) ExecuteSkillByIndex(1);
             else if (currentState == MenuState.Item) ExecuteItemByIndex(1);
         };
 
         inputActions.Battle.OpenItemMenu.performed += ctx => {
-            if (!canInput || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
+            if (!CanPlayerAct() || !(ctx.control.device is Keyboard) || EventSystem.current.IsPointerOverGameObject()) return;
             if (currentState == MenuState.Main) OpenItemMenu();
             else if (currentState == MenuState.Skill) ExecuteSkillByIndex(2);
             else if (currentState == MenuState.Item) ExecuteItemByIndex(2);
         };
 
         inputActions.Battle.Parry.performed += _ => {
-            if (!canInput) tuanStatus.RequestParry();
+            if (!CanPlayerAct()) return;
+            tuanStatus.RequestParry();
         };
 
-        inputActions.SkillMenu.Cancel.performed += _ => { if (canInput && currentState != MenuState.Main) BackToMainMenu(); };
+        inputActions.SkillMenu.Cancel.performed += _ => { if (CanPlayerAct() && currentState != MenuState.Main) BackToMainMenu(); };
     }
+
+    bool CanPlayerAct() =>
+        tuanStatus != null && tuanStatus.IsAlive && canInput && !_playerDefeated && !_tutorialExitTriggered;
 
     public void ExecuteSkillByIndex(int index)
     {
+        if (!CanPlayerAct()) return;
         var skill = tuanStatus.GetSkillByIndex(index);
         if (skill == null) return;
 
@@ -176,12 +190,14 @@ public class SimpleTutorialManager : MonoBehaviour
 
         UpdateUI();
         yield return new WaitForSeconds(0.5f);
+        if (!tuanStatus.IsAlive) yield break;
         if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn());
-        else { canInput = true; UpdateUI(); }
+        else { canInput = true; UpdateUI(); TryCompleteTutorial(); }
     }
 
     IEnumerator EnemyComboTurn()
     {
+        if (!tuanStatus.IsAlive) yield break;
         yield return MoveTo(linhObj, tuanHomePos - (tuanHomePos - linhHomePos).normalized * attackOffset, dashSpeed);
         var enemyAtkData = enemyData.attacks[0];
 
@@ -210,16 +226,66 @@ public class SimpleTutorialManager : MonoBehaviour
             else tuanStatus.TakeDamage(linhStatus, Mathf.RoundToInt(linhStatus.Atk * hit.damageMultiplier));
 
             UpdateUI();
+            if (!tuanStatus.IsAlive)
+            {
+                HandlePlayerDefeated();
+                yield break;
+            }
             if (hit.delayBetweenHits > 0) yield return new WaitForSeconds(hit.delayBetweenHits);
         }
+
+        if (!tuanStatus.IsAlive) yield break;
 
         yield return new WaitForSeconds(0.5f);
         yield return MoveTo(linhObj, linhHomePos, returnSpeed);
 
         UpdateStatusDurations();
+        EndPlayerTurn();
+    }
+
+    void EndPlayerTurn()
+    {
+        if (!tuanStatus.IsAlive)
+        {
+            HandlePlayerDefeated();
+            return;
+        }
 
         canInput = true;
         SwitchMenu(MenuState.Main);
+    }
+
+    void HandlePlayerDefeated()
+    {
+        if (_playerDefeated || _tutorialExitTriggered || tuanStatus == null) return;
+        _playerDefeated = true;
+        canInput = false;
+        tuanStatus.CloseParryWindow();
+        StopAllCoroutines();
+        SetMenuGroup(mainMenuCG, false);
+        SetMenuGroup(skillMenuCG, false);
+        SetMenuGroup(itemMenuCG, false);
+        Debug.Log("[Tutorial] Quốc Tuấn đã gục — khóa hành động.");
+
+        if (autoReviveAfterDefeat)
+            StartCoroutine(PlayerReviveRoutine());
+    }
+
+    IEnumerator PlayerReviveRoutine()
+    {
+        yield return new WaitForSeconds(reviveDelay);
+        if (_tutorialExitTriggered || tuanStatus == null) yield break;
+
+        int hp = reviveHP > 0 ? reviveHP : tuanStatus.MaxHP;
+        tuanStatus.Revive(hp);
+        if (tuanObj != null)
+            tuanObj.transform.position = tuanHomePos;
+
+        _playerDefeated = false;
+        canInput = true;
+        UpdateUI();
+        SwitchMenu(MenuState.Main);
+        Debug.Log("[Tutorial] Hồi sinh — có thể tiếp tục luyện tập.");
     }
 
     void UpdateStatusDurations()
@@ -246,17 +312,29 @@ public class SimpleTutorialManager : MonoBehaviour
 
     public void ExecuteBasicAttack()
     {
+        if (!CanPlayerAct()) return;
         var basicAtk = tuanStatus.BasicAttack;
         if (basicAtk != null)
         {
             tuanStatus.RestoreAP(20);
             int dmg = (basicAtk.hits.Count > 0) ? Mathf.RoundToInt(tuanStatus.Atk * basicAtk.hits[0].damageMultiplier) : tuanStatus.Atk;
+            var skipConfig = GetComponent("TutorialOneHitSkip");
+            if (skipConfig != null)
+            {
+                var skipType = skipConfig.GetType();
+                var enableField = skipType.GetField("enableOneHitBasicAttack");
+                var dmgField = skipType.GetField("oneHitDamage");
+                bool enabled = enableField != null && (bool)enableField.GetValue(skipConfig);
+                int oneHitDamage = dmgField != null ? (int)dmgField.GetValue(skipConfig) : 9999;
+                if (enabled) dmg = Mathf.Max(dmg, oneHitDamage);
+            }
             StartCoroutine(CombatSequence(dmg, 0, null, null));
         }
     }
 
     IEnumerator CombatSequence(int dmg, int apCost, GameObject vfx, PlayerAttackData skillData)
     {
+        if (!tuanStatus.IsAlive) yield break;
         canInput = false;
         SwitchMenu(MenuState.Main);
         SetMenuGroup(mainMenuCG, false);
@@ -283,8 +361,9 @@ public class SimpleTutorialManager : MonoBehaviour
         UpdateUI();
         yield return new WaitForSeconds(0.6f);
         yield return MoveTo(tuanObj, tuanHomePos, returnSpeed);
+        if (!tuanStatus.IsAlive) yield break;
         if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn());
-        else { canInput = true; UpdateUI(); }
+        else { canInput = true; UpdateUI(); TryCompleteTutorial(); }
     }
 
     void SpawnDebuffVisual(int turns)
@@ -298,6 +377,7 @@ public class SimpleTutorialManager : MonoBehaviour
 
     public void ExecuteItemByIndex(int index)
     {
+        if (!CanPlayerAct()) return;
         canInput = false;
         SwitchMenu(MenuState.Main);
         SetMenuGroup(mainMenuCG, false);
@@ -311,12 +391,37 @@ public class SimpleTutorialManager : MonoBehaviour
         StartCoroutine(EndItemTurn());
     }
 
-    IEnumerator EndItemTurn() { yield return new WaitForSeconds(0.8f); if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn()); else { canInput = true; SwitchMenu(MenuState.Main); } }
+    IEnumerator EndItemTurn()
+    {
+        yield return new WaitForSeconds(0.8f);
+        if (!tuanStatus.IsAlive) yield break;
+        if (linhStatus.IsAlive) StartCoroutine(EnemyComboTurn());
+        else
+        {
+            canInput = true;
+            SwitchMenu(MenuState.Main);
+            TryCompleteTutorial();
+        }
+    }
+
+    void TryCompleteTutorial()
+    {
+        if (_tutorialExitTriggered) return;
+        _tutorialExitTriggered = true;
+
+        var exit = GetComponent<TutorialChapter1Exit>();
+        if (exit == null) exit = gameObject.AddComponent<TutorialChapter1Exit>();
+        exit.CompleteTutorial();
+    }
+
+    /// <summary>Gọi từ nút UI "Tiếp tục" nếu cần kết thúc tutorial thủ công.</summary>
+    public void OnContinueToMap() => TryCompleteTutorial();
 
     IEnumerator MoveTo(GameObject obj, Vector3 target, float speed)
     {
         while (Vector3.Distance(obj.transform.position, target) > 0.05f)
         {
+            if (obj == tuanObj && !tuanStatus.IsAlive) yield break;
             obj.transform.position = Vector3.MoveTowards(obj.transform.position, target, speed * Time.deltaTime);
             yield return null;
         }

@@ -13,31 +13,28 @@ MonoBehaviour:
   m_Name: Q005
   m_EditorClassIdentifier: Assembly-CSharp::QuestSO
   Id: Q005
-  Title: "D\u1EA5u tro tr\u00EAn \u0111\u01B0\u1EDDng r\u00FAt"
-  Description: "Tr\u00EAn \u0111\u01B0\u1EDDng r\u00FAt: ch\u00E1y \u0111\u1ED5 n\u00E1t,
-    d\u00E2n s\u1ED1ng s\u00F3t, l\u00E0ng v\u1EAFng, \u0111i\u1EC3m d\u1EEBng ch\u00E2n."
+  Title: "V\u01B0\u1EDDn kh\u00F4ng nh\u00E0 tr\u1ED1ng"
+  Description: "Chi\u1EBFn thu\u1EADt b\u1ECF hoang l\u01B0\u01A1ng, s\u01A1 t\u00E1n
+    d\u00E2n, l\u00E0m suy y\u1EBFu \u0111\u1ECBch."
   IsMainQuest: 1
   Objectives:
   - Id: O1
-    Description: "R\u1EDDi tr\u1EADn \u0111\u1ECBa, b\u01B0\u1EDBc v\u00E0o tuy\u1EBFn
-      \u0111\u01B0\u1EDDng r\u00FAt"
+    Description: "G\u1EB7p ch\u1EC9 huy, nh\u1EADn k\u1EBF ho\u1EA1ch v\u01B0\u1EDDn
+      kh\u00F4ng"
     IsCompleted: 0
   - Id: O2
-    Description: "\u0110i qua \u0111o\u1EA1n \u0111\u01B0\u1EDDng ch\u00E1y / \u0111\u1ED5
-      n\u00E1t"
+    Description: "L\u00E0ng A \u2014 ho\u00E0n t\u1EA5t s\u01A1 t\u00E1n"
     IsCompleted: 0
   - Id: O3
-    Description: "G\u1EB7p d\u00E2n s\u1ED1ng s\u00F3t (nh\u00F3m 1)"
+    Description: "Kho l\u01B0\u01A1ng B \u2014 ph\u00E1 / \u0111\u1ED1t / b\u1ECF
+      hoang"
     IsCompleted: 0
   - Id: O4
-    Description: "G\u1EB7p d\u00E2n s\u1ED1ng s\u00F3t (nh\u00F3m 2)"
+    Description: "Tr\u00E1nh giao chi\u1EBFn l\u1EDBn / \u0111i an to\u00E0n"
     IsCompleted: 0
   - Id: O5
-    Description: "\u0110i qua l\u00E0ng v\u1EAFng"
-    IsCompleted: 0
-  - Id: O6
-    Description: "\u0110\u1EBFn \u0111i\u1EC3m d\u1EEBng ch\u00E2n / tr\u1EA1i t\u1EA1m"
+    Description: "B\u00E1o c\u00E1o ho\u00E0n t\u1EA5t cho ch\u1EC9 huy"
     IsCompleted: 0
   BranchChoices: []
   NextQuests:
-  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd4, type: 2}
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd5, type: 2}

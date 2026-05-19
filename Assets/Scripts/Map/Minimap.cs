@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.InputSystem;
+using UnityEngine.Tilemaps;
 
 /// <summary>
 /// Minimap hiển thị ở góc trên bên phải màn hình.
@@ -29,7 +30,7 @@ public class Minimap : MonoBehaviour
 
     [Header("Settings")]
     [Tooltip("Độ zoom (orthographicSize) của minimap camera. Nhỏ hơn = zoom gần hơn.")]
-    [Range(5f, 50f)]
+    [Range(1f, 50f)]
     public float zoomLevel = 15f;
 
     [Tooltip("Cho phép Player cuộn chuột để zoom minimap trong lúc chơi.")]
@@ -38,6 +39,19 @@ public class Minimap : MonoBehaviour
     [Tooltip("Tốc độ mượt khi camera minimap bám theo Player.")]
     [Range(1f, 20f)]
     public float followSmoothness = 8f;
+
+    [Tooltip("Đồng bộ theo Main Camera (góc nhìn ngoài) thay vì bám thẳng Player.")]
+    public bool syncWithMainCamera = true;
+
+    [Tooltip("Bật để camera minimap bám mượt (có trễ nhẹ). Tắt để bám tức thì.")]
+    public bool smoothFollow = false;
+
+    [Header("World Bounds")]
+    [Tooltip("Tự động chặn camera minimap trong phạm vi map để tránh lộ màu nền ở rìa.")]
+    public bool clampToWorldBounds = true;
+    [Tooltip("Padding mép trong world bounds (đơn vị world).")]
+    [Range(0f, 3f)]
+    public float boundsPadding = 0.2f;
 
     [Header("Visibility")]
 
@@ -57,6 +71,8 @@ public class Minimap : MonoBehaviour
     private bool isVisible = true;
     private CanvasGroup canvasGroup;
     private int frameCounter = 0;
+    private Bounds worldBounds;
+    private bool hasWorldBounds = false;
 
     // ================= INIT =================
 
@@ -102,6 +118,8 @@ public class Minimap : MonoBehaviour
 
         // Cấu hình layer culling: MinimapIcon chỉ hiện trên minimap, ẩn khỏi main camera
         ConfigureLayerCulling();
+        CollectWorldBounds();
+        zoomLevel = ClampZoomByBounds(zoomLevel);
 
         // Hiện/ẩn ban đầu
         isVisible = visibleOnStart;
@@ -109,6 +127,13 @@ public class Minimap : MonoBehaviour
 
         // Cập nhật tên map
         UpdateMapName();
+
+        // Không dùng marker đỏ nữa
+        if (playerMarker != null)
+        {
+            Destroy(playerMarker.gameObject);
+            playerMarker = null;
+        }
 
         // Render 1 frame minimap ngay lập tức
         RenderMinimapManually();
@@ -175,13 +200,30 @@ public class Minimap : MonoBehaviour
         if (minimapCamera != null)
         {
             Vector3 targetPos = playerTransform.position;
+            Camera mainCam = Camera.main;
+            if (syncWithMainCamera && mainCam != null)
+            {
+                targetPos = mainCam.transform.position;
+            }
+
+            if (clampToWorldBounds && hasWorldBounds)
+            {
+                targetPos = ClampTargetToWorldBounds(targetPos);
+            }
             targetPos.z = minimapCamera.transform.position.z;
 
-            minimapCamera.transform.position = Vector3.Lerp(
-                minimapCamera.transform.position,
-                targetPos,
-                followSmoothness * Time.deltaTime
-            );
+            if (smoothFollow)
+            {
+                minimapCamera.transform.position = Vector3.Lerp(
+                    minimapCamera.transform.position,
+                    targetPos,
+                    followSmoothness * Time.deltaTime
+                );
+            }
+            else
+            {
+                minimapCamera.transform.position = targetPos;
+            }
 
             minimapCamera.orthographicSize = zoomLevel;
         }
@@ -206,7 +248,7 @@ public class Minimap : MonoBehaviour
                 float scroll = mouse.scroll.ReadValue().y;
                 if (Mathf.Abs(scroll) > 0.01f)
                 {
-                    zoomLevel = Mathf.Clamp(zoomLevel - scroll * 0.01f, 5f, 50f);
+                    zoomLevel = ClampZoomByBounds(zoomLevel - scroll * 0.01f);
                 }
             }
         }
@@ -259,7 +301,7 @@ public class Minimap : MonoBehaviour
     /// <summary>Gọi để thay đổi zoom từ code khác (vd: khi vào dungeon thì zoom gần hơn).</summary>
     public void SetZoom(float newZoom)
     {
-        zoomLevel = Mathf.Clamp(newZoom, 5f, 50f);
+        zoomLevel = ClampZoomByBounds(newZoom);
     }
 
     /// <summary>Bật/tắt minimap từ code.</summary>
@@ -268,4 +310,115 @@ public class Minimap : MonoBehaviour
         isVisible = show;
         SetVisibility(isVisible);
     }
+
+    private float GetMinimapAspect()
+    {
+        if (minimapCamera != null && minimapCamera.targetTexture != null)
+        {
+            return (float)minimapCamera.targetTexture.width / minimapCamera.targetTexture.height;
+        }
+        if (minimapCamera != null) return minimapCamera.aspect;
+        return 1f;
+    }
+
+    private Vector3 ClampTargetToWorldBounds(Vector3 targetPos)
+    {
+        float aspect = GetMinimapAspect();
+        float halfH = zoomLevel;
+        float halfW = zoomLevel * aspect;
+
+        float minX = worldBounds.min.x + halfW + boundsPadding;
+        float maxX = worldBounds.max.x - halfW - boundsPadding;
+        float minY = worldBounds.min.y + halfH + boundsPadding;
+        float maxY = worldBounds.max.y - halfH - boundsPadding;
+
+        if (minX > maxX) targetPos.x = worldBounds.center.x;
+        else targetPos.x = Mathf.Clamp(targetPos.x, minX, maxX);
+
+        if (minY > maxY) targetPos.y = worldBounds.center.y;
+        else targetPos.y = Mathf.Clamp(targetPos.y, minY, maxY);
+
+        return targetPos;
+    }
+
+    private float GetMaxZoomByBounds()
+    {
+        if (!hasWorldBounds) return 50f;
+        float aspect = GetMinimapAspect();
+        float halfHeightByMap = Mathf.Max(0.1f, (worldBounds.size.y * 0.5f) - boundsPadding);
+        float halfWidthByMap = Mathf.Max(0.1f, (worldBounds.size.x * 0.5f) - boundsPadding);
+        float halfHeightByWidth = halfWidthByMap / Mathf.Max(0.0001f, aspect);
+        return Mathf.Min(halfHeightByMap, halfHeightByWidth);
+    }
+
+    private float ClampZoomByBounds(float value)
+    {
+        float maxByBounds = GetMaxZoomByBounds();
+        float safeMax = Mathf.Clamp(maxByBounds, 1f, 50f);
+        return Mathf.Clamp(value, 1f, safeMax);
+    }
+
+    private void CollectWorldBounds()
+    {
+        hasWorldBounds = false;
+
+        Tilemap[] tilemaps = Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
+        for (int i = 0; i < tilemaps.Length; i++)
+        {
+            Tilemap tm = tilemaps[i];
+            if (tm == null || !tm.gameObject.activeInHierarchy) continue;
+            if (tm.cellBounds.size == Vector3Int.zero) continue;
+
+            tm.CompressBounds();
+            BoundsInt cb = tm.cellBounds;
+            Vector3Int minCell = cb.min;
+            Vector3Int maxCell = cb.max;
+
+            Vector3 worldMin = tm.CellToWorld(minCell);
+            Vector3 worldMax = tm.CellToWorld(maxCell);
+            Bounds b = new Bounds();
+            b.SetMinMax(
+                Vector3.Min(worldMin, worldMax),
+                Vector3.Max(worldMin, worldMax)
+            );
+
+            if (!hasWorldBounds)
+            {
+                worldBounds = b;
+                hasWorldBounds = true;
+            }
+            else
+            {
+                worldBounds.Encapsulate(b);
+            }
+        }
+
+        if (!hasWorldBounds)
+        {
+            SpriteRenderer[] spriteRenderers = Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None);
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                if (!spriteRenderers[i].enabled || !spriteRenderers[i].gameObject.activeInHierarchy) continue;
+                if (!hasWorldBounds)
+                {
+                    worldBounds = spriteRenderers[i].bounds;
+                    hasWorldBounds = true;
+                }
+                else
+                {
+                    worldBounds.Encapsulate(spriteRenderers[i].bounds);
+                }
+            }
+        }
+
+        if (hasWorldBounds)
+        {
+            Debug.Log($"[Minimap] World bounds: center={worldBounds.center}, size={worldBounds.size}");
+        }
+        else
+        {
+            Debug.LogWarning("[Minimap] Không tìm thấy bounds map để clamp camera minimap.");
+        }
+    }
+
 }

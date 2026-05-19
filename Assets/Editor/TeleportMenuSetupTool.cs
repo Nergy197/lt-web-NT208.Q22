@@ -264,17 +264,18 @@ public class TeleportMenuSetupTool
         if (mapListProp != null)
         {
             mapListProp.ClearArray();
-            for (int i = 0; i < mapGuids.Length; i++)
+            int assigned = 0;
+            foreach (string guid in mapGuids)
             {
-                string path = AssetDatabase.GUIDToAssetPath(mapGuids[i]);
+                string path = AssetDatabase.GUIDToAssetPath(guid);
                 Mapdata mapAsset = AssetDatabase.LoadAssetAtPath<Mapdata>(path);
-                if (mapAsset != null)
-                {
-                    mapListProp.InsertArrayElementAtIndex(i);
-                    mapListProp.GetArrayElementAtIndex(i).objectReferenceValue = mapAsset;
-                }
+                if (mapAsset == null) continue;
+                int idx = mapListProp.arraySize;
+                mapListProp.arraySize++;
+                mapListProp.GetArrayElementAtIndex(idx).objectReferenceValue = mapAsset;
+                assigned++;
             }
-            Debug.Log($"[TeleportMenuSetupTool] Đã gán {mapGuids.Length} Mapdata vào availableMaps.");
+            Debug.Log($"[TeleportMenuSetupTool] Đã gán {assigned} Mapdata vào availableMaps (tổng GUID: {mapGuids.Length}).");
         }
 
         so.ApplyModifiedProperties();
@@ -284,41 +285,20 @@ public class TeleportMenuSetupTool
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         Selection.activeGameObject = systemObj;
 
-        Debug.Log("✅ [TeleportMenuSetupTool] Teleport Menu UI đã được tạo thành công!");
+        Debug.Log("✅ [TeleportMenuSetupTool] Teleport Menu UI đã được tạo thành công! " +
+                  "Tùy chọn: prefab có TeleportMenuBindings → kéo vào TeleportPillar hoặc TeleportMenuUI (Menu Layout Prefab).");
     }
 
     // ================================================================
-    //  TOOL 2: TẠO TRỤ MỚI (THAY THẾ CŨ)
-    //  Xóa tất cả trụ cũ trong scene trước khi tạo trụ mới.
-    //  Đảm bảo mỗi scene chỉ có đúng 1 trụ teleport.
+    //  TOOL 2: TẠO THÊM TRỤ MỚI
+    //  Cho phép nhiều trụ trong cùng scene để teleport qua lại.
     // ================================================================
-    [MenuItem("Tools/Teleport/2. Tạo Trụ Mới (Thay Thế Cũ)")]
+    [MenuItem("Tools/Teleport/2. Tạo Trụ Mới (Không Xóa Trụ Cũ)")]
     public static void CreateTeleportPillar()
     {
-        // Xóa tất cả trụ cũ trong scene
-        TeleportPillar[] existingPillars = Object.FindObjectsByType<TeleportPillar>(FindObjectsSortMode.None);
-        if (existingPillars.Length > 0)
-        {
-            bool confirm = EditorUtility.DisplayDialog(
-                "Xác nhận thay thế trụ",
-                $"Hiện có {existingPillars.Length} trụ teleport trong scene.\n" +
-                "Tất cả sẽ bị XÓA trước khi tạo trụ mới.\n\n" +
-                "Bạn có chắc muốn tiếp tục?",
-                "Xóa và tạo mới",
-                "Hủy"
-            );
-
-            if (!confirm) return;
-
-            foreach (var old in existingPillars)
-            {
-                Debug.Log($"[TeleportMenuSetupTool] Xóa trụ cũ: '{old.pillarName}' ({old.gameObject.name})");
-                Undo.DestroyObjectImmediate(old.gameObject);
-            }
-        }
-
         // Tạo trụ mới
-        GameObject pillarObj = new GameObject("TeleportPillar");
+        int count = Object.FindObjectsByType<TeleportPillar>(FindObjectsSortMode.None).Length + 1;
+        GameObject pillarObj = new GameObject($"TeleportPillar_{count}");
         Undo.RegisterCreatedObjectUndo(pillarObj, "Create Teleport Pillar");
 
         // Vị trí: SceneView camera
@@ -351,11 +331,11 @@ public class TeleportMenuSetupTool
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         Selection.activeGameObject = pillarObj;
 
-        Debug.Log("[TeleportMenuSetupTool] ✅ Đã tạo Trụ Dịch Chuyển mới (đã xóa trụ cũ nếu có)." +
+        Debug.Log("[TeleportMenuSetupTool] ✅ Đã tạo thêm Trụ Dịch Chuyển mới." +
                   "\n  → Đổi tên trong 'Pillar Name'." +
                   "\n  → Kéo tới vị trí mong muốn." +
                   "\n  → Gán Mapdata nếu cần." +
-                  "\n  → Mỗi map nên chỉ có 1 trụ duy nhất!");
+                  "\n  → Có thể tạo nhiều trụ để dịch chuyển qua lại.");
     }
 
     // ================================================================
@@ -388,11 +368,9 @@ public class TeleportMenuSetupTool
             report.Add("⚠️ CẢNH BÁO: Chưa có trụ nào! Chạy Tool 2 để tạo.");
             warnings++;
         }
-        else if (pillars.Length > 1)
+        else
         {
-            report.Add("⚠️ CẢNH BÁO: Có nhiều hơn 1 trụ trong scene! Nên chỉ có 1 trụ mỗi map.");
-            report.Add("   → Dùng Tool 4 để xóa sạch, rồi Tool 2 để tạo lại 1 trụ duy nhất.");
-            warnings++;
+            report.Add("✅ Hệ thống nhiều trụ: Hỗ trợ dịch chuyển qua lại giữa các trụ.");
         }
 
         foreach (var p in pillars)

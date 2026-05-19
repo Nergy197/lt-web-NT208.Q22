@@ -6,12 +6,10 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Menu UI chọn điểm đến khi tương tác với TeleportPillar.
-/// Hỗ trợ 2 chế độ:
-///   1. Hiển thị danh sách trụ đích (khi có ≥ 2 trụ trong scene).
-///   2. Hiển thị danh sách map titles (khi chỉ có 1 trụ hoặc muốn chọn map).
+/// Ưu tiên hiển thị danh sách trụ teleport; fallback sang danh sách map.
 /// Nhấn Esc hoặc nút Đóng để thoát menu.
 ///
-/// Setup tự động: Tools/Teleport Menu/1. Tạo Teleport Menu UI Tự Động
+/// Setup tự động: Tools/Teleport/1. Tạo Teleport Menu UI Tự Động
 /// </summary>
 public class TeleportMenuUI : MonoBehaviour
 {
@@ -30,19 +28,34 @@ public class TeleportMenuUI : MonoBehaviour
     [Tooltip("Template nút destination. Sẽ bị tắt đi và dùng làm mẫu clone.")]
     [SerializeField] private GameObject buttonTemplate;
 
+    [Header("Prefab layout (tùy chọn)")]
+    [Tooltip("Prefab có TeleportMenuBindings. Dùng khi không gán prefab trên TeleportPillar; áp dụng lần đầu mở menu.")]
+    [SerializeField] private GameObject menuLayoutPrefab;
+
     [Header("Teleport Settings")]
     [Tooltip("Thời gian delay nhỏ trước khi teleport (giây). 0 = tức thì.")]
     public float teleportDelay = 0.15f;
 
-    [Header("Map List (dùng khi chỉ có 1 trụ hoặc muốn chọn map)")]
-    [Tooltip("Danh sách tất cả map có thể teleport tới. Kéo thả Mapdata assets vào đây.")]
+    [Header("Map List")]
+    [Tooltip("Các map hiển thị khi mở trụ teleport. Một phần tử → một nút.")]
     public List<Mapdata> availableMaps = new List<Mapdata>();
 
     private TeleportPillar currentPillar;
+    private string mapMenuFooterDescription = "";
     private List<GameObject> spawnedButtons = new List<GameObject>();
 
     // Cooldown chống teleport lặp
     private static float lastTeleportTime = 0f;
+
+    private GameObject _bakPanel;
+    private GameObject _bakButtonTemplate;
+    private TMP_Text _bakTitleText;
+    private TMP_Text _bakDescriptionText;
+    private Transform _bakButtonContainer;
+    private Button _bakCloseButton;
+    private GameObject _layoutInstanceRoot;
+    private GameObject _boundLayoutPrefab;
+    private bool _defaultsCaptured;
 
     // ================= INIT =================
 
@@ -55,74 +68,203 @@ public class TeleportMenuUI : MonoBehaviour
         }
         Instance = this;
 
-        closeButton?.onClick.AddListener(Close);
+        if (!_defaultsCaptured)
+        {
+            CaptureUiDefaults();
+            _defaultsCaptured = true;
+        }
 
         if (buttonTemplate != null) buttonTemplate.SetActive(false);
         if (panel != null) panel.SetActive(false);
     }
 
-    // ================= OPEN (PILLAR MODE) =================
+    private void CaptureUiDefaults()
+    {
+        _bakPanel = panel;
+        _bakTitleText = titleText;
+        _bakDescriptionText = descriptionText;
+        _bakButtonContainer = buttonContainer;
+        _bakCloseButton = closeButton;
+        _bakButtonTemplate = buttonTemplate;
+    }
+
+    private void RestoreUiDefaults()
+    {
+        panel = _bakPanel;
+        titleText = _bakTitleText;
+        descriptionText = _bakDescriptionText;
+        buttonContainer = _bakButtonContainer;
+        closeButton = _bakCloseButton;
+        buttonTemplate = _bakButtonTemplate;
+    }
+
+    private void ClearLayoutInstance()
+    {
+        if (_layoutInstanceRoot != null)
+        {
+            Destroy(_layoutInstanceRoot);
+            _layoutInstanceRoot = null;
+        }
+        _boundLayoutPrefab = null;
+        RestoreUiDefaults();
+    }
+
+    /// <summary>Prefab map UI: ưu tiên trên TeleportPillar, không thì dùng menuLayoutPrefab trên singleton.</summary>
+    private void ResolveMenuLayout(TeleportPillar sourcePillar)
+    {
+        GameObject want = null;
+        if (sourcePillar != null && sourcePillar.MenuLayoutPrefab != null)
+            want = sourcePillar.MenuLayoutPrefab;
+        else if (menuLayoutPrefab != null)
+            want = menuLayoutPrefab;
+
+        if (want == null)
+        {
+            if (_layoutInstanceRoot != null)
+                ClearLayoutInstance();
+            return;
+        }
+
+        if (_boundLayoutPrefab == want && _layoutInstanceRoot != null)
+            return;
+
+        ClearLayoutInstance();
+
+        _layoutInstanceRoot = Instantiate(want, transform, false);
+        _layoutInstanceRoot.name = want.name + "(Instance)";
+        _boundLayoutPrefab = want;
+
+        var bindings = _layoutInstanceRoot.GetComponent<TeleportMenuBindings>();
+        if (bindings == null)
+            bindings = _layoutInstanceRoot.GetComponentInChildren<TeleportMenuBindings>(true);
+        if (bindings != null)
+            ApplyBindings(bindings);
+        else
+        {
+            Debug.LogError("[TeleportMenuUI] Prefab layout cần TeleportMenuBindings (root hoặc con).");
+            Destroy(_layoutInstanceRoot);
+            _layoutInstanceRoot = null;
+            _boundLayoutPrefab = null;
+            RestoreUiDefaults();
+        }
+    }
+
+    private void ApplyBindings(TeleportMenuBindings b)
+    {
+        if (b.panel != null) panel = b.panel;
+        if (b.titleText != null) titleText = b.titleText;
+        if (b.descriptionText != null) descriptionText = b.descriptionText;
+        if (b.buttonContainer != null) buttonContainer = b.buttonContainer;
+        if (b.closeButton != null) closeButton = b.closeButton;
+        if (b.buttonTemplate != null) buttonTemplate = b.buttonTemplate;
+    }
+
+    // ================= OPEN (PILLAR LIST) =================
 
     /// <summary>
-    /// Mở menu với danh sách các trụ đích (đã loại bỏ trụ hiện tại).
+    /// Mở menu danh sách trụ đích (loại trừ trụ hiện tại).
     /// </summary>
     public void Open(TeleportPillar sourcePillar, List<TeleportPillar> destinations)
     {
+        ResolveMenuLayout(sourcePillar);
+
         if (panel == null)
         {
-            Debug.LogError("[TeleportMenuUI] Panel chưa được gán!");
+            Debug.LogError("[TeleportMenuUI] Panel chưa được gán! Gán trên TeleportMenuBindings trong prefab hoặc hierarchy do tool tạo.");
             return;
         }
 
-        currentPillar = sourcePillar;
-
-        // Tiêu đề
-        if (titleText != null)
-            titleText.text = sourcePillar.pillarName;
-
-        // Mô tả mặc định
-        if (descriptionText != null)
-            descriptionText.text = "Chọn điểm đến để dịch chuyển.";
-
-        // Xóa nút cũ
-        ClearButtons();
-
-        // Sinh nút cho từng trụ đích
-        for (int i = 0; i < destinations.Count; i++)
+        if (closeButton != null)
         {
-            CreateDestinationButton(destinations[i], i);
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(Close);
         }
 
-        // Mở panel + chặn di chuyển
+        if (buttonTemplate != null) buttonTemplate.SetActive(false);
+
+        currentPillar = sourcePillar;
+
+        if (titleText != null)
+            titleText.text = sourcePillar != null && !string.IsNullOrWhiteSpace(sourcePillar.pillarName)
+                ? sourcePillar.pillarName
+                : "CHỌN TRỤ DỊCH CHUYỂN";
+
+        mapMenuFooterDescription = "Chọn trụ đích để dịch chuyển.";
+        if (descriptionText != null)
+            descriptionText.text = mapMenuFooterDescription;
+
+        ClearButtons();
+
+        if (destinations == null || destinations.Count == 0)
+        {
+            CreateInfoButton("Chưa có trụ đích", "Hãy tạo thêm trụ teleport khác trong scene.");
+        }
+        else
+        {
+            for (int i = 0; i < destinations.Count; i++)
+            {
+                if (destinations[i] != null)
+                    CreateDestinationButton(destinations[i], i);
+            }
+        }
+
         panel.SetActive(true);
         InputController.Instance?.SetMode(InputMode.UI);
 
-        Debug.Log($"[TeleportMenuUI] Mở menu: {sourcePillar.pillarName} ({destinations.Count} điểm đến)");
+        Debug.Log($"[TeleportMenuUI] Mở pillar menu: {(sourcePillar != null ? sourcePillar.pillarName : "?")} ({destinations?.Count ?? 0} trụ)");
     }
 
-    // ================= OPEN (MAP MODE) =================
+    // ================= OPEN (MAP LIST) =================
 
     /// <summary>
-    /// Mở menu hiển thị danh sách map titles.
-    /// Dùng khi chỉ có 1 trụ duy nhất hoặc muốn hiển thị danh sách map thay vì trụ.
+    /// Mở menu danh sách map (availableMaps). Một map → một nút.
     /// </summary>
     public void OpenMapMenu(TeleportPillar sourcePillar)
     {
+        ResolveMenuLayout(sourcePillar);
+
         if (panel == null)
         {
-            Debug.LogError("[TeleportMenuUI] Panel chưa được gán!");
+            Debug.LogError("[TeleportMenuUI] Panel chưa được gán! Gán trên TeleportMenuBindings trong prefab hoặc hierarchy do tool tạo.");
             return;
         }
 
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(Close);
+        }
+
+        if (buttonTemplate != null) buttonTemplate.SetActive(false);
+
         currentPillar = sourcePillar;
 
-        // Tiêu đề
-        if (titleText != null)
-            titleText.text = "CHỌN ĐIỂM ĐẾN";
+        int mapCount = 0;
+        if (availableMaps != null)
+        {
+            for (int i = 0; i < availableMaps.Count; i++)
+            {
+                if (availableMaps[i] != null) mapCount++;
+            }
+        }
 
-        // Mô tả
+        if (titleText != null)
+        {
+            string pname = sourcePillar != null && !string.IsNullOrWhiteSpace(sourcePillar.pillarName)
+                ? sourcePillar.pillarName
+                : "CHỌN MAP";
+            titleText.text = pname;
+        }
+
+        if (mapCount == 0)
+            mapMenuFooterDescription = "Chưa cấu hình map trong TeleportMenuUI.";
+        else if (mapCount == 1)
+            mapMenuFooterDescription = "Khu vực hiện có — chọn để dịch chuyển.";
+        else
+            mapMenuFooterDescription = "Chọn khu vực bạn muốn dịch chuyển tới.";
+
         if (descriptionText != null)
-            descriptionText.text = "Chọn khu vực bạn muốn dịch chuyển tới.";
+            descriptionText.text = mapMenuFooterDescription;
 
         // Xóa nút cũ
         ClearButtons();
@@ -148,7 +290,7 @@ public class TeleportMenuUI : MonoBehaviour
         panel.SetActive(true);
         InputController.Instance?.SetMode(InputMode.UI);
 
-        Debug.Log($"[TeleportMenuUI] Mở map menu từ trụ: {sourcePillar.pillarName} ({availableMaps.Count} map)");
+        Debug.Log($"[TeleportMenuUI] Mở map menu từ trụ: {(sourcePillar != null ? sourcePillar.pillarName : "?")} ({mapCount} map)");
     }
 
     // ================= CLOSE =================
@@ -163,9 +305,9 @@ public class TeleportMenuUI : MonoBehaviour
         Debug.Log("[TeleportMenuUI] Đóng menu.");
     }
 
-    // ================= TELEPORT (PILLAR) =================
+    // ================= TELEPORT (ĐẾN TRỤ) =================
 
-    private void TeleportTo(TeleportPillar targetPillar)
+    private void TeleportToPillar(TeleportPillar targetPillar)
     {
         if (Time.time - lastTeleportTime < 0.5f) return;
 
@@ -182,18 +324,12 @@ public class TeleportMenuUI : MonoBehaviour
             return;
         }
 
-        // Đóng menu trước
         Close();
 
-        // Dịch chuyển
         if (teleportDelay > 0)
-        {
             StartCoroutine(TeleportAfterDelay(player.transform, targetPillar));
-        }
         else
-        {
             ExecuteTeleport(player.transform, targetPillar);
-        }
     }
 
     private System.Collections.IEnumerator TeleportAfterDelay(Transform playerTransform, TeleportPillar targetPillar)
@@ -291,39 +427,35 @@ public class TeleportMenuUI : MonoBehaviour
         if (buttonTemplate == null || buttonContainer == null) return;
 
         GameObject btnObj = Instantiate(buttonTemplate, buttonContainer);
-        btnObj.name = $"Btn_Dest_{index}_{targetPillar.pillarName}";
+        btnObj.name = $"Btn_Pillar_{index}_{targetPillar.pillarName}";
         btnObj.SetActive(true);
 
-        // Text
         TMP_Text btnText = btnObj.GetComponentInChildren<TMP_Text>();
         if (btnText != null)
         {
-            string label = targetPillar.pillarName;
-
-            if (targetPillar.mapData != null)
-            {
-                label += $"  <size=80%><color=#aaa>(Lv.{targetPillar.mapData.enemyLevel})</color></size>";
-            }
-
+            string mapLabel = targetPillar.mapData != null ? targetPillar.mapData.mapName : "Map chưa gán";
+            string label = $"{targetPillar.pillarName}  <size=80%><color=#aaa>({mapLabel})</color></size>";
             btnText.text = label;
         }
 
-        // Click
         Button btn = btnObj.GetComponent<Button>();
         if (btn != null)
         {
             TeleportPillar captured = targetPillar;
-            btn.onClick.AddListener(() => TeleportTo(captured));
+            btn.onClick.AddListener(() => TeleportToPillar(captured));
 
-            // Hover → hiện mô tả
             var trigger = btnObj.AddComponent<UnityEngine.EventSystems.EventTrigger>();
 
             var pointerEnter = new UnityEngine.EventSystems.EventTrigger.Entry();
             pointerEnter.eventID = UnityEngine.EventSystems.EventTriggerType.PointerEnter;
             pointerEnter.callback.AddListener((_) =>
             {
-                if (descriptionText != null && !string.IsNullOrEmpty(captured.description))
-                    descriptionText.text = captured.description;
+                if (descriptionText != null)
+                {
+                    string desc = !string.IsNullOrWhiteSpace(captured.description) ? captured.description : $"Trụ: {captured.pillarName}";
+                    if (captured.mapData != null) desc += $"\nMap: {captured.mapData.mapName}";
+                    descriptionText.text = desc;
+                }
             });
             trigger.triggers.Add(pointerEnter);
 
@@ -332,7 +464,7 @@ public class TeleportMenuUI : MonoBehaviour
             pointerExit.callback.AddListener((_) =>
             {
                 if (descriptionText != null)
-                    descriptionText.text = "Chọn điểm đến để dịch chuyển.";
+                    descriptionText.text = mapMenuFooterDescription;
             });
             trigger.triggers.Add(pointerExit);
         }
@@ -397,7 +529,7 @@ public class TeleportMenuUI : MonoBehaviour
             pointerExit.callback.AddListener((_) =>
             {
                 if (descriptionText != null)
-                    descriptionText.text = "Chọn khu vực bạn muốn dịch chuyển tới.";
+                    descriptionText.text = mapMenuFooterDescription;
             });
             trigger.triggers.Add(pointerExit);
         }

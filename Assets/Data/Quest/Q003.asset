@@ -13,24 +13,35 @@ MonoBehaviour:
   m_Name: Q003
   m_EditorClassIdentifier: Assembly-CSharp::QuestSO
   Id: Q003
-  Title: "Tr\u1EADn chi\u1EBFn \u0111\u1EA7u ti\u00EAn"
-  Description: "L\u1EA7n \u0111\u1EA7u ch\u1EA1m tr\u00E1n qu\u00E2n M\u00F4ng Nguy\u00EAn
-    quy m\u00F4 l\u1EDBn. Tr\u1EADn n\u00E0y thi\u1EBFt k\u1EBF thua b\u1EAFt bu\u1ED9c."
+  Title: "L\u1EC7nh r\u00FAt lui"
+  Description: "Sau th\u1EA3m b\u1EA1i: ch\u1EE9ng ki\u1EBFn th\u01B0\u01A1ng vong,
+    c\u1EE9u binh c\u00F2n s\u1ED1ng, truy\u1EC1n l\u1EC7nh r\u00FAt lui, t\u1EADp k\u1EBFt
+    t\u00E0n qu\u00E2n."
   IsMainQuest: 1
   Objectives:
   - Id: O1
-    Description: "V\u00E0o tr\u1EADn v\u00E0 ho\u00E0n t\u1EA5t pha m\u1EDF \u0111\u1EA7u"
+    Description: "H\u1ED3i t\u1EC9nh / \u0111\u1EE9ng d\u1EADy sau h\u1ED7n lo\u1EA1n"
     IsCompleted: 0
   - Id: O2
-    Description: "Ho\u00E0n th\u00E0nh m\u1EE5c ti\u00EAu ph\u1EE5 trong tr\u1EADn"
+    Description: "\u0110i\u1EC3m quan s\u00E1t A \u2014 d\u00E2n b\u1ECB th\u01B0\u01A1ng
+      / tan hoang"
     IsCompleted: 0
   - Id: O3
-    Description: "Ch\u1ECBu \u00E1p l\u1EF1c t\u1EA5n c\u00F4ng c\u1EE7a \u0111\u1ECBch"
+    Description: "\u0110i\u1EC3m quan s\u00E1t B \u2014 binh \u0111\u00E3 t\u1EED tr\u1EADn"
     IsCompleted: 0
   - Id: O4
-    Description: "Thua tr\u1EADn theo k\u1ECBch b\u1EA3n (s\u1EE5p \u0111\u1ED5 ph\u00F2ng
-      tuy\u1EBFn)"
+    Description: "C\u1EE9u binh l\u00EDnh c\u00F2n s\u1ED1ng (nh\u00F3m 1)"
+    IsCompleted: 0
+  - Id: O5
+    Description: "C\u1EE9u binh l\u00EDnh c\u00F2n s\u1ED1ng (nh\u00F3m 2)"
+    IsCompleted: 0
+  - Id: O6
+    Description: "Truy\u1EC1n l\u1EC7nh r\u00FAt lui"
+    IsCompleted: 0
+  - Id: O7
+    Description: "D\u1EABn t\u00E0n qu\u00E2n t\u1EDBi \u0111i\u1EC3m t\u1EADp k\u1EBFt
+      r\u00FAt lui"
     IsCompleted: 0
   BranchChoices: []
   NextQuests:
-  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd2, type: 2}
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd3, type: 2}

@@ -13,14 +13,25 @@ MonoBehaviour:
   m_Name: Q001
   m_EditorClassIdentifier: Assembly-CSharp::QuestSO
   Id: Q001
-  Title: "Di nguy\u1EC7n c\u1EE7a cha"
-  Description: "Tr\u1EA7n Qu\u1ED1c Tu\u1EA5n ch\u1EE9ng ki\u1EBFn di nguy\u1EC7n c\u1EE7a
-    Tr\u1EA7n Li\u1EC5u; gi\u1EEF b\u00ED m\u1EADt trong l\u00F2ng."
+  Title: "Ti\u1EBFng tr\u1ED1ng bi\u00EAn \u1EA3i"
+  Description: "Nhi\u1EC1u n\u0103m sau di nguy\u1EC7n, qu\u00E2n M\u00F4ng C\u1ED5 tr\u00E0n
+    v\u00E0o \u0110\u1EA1i Vi\u1EC7t. Qu\u1ED1c Tu\u1EA5n nh\u1EADn l\u1EC7nh ra chi\u1EBFn
+    tuy\u1EBFn."
   IsMainQuest: 1
   Objectives:
-  - Id: 01
-    Description: "g\u1EB7p cha"
+  - Id: O1
+    Description: "\u0110\u1EBFn \u0111i\u1EC3m h\u1ECDp qu\u00E2n / nh\u1EADn tin gi\u1EB7c"
+    IsCompleted: 0
+  - Id: O2
+    Description: "Nghe b\u00E1o c\u00E1o t\u00ECnh h\u00ECnh bi\u00EAn \u1EA3i"
+    IsCompleted: 0
+  - Id: O3
+    Description: "G\u1EB7p t\u01B0\u1EDBng \u0111\u1ED3ng minh / th\u1EE7 l\u0129nh c\u00E1nh
+      qu\u00E2n"
+    IsCompleted: 0
+  - Id: O4
+    Description: "Nh\u1EADn l\u1EC7nh xu\u1EA5t ph\u00E1t t\u1EDBi tr\u1EADn \u0111\u1ECBa"
     IsCompleted: 0
   BranchChoices: []
   NextQuests:
-  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd0, type: 2}
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd1, type: 2}

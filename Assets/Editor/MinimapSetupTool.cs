@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.Rendering.Universal;
+using System.IO;
 
 /// <summary>
 /// Editor Tool tự động tạo toàn bộ hệ thống Minimap trong Scene hiện tại.
@@ -142,45 +143,57 @@ public class MinimapSetupTool
         CanvasGroup cg = container.GetComponent<CanvasGroup>();
         if (cg == null) cg = container.AddComponent<CanvasGroup>();
 
-        // ---- 5. Tạo Viền (Border) - hình tròn / vuông bo góc ----
-        // Background tối tạo viền
+        // ---- 5. Tạo viền + mask minimap hình tròn ----
+        Sprite circleMaskSprite = GetOrCreateMinimapCircleSprite();
+
+        // Border tròn
         GameObject borderObj = GetOrCreateChild(container, "MinimapBorder");
         RectTransform borderRect = SetupRect(borderObj, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
         Image borderImg = borderObj.GetComponent<Image>();
         if (borderImg == null) borderImg = borderObj.AddComponent<Image>();
+        borderImg.sprite = circleMaskSprite;
+        borderImg.type = Image.Type.Simple;
+        borderImg.preserveAspect = true;
         borderImg.color = new Color(0.15f, 0.18f, 0.25f, 0.95f); // Viền xanh đen
         borderImg.raycastTarget = false;
 
+        // Vùng mask tròn (ẩn phần góc của minimap)
+        GameObject maskObj = GetOrCreateChild(borderObj, "MinimapMask");
+        RectTransform maskRect = SetupRect(maskObj, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(-10, -10));
+        Image maskImg = maskObj.GetComponent<Image>();
+        if (maskImg == null) maskImg = maskObj.AddComponent<Image>();
+        maskImg.sprite = circleMaskSprite;
+        maskImg.type = Image.Type.Simple;
+        maskImg.preserveAspect = true;
+        maskImg.color = Color.white;
+        maskImg.raycastTarget = false;
+        Mask circleMask = maskObj.GetComponent<Mask>();
+        if (circleMask == null) circleMask = maskObj.AddComponent<Mask>();
+        circleMask.showMaskGraphic = false;
+
+        // Nếu có cấu trúc cũ: chuyển MinimapImage vào trong MinimapMask
+        Transform legacyRaw = container.transform.Find("MinimapImage");
+        if (legacyRaw != null && legacyRaw.parent != maskObj.transform)
+        {
+            legacyRaw.SetParent(maskObj.transform, false);
+        }
+
         // ---- 6. Tạo RawImage hiển thị minimap ----
-        GameObject rawImgObj = GetOrCreateChild(container, "MinimapImage");
+        GameObject rawImgObj = GetOrCreateChild(maskObj, "MinimapImage");
         RectTransform rawRect = SetupRect(rawImgObj, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(-6, -6)); // padding 3px mỗi bên
         RawImage rawImg = rawImgObj.GetComponent<RawImage>();
         if (rawImg == null) rawImg = rawImgObj.AddComponent<RawImage>();
         rawImg.texture = rt;
         rawImg.raycastTarget = false;
 
-        // ---- 7. Tạo Player Marker (chấm nhỏ ở giữa minimap) ----
-        GameObject markerObj = GetOrCreateChild(rawImgObj, "PlayerMarker");
-        RectTransform markerRect = markerObj.GetComponent<RectTransform>();
-        if (markerRect == null) markerRect = markerObj.AddComponent<RectTransform>();
-        markerRect.anchorMin = new Vector2(0.5f, 0.5f);
-        markerRect.anchorMax = new Vector2(0.5f, 0.5f);
-        markerRect.pivot = new Vector2(0.5f, 0.5f);
-        markerRect.anchoredPosition = Vector2.zero;
-        markerRect.sizeDelta = new Vector2(12, 12);
+        // Không dùng PlayerMarker đỏ nữa (player đã hiển thị trực tiếp trên minimap)
+        Transform legacyMarker = rawImgObj.transform.Find("PlayerMarker");
+        if (legacyMarker != null)
+        {
+            Undo.DestroyObjectImmediate(legacyMarker.gameObject);
+        }
 
-        Image markerImg = markerObj.GetComponent<Image>();
-        if (markerImg == null) markerImg = markerObj.AddComponent<Image>();
-        markerImg.color = new Color(1f, 0.3f, 0.3f, 1f); // Đỏ sáng
-        markerImg.raycastTarget = false;
-
-        // Outline cho marker
-        Outline markerOutline = markerObj.GetComponent<Outline>();
-        if (markerOutline == null) markerOutline = markerObj.AddComponent<Outline>();
-        markerOutline.effectColor = Color.white;
-        markerOutline.effectDistance = new Vector2(1, 1);
-
-        // ---- 8. Tạo Label tên map ----
+        // ---- 7. Tạo Label tên map ----
         GameObject labelObj = GetOrCreateChild(container, "MapNameLabel");
         RectTransform labelRect = labelObj.GetComponent<RectTransform>();
         if (labelRect == null) labelRect = labelObj.AddComponent<RectTransform>();
@@ -198,7 +211,7 @@ public class MinimapSetupTool
         mapLabel.color = new Color(0.85f, 0.9f, 1f, 0.9f); // Trắng xanh nhẹ
         mapLabel.raycastTarget = false;
 
-        // ---- 9. Tạo Label phím tắt nhỏ ----
+        // ---- 8. Tạo Label phím tắt nhỏ ----
         GameObject hintObj = GetOrCreateChild(container, "ToggleHint");
         RectTransform hintRect = hintObj.GetComponent<RectTransform>();
         if (hintRect == null) hintRect = hintObj.AddComponent<RectTransform>();
@@ -216,13 +229,13 @@ public class MinimapSetupTool
         hintLabel.color = new Color(0.6f, 0.65f, 0.7f, 0.6f);
         hintLabel.raycastTarget = false;
 
-        // ---- 10. Gắn Minimap script vào Container ----
+        // ---- 9. Gắn Minimap script vào Container ----
         Minimap minimap = container.GetComponent<Minimap>();
         if (minimap == null) minimap = container.AddComponent<Minimap>();
 
         minimap.minimapCamera = minimapCam;
         minimap.minimapDisplay = rawImg;
-        minimap.playerMarker = markerRect;
+        minimap.playerMarker = null;
         minimap.mapNameText = mapLabel;
         minimap.zoomLevel = 15f;
         minimap.visibleOnStart = true;
@@ -234,8 +247,8 @@ public class MinimapSetupTool
         Debug.Log("========================================");
         Debug.Log("[MinimapSetupTool] ✅ Minimap đã được tạo hoàn chỉnh!");
         Debug.Log("  • MinimapCamera: orthographic, zoom 15, render to texture");
-        Debug.Log("  • MinimapContainer: góc trên bên phải, 250x250px");
-        Debug.Log("  • Player Marker: chấm đỏ ở giữa minimap");
+        Debug.Log("  • MinimapContainer: góc trên bên phải, 250x250px (mask hình tròn)");
+        Debug.Log("  • Player Marker: đã tắt");
         Debug.Log("  • Map Name Label: hiện tên khu vực ở dưới minimap");
         Debug.Log("  • Phím M: bật/tắt minimap");
         Debug.Log("  • Scroll chuột: zoom in/out minimap");
@@ -316,5 +329,60 @@ public class MinimapSetupTool
         }
 
         return rect;
+    }
+
+    private static Sprite GetOrCreateMinimapCircleSprite()
+    {
+        const string spritePath = "Assets/Data/MinimapCircleMask.png";
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(spritePath);
+        if (texture == null)
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Data"))
+            {
+                AssetDatabase.CreateFolder("Assets", "Data");
+            }
+
+            const int size = 256;
+            Texture2D generated = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            generated.filterMode = FilterMode.Bilinear;
+
+            float cx = (size - 1) * 0.5f;
+            float cy = (size - 1) * 0.5f;
+            float radius = size * 0.5f - 2f;
+            float feather = 1.5f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - cx;
+                    float dy = y - cy;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    float alpha = Mathf.Clamp01((radius - dist) / feather);
+                    generated.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            generated.Apply();
+            string fullPath = Path.Combine(Application.dataPath, "Data", "MinimapCircleMask.png");
+            File.WriteAllBytes(fullPath, generated.EncodeToPNG());
+            Object.DestroyImmediate(generated);
+            AssetDatabase.ImportAsset(spritePath, ImportAssetOptions.ForceUpdate);
+        }
+
+        TextureImporter importer = AssetImporter.GetAtPath(spritePath) as TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SaveAndReimport();
+        }
+
+        return AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
     }
 }

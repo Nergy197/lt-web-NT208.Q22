@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Tilemaps;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
@@ -12,10 +13,15 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 move;
 
     public float speed = 5f;
+    [Header("Map Bounds")]
+    public bool constrainToMapBounds = true;
+    [Range(0f, 1f)] public float boundsPadding = 0.05f;
 
     // Lưu reference delegate để unsubscribe khi Destroy (tránh input leak)
     private System.Action<InputAction.CallbackContext> onMovePerformed;
     private System.Action<InputAction.CallbackContext> onMoveCanceled;
+    private Bounds worldBounds;
+    private bool hasWorldBounds = false;
 
     void Awake()
     {
@@ -84,6 +90,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         Debug.Log("PLAYER READY");
+        CollectWorldBounds();
     }
 
     void OnDestroy()
@@ -99,6 +106,7 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         rb.linearVelocity = move * speed;
+        ClampInsideMapBounds();
 
         // đảm bảo update liên tục
         UpdateAnimation();
@@ -139,5 +147,78 @@ public class PlayerMovement : MonoBehaviour
         }
 
         MapManager.Instance.CheckForEncounter();
+    }
+
+    void ClampInsideMapBounds()
+    {
+        if (!constrainToMapBounds || !hasWorldBounds) return;
+
+        Vector2 pos = rb.position;
+        float minX = worldBounds.min.x + boundsPadding;
+        float maxX = worldBounds.max.x - boundsPadding;
+        float minY = worldBounds.min.y + boundsPadding;
+        float maxY = worldBounds.max.y - boundsPadding;
+
+        float clampedX = Mathf.Clamp(pos.x, minX, maxX);
+        float clampedY = Mathf.Clamp(pos.y, minY, maxY);
+
+        if (!Mathf.Approximately(pos.x, clampedX) || !Mathf.Approximately(pos.y, clampedY))
+        {
+            rb.position = new Vector2(clampedX, clampedY);
+
+            // Nếu đang đẩy ra ngoài thì triệt velocity theo trục vi phạm để tránh rung.
+            Vector2 v = rb.linearVelocity;
+            if ((pos.x < minX && v.x < 0f) || (pos.x > maxX && v.x > 0f)) v.x = 0f;
+            if ((pos.y < minY && v.y < 0f) || (pos.y > maxY && v.y > 0f)) v.y = 0f;
+            rb.linearVelocity = v;
+        }
+    }
+
+    void CollectWorldBounds()
+    {
+        hasWorldBounds = false;
+
+        Tilemap[] tilemaps = Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
+        for (int i = 0; i < tilemaps.Length; i++)
+        {
+            Tilemap tm = tilemaps[i];
+            if (tm == null || !tm.gameObject.activeInHierarchy) continue;
+            if (tm.cellBounds.size == Vector3Int.zero) continue;
+
+            tm.CompressBounds();
+            BoundsInt cb = tm.cellBounds;
+            Vector3 worldMin = tm.CellToWorld(cb.min);
+            Vector3 worldMax = tm.CellToWorld(cb.max);
+            Bounds b = new Bounds();
+            b.SetMinMax(Vector3.Min(worldMin, worldMax), Vector3.Max(worldMin, worldMax));
+
+            if (!hasWorldBounds)
+            {
+                worldBounds = b;
+                hasWorldBounds = true;
+            }
+            else
+            {
+                worldBounds.Encapsulate(b);
+            }
+        }
+
+        if (!hasWorldBounds)
+        {
+            SpriteRenderer[] srs = Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None);
+            for (int i = 0; i < srs.Length; i++)
+            {
+                if (!srs[i].enabled || !srs[i].gameObject.activeInHierarchy) continue;
+                if (!hasWorldBounds)
+                {
+                    worldBounds = srs[i].bounds;
+                    hasWorldBounds = true;
+                }
+                else
+                {
+                    worldBounds.Encapsulate(srs[i].bounds);
+                }
+            }
+        }
     }
 }

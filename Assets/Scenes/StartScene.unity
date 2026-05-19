@@ -2297,7 +2297,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QuestManager
   AllQuests:
-  - {fileID: 11400000, guid: 0d969dc8754694f07822aad20b193e68, type: 2}
   - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd0, type: 2}
   - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd1, type: 2}
   - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd2, type: 2}
@@ -2306,7 +2305,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd5, type: 2}
   - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd6, type: 2}
   StartingQuests:
-  - {fileID: 11400000, guid: 0d969dc8754694f07822aad20b193e68, type: 2}
+  - {fileID: 11400000, guid: 1a2b3c4d5e6f7890aaaabbbbccccddd0, type: 2}
 --- !u!4 &1661835453
 Transform:
   m_ObjectHideFlags: 0

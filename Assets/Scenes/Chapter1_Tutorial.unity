@@ -401,6 +401,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fa185f7752a444e583cdca04e1d558e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitVisual
+  dashSpeed: 8
+  dashStopDistance: 0.8
+  returnSpeed: 10
+  bodyRenderer: {fileID: 0}
 --- !u!1 &54117414
 GameObject:
   m_ObjectHideFlags: 0
@@ -2487,6 +2491,7 @@ GameObject:
   m_Component:
   - component: {fileID: 824090961}
   - component: {fileID: 824090960}
+  - component: {fileID: 824090962}
   m_Layer: 0
   m_Name: Tutorial_Controller
   m_TagString: Untagged
@@ -2532,6 +2537,9 @@ MonoBehaviour:
   hoTheVFXPrefab: {fileID: 5460033623015122542, guid: 0734975a876d03843a28ea6eedd382e3, type: 3}
   buffHoTheIconPrefab: {fileID: 5777027566741580552, guid: d5509982e34cd2a41bcc2ac036f8f6d2, type: 3}
   debuffYOffset: -2.23
+  autoReviveAfterDefeat: 1
+  reviveDelay: 2
+  reviveHP: 0
 --- !u!4 &824090961
 Transform:
   m_ObjectHideFlags: 0
@@ -2547,6 +2555,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &824090962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 824090959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5dad17f3291ebb40b3f74a578c01213, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialOneHitSkip
+  enableOneHitBasicAttack: 1
+  oneHitDamage: 9999
 --- !u!1 &869289636
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - Environment
+  - Wall
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -48,5 +50,9 @@ TagManager:
   - name: Player
     uniqueID: 2952420525
     locked: 0
+  - name: New Layer 3
+    uniqueID: 3749871421
+    locked: 0
   m_RenderingLayers:
   - Default
+  m_MigratedRenderPipelines: []

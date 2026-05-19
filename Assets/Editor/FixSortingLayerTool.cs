@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Editor Tool sửa tất cả Sorting Layer "Unknown" trong Battlefield-Map.
@@ -113,6 +114,43 @@ public class FixSortingLayerTool
     }
 
     // ================================================================
+    //  TOOL 3: MOUNTAIN DECORATIVE PROPS -> PLAYER LAYER
+    // ================================================================
+    [MenuItem("Tools/Fix Sorting/3. Mountain Props -> Player Layer")]
+    public static void SetMountainDecorativePropsToPlayerLayer()
+    {
+        SpriteRenderer[] allRenderers = Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None);
+        int changed = 0;
+        int matched = 0;
+
+        Debug.Log("========================================");
+        Debug.Log($"[FixSortingLayer] Quét Mountain props... ({allRenderers.Length} SpriteRenderer)");
+
+        foreach (var sr in allRenderers)
+        {
+            if (!IsMountainDecorativePath(sr.transform)) continue;
+            matched++;
+
+            if (sr.sortingLayerName != "Player")
+            {
+                Undo.RecordObject(sr, "Set Mountain Props To Player Layer");
+                string oldLayer = sr.sortingLayerName;
+                sr.sortingLayerName = "Player";
+                changed++;
+                Debug.Log($"  [MountainProp] {GetFullPath(sr.transform)} : {oldLayer} -> Player (order {sr.sortingOrder})");
+            }
+        }
+
+        if (changed > 0)
+        {
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        }
+
+        Debug.Log($"[FixSortingLayer] ✅ Match: {matched}, changed: {changed}, unchanged: {matched - changed}");
+        Debug.Log("========================================");
+    }
+
+    // ================================================================
     //  TOOL 2: BÁO CÁO SORTING LAYER HIỆN TẠI (KHÔNG SỬA)
     // ================================================================
     [MenuItem("Tools/Fix Sorting/2. Báo Cáo Sorting Layer (Chỉ Xem)")]
@@ -192,6 +230,33 @@ public class FixSortingLayerTool
             path = parent.name + "/" + path;
             parent = parent.parent;
             depth++;
+        }
+        return path;
+    }
+
+    /// <summary>
+    /// Match object có hierarchy dạng:
+    /// .../Mountain/m*/... hoặc .../Moutain/m*/...
+    /// Chỉ match object con phía sau m* (không match chính root m*).
+    /// </summary>
+    static bool IsMountainDecorativePath(Transform t)
+    {
+        string path = GetFullPath(t).ToLowerInvariant();
+        if (!path.Contains("/mountain/") && !path.Contains("/moutain/")) return false;
+
+        // Segment m*: m1, m2.1, m_3, rev_m2...
+        const string pattern = @"/((m[\w\.\-]*\d[\w\.\-]*)|(rev_m[\w\.\-]*\d[\w\.\-]*))/[^/]+";
+        return Regex.IsMatch(path, pattern);
+    }
+
+    static string GetFullPath(Transform t)
+    {
+        string path = t.name;
+        Transform p = t.parent;
+        while (p != null)
+        {
+            path = p.name + "/" + path;
+            p = p.parent;
         }
         return path;
     }
