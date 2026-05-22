@@ -87,7 +87,7 @@ npm start
 | :--- | :--- | :--- |
 | **24520238** | **Nguyễn Mạnh Cường** | Nhóm trưởng, Gameplay Logic, AI |
 | **24520262** | **Nguyễn Tấn Danh** | Gameplay Logic, Battle System |
-| **24520074** | **Trầm Tĩnh An** | UI/UX Design, Audio System |
+| **24520074** | **Trầm Tính Ân** | UI/UX Design, Audio System |
 | **24520228** | **Trần Đức Chuẩn** | Database, Cloud Sync, WebGL Deploy |
 
 ---
