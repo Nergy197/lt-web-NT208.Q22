@@ -7,11 +7,11 @@ using UnityEngine.UI;
 /// SETUP trong Unity:
 ///   1. Tạo Canvas (Screen Space – Overlay, Scale with Screen Size 1080×1920).
 ///   2. Gắn script này vào root GameObject của Canvas.
-///   3. Tạo 3 Panel con: MapPanel, BattlePanel, SkillMenuPanel.
+///   3. Tạo 4 Panel con: MapPanel, BattlePanel, SkillMenuPanel, PausePanel.
 ///   4. Trong MapPanel: thêm VirtualJoystick (bottom-left) + Button "Tương tác" (bottom-right).
 ///   5. Trong BattlePanel: Attack, SkillMenu, Parry, Flee, ← →, Confirm, Cancel.
 ///   6. Trong SkillMenuPanel: Skill1, Skill2, Skill3, Cancel.
-///   7. Kéo các references vào Inspector.
+///   7. Tạo PauseButton góc trên phải và kéo các references vào Inspector.
 /// </summary>
 public class MobileInputUI : MonoBehaviour
 {
@@ -21,6 +21,10 @@ public class MobileInputUI : MonoBehaviour
     [SerializeField] private GameObject mapPanel;
     [SerializeField] private GameObject battlePanel;
     [SerializeField] private GameObject skillMenuPanel;
+    [SerializeField] private GameObject pausePanel;
+
+    [Header("Global – Pause")]
+    [SerializeField] private Button pauseButton;
 
     [Header("Map – Joystick & Interact")]
     [SerializeField] private VirtualJoystick joystick;
@@ -99,17 +103,24 @@ public class MobileInputUI : MonoBehaviour
 
     void RefreshPanels(InputMode mode)
     {
-        bool isMap    = mode == InputMode.Map || mode == InputMode.Cutscene;
-        bool isBattle = mode == InputMode.Battle || mode == InputMode.BattleItemMenu;
-        bool isSkill  = mode == InputMode.BattleSkillMenu;
+        bool isPaused = mode == InputMode.Pause;
+        bool isMap    = !isPaused && (mode == InputMode.Map || mode == InputMode.Cutscene);
+        bool isBattle = !isPaused && (mode == InputMode.Battle || mode == InputMode.BattleItemMenu);
+        bool isSkill  = !isPaused && mode == InputMode.BattleSkillMenu;
 
         if (mapPanel)       mapPanel.SetActive(isMap);
         if (battlePanel)    battlePanel.SetActive(isBattle);
         if (skillMenuPanel) skillMenuPanel.SetActive(isSkill);
+        if (pausePanel)     pausePanel.SetActive(isPaused);
+
+        if (pauseButton != null)
+            pauseButton.gameObject.SetActive(CanShowPauseButton(mode));
     }
 
     void BindButtons()
     {
+        pauseButton?.onClick.AddListener(() => PauseMenuUI.Instance?.Toggle());
+
         // Map
         interactButton?.onClick.AddListener(() =>
             InputController.Instance?.QueueMobileInteract());
@@ -129,5 +140,13 @@ public class MobileInputUI : MonoBehaviour
         skill2Button?.onClick.AddListener(()    => BattleManager.Instance?.UseSkill(1));
         skill3Button?.onClick.AddListener(()    => BattleManager.Instance?.UseSkill(2));
         skillCancelButton?.onClick.AddListener(() => BattleManager.Instance?.BackToActionMenu());
+    }
+
+    bool CanShowPauseButton(InputMode mode)
+    {
+        return mode == InputMode.Map
+            || mode == InputMode.Battle
+            || mode == InputMode.BattleSkillMenu
+            || mode == InputMode.BattleItemMenu;
     }
 }

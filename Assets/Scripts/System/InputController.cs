@@ -59,6 +59,7 @@ public class InputController : MonoBehaviour
             case InputMode.BattleSkillMenu: Input.SkillMenu.Enable();  break;
             case InputMode.UI:             Input.SavePointMenu.Enable(); break;
             case InputMode.Cutscene:       Input.Map.Enable();          break;
+            case InputMode.Pause:                                         break;
         }
 
         Debug.Log("[INPUT MODE] " + mode);
