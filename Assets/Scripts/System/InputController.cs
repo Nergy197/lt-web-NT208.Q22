@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class InputController : MonoBehaviour
 {
@@ -57,6 +58,7 @@ public class InputController : MonoBehaviour
             case InputMode.Map:            Input.Map.Enable();          break;
             case InputMode.Battle:         Input.Battle.Enable();       break;
             case InputMode.BattleSkillMenu: Input.SkillMenu.Enable();  break;
+            case InputMode.BattleItemMenu: Input.Battle.Enable();       break;
             case InputMode.UI:             Input.SavePointMenu.Enable(); break;
             case InputMode.Cutscene:       Input.Map.Enable();          break;
             case InputMode.Pause:                                         break;
@@ -81,15 +83,15 @@ public class InputController : MonoBehaviour
 
     void BindBattleInput()
     {
-        Input.Battle.BasicAttack.performed   += _ => battle?.SelectBasicAttack();
-        Input.Battle.NextTarget.performed    += _ => battle?.ChangeTargetInput(1);
-        Input.Battle.PrevTarget.performed    += _ => battle?.ChangeTargetInput(-1);
-        Input.Battle.Parry.performed         += _ => battle?.RequestParry();
-        Input.Battle.OpenSkillMenu.performed += _ => battle?.RequestOpenSkillMenu();
-        Input.Battle.OpenItemMenu.performed  += _ => Debug.Log("[INPUT] OpenItemMenu (chưa implement)");
-        Input.Battle.Flee.performed          += _ => battle?.TryFlee();
-        Input.Battle.Confirm.performed       += _ => battle?.ConfirmAction();
-        Input.Battle.Cancel.performed        += _ => battle?.BackToActionMenu();
+        Input.Battle.BasicAttack.performed   += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.SelectBasicAttack(); };
+        Input.Battle.NextTarget.performed    += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.ChangeTargetInput(1); };
+        Input.Battle.PrevTarget.performed    += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.ChangeTargetInput(-1); };
+        Input.Battle.Parry.performed         += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.RequestParry(); };
+        Input.Battle.OpenSkillMenu.performed += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.RequestOpenSkillMenu(); };
+        Input.Battle.OpenItemMenu.performed  += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.RequestOpenItemMenu(); };
+        Input.Battle.Flee.performed          += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.TryFlee(); };
+        Input.Battle.Confirm.performed       += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.ConfirmAction(); };
+        Input.Battle.Cancel.performed        += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.BackToActionMenu(); };
     }
 
     void BindSkillMenuInput()
@@ -117,5 +119,24 @@ public class InputController : MonoBehaviour
         Input.SavePointMenu.Close.performed += _ => SavePointUI.Instance?.OnClose();
         Input.SavePointMenu.Heal.performed  += _ => SavePointUI.Instance?.OnHeal();
         Input.SavePointMenu.Save.performed  += _ => SavePointUI.Instance?.OnSave();
+    }
+
+    bool ShouldIgnoreBattleGameplayInput()
+    {
+        if (EventSystem.current == null) return false;
+
+        var touchscreen = Touchscreen.current;
+        if (touchscreen != null)
+        {
+            foreach (var touch in touchscreen.touches)
+            {
+                if (!touch.press.isPressed) continue;
+                if (EventSystem.current.IsPointerOverGameObject(touch.touchId.ReadValue()))
+                    return true;
+            }
+        }
+
+        // Mouse click lên UI button không được trigger gameplay battle input.
+        return EventSystem.current.IsPointerOverGameObject();
     }
 }

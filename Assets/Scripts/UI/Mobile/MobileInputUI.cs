@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Overlay mobile: joystick di chuyển + các nút battle.
@@ -7,11 +8,9 @@ using UnityEngine.UI;
 /// SETUP trong Unity:
 ///   1. Tạo Canvas (Screen Space – Overlay, Scale with Screen Size 1080×1920).
 ///   2. Gắn script này vào root GameObject của Canvas.
-///   3. Tạo 4 Panel con: MapPanel, BattlePanel, SkillMenuPanel, PausePanel.
+///   3. Tạo panel MapPanel và PausePanel.
 ///   4. Trong MapPanel: thêm VirtualJoystick (bottom-left) + Button "Tương tác" (bottom-right).
-///   5. Trong BattlePanel: Attack, SkillMenu, Parry, Flee, ← →, Confirm, Cancel.
-///   6. Trong SkillMenuPanel: Skill1, Skill2, Skill3, Cancel.
-///   7. Tạo PauseButton góc trên phải và kéo các references vào Inspector.
+///   5. Tạo PauseButton góc trên phải và kéo các references vào Inspector.
 /// </summary>
 public class MobileInputUI : MonoBehaviour
 {
@@ -19,36 +18,21 @@ public class MobileInputUI : MonoBehaviour
 
     [Header("Panels")]
     [SerializeField] private GameObject mapPanel;
-    [SerializeField] private GameObject battlePanel;
-    [SerializeField] private GameObject skillMenuPanel;
     [SerializeField] private GameObject pausePanel;
 
     [Header("Global – Pause")]
     [SerializeField] private Button pauseButton;
+    [SerializeField] private Button battleBackButton;
 
     [Header("Map – Joystick & Interact")]
     [SerializeField] private VirtualJoystick joystick;
     [SerializeField] private Button interactButton;
 
-    [Header("Battle – Action Buttons")]
-    [SerializeField] private Button attackButton;
-    [SerializeField] private Button skillMenuButton;
-    [SerializeField] private Button parryButton;
-    [SerializeField] private Button fleeButton;
-    [SerializeField] private Button nextTargetButton;
-    [SerializeField] private Button prevTargetButton;
-    [SerializeField] private Button confirmButton;
-    [SerializeField] private Button cancelBattleButton;
-
-    [Header("Skill Menu Buttons")]
-    [SerializeField] private Button skill1Button;
-    [SerializeField] private Button skill2Button;
-    [SerializeField] private Button skill3Button;
-    [SerializeField] private Button skillCancelButton;
-
     [Header("Settings")]
     [Tooltip("Bật để test giao diện mobile ngay trong Editor")]
     [SerializeField] private bool forceEnableInEditor = false;
+    [Tooltip("Tự tạo nút Back battle nếu prefab chưa wire.")]
+    [SerializeField] private bool autoCreateBattleBackButton = true;
 
     private InputMode lastMode = (InputMode)(-1);
     private PlayerMovement playerMovement;
@@ -71,6 +55,8 @@ public class MobileInputUI : MonoBehaviour
 #else
         if (!Application.isMobilePlatform) { gameObject.SetActive(false); return; }
 #endif
+        DisableLegacyBattleOverlay();
+        EnsureBattleBackButton();
         BindButtons();
 
         if (joystick != null)
@@ -105,13 +91,11 @@ public class MobileInputUI : MonoBehaviour
     {
         bool isPaused = mode == InputMode.Pause;
         bool isMap    = !isPaused && (mode == InputMode.Map || mode == InputMode.Cutscene);
-        bool isBattle = !isPaused && (mode == InputMode.Battle || mode == InputMode.BattleItemMenu);
-        bool isSkill  = !isPaused && mode == InputMode.BattleSkillMenu;
+        bool isBattleFlow = !isPaused && (mode == InputMode.Battle || mode == InputMode.BattleSkillMenu || mode == InputMode.BattleItemMenu);
 
         if (mapPanel)       mapPanel.SetActive(isMap);
-        if (battlePanel)    battlePanel.SetActive(isBattle);
-        if (skillMenuPanel) skillMenuPanel.SetActive(isSkill);
         if (pausePanel)     pausePanel.SetActive(isPaused);
+        if (battleBackButton != null) battleBackButton.gameObject.SetActive(isBattleFlow);
 
         if (pauseButton != null)
             pauseButton.gameObject.SetActive(CanShowPauseButton(mode));
@@ -120,26 +104,56 @@ public class MobileInputUI : MonoBehaviour
     void BindButtons()
     {
         pauseButton?.onClick.AddListener(() => PauseMenuUI.Instance?.Toggle());
+        battleBackButton?.onClick.AddListener(() => BattleManager.Instance?.BackToActionMenu());
 
         // Map
         interactButton?.onClick.AddListener(() =>
             InputController.Instance?.QueueMobileInteract());
+    }
 
-        // Battle
-        attackButton?.onClick.AddListener(()    => BattleManager.Instance?.SelectBasicAttack());
-        skillMenuButton?.onClick.AddListener(() => BattleManager.Instance?.RequestOpenSkillMenu());
-        parryButton?.onClick.AddListener(()     => BattleManager.Instance?.RequestParry());
-        fleeButton?.onClick.AddListener(()      => BattleManager.Instance?.TryFlee());
-        nextTargetButton?.onClick.AddListener(() => BattleManager.Instance?.ChangeTargetInput(1));
-        prevTargetButton?.onClick.AddListener(() => BattleManager.Instance?.ChangeTargetInput(-1));
-        confirmButton?.onClick.AddListener(()   => BattleManager.Instance?.ConfirmAction());
-        cancelBattleButton?.onClick.AddListener(() => BattleManager.Instance?.BackToActionMenu());
+    void EnsureBattleBackButton()
+    {
+        if (!autoCreateBattleBackButton || battleBackButton != null)
+            return;
 
-        // Skill Menu
-        skill1Button?.onClick.AddListener(()    => BattleManager.Instance?.UseSkill(0));
-        skill2Button?.onClick.AddListener(()    => BattleManager.Instance?.UseSkill(1));
-        skill3Button?.onClick.AddListener(()    => BattleManager.Instance?.UseSkill(2));
-        skillCancelButton?.onClick.AddListener(() => BattleManager.Instance?.BackToActionMenu());
+        var go = new GameObject("BattleBackButtonRuntime", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        go.transform.SetParent(transform, false);
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.9f, 0.14f);
+        rt.anchorMax = new Vector2(0.9f, 0.14f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(150f, 72f);
+        rt.anchoredPosition = Vector2.zero;
+
+        var image = go.GetComponent<Image>();
+        image.color = new Color(0.22f, 0.12f, 0.12f, 0.88f);
+
+        var textGo = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+        textGo.transform.SetParent(go.transform, false);
+        var textRt = textGo.GetComponent<RectTransform>();
+        textRt.anchorMin = Vector2.zero;
+        textRt.anchorMax = Vector2.one;
+        textRt.offsetMin = Vector2.zero;
+        textRt.offsetMax = Vector2.zero;
+
+        var text = textGo.GetComponent<TextMeshProUGUI>();
+        text.text = "Back";
+        text.alignment = TextAlignmentOptions.Center;
+        text.fontSize = 30;
+        text.color = Color.white;
+
+        battleBackButton = go.GetComponent<Button>();
+    }
+
+    void DisableLegacyBattleOverlay()
+    {
+        // Cách A: Battle dùng UI trong BattleScene, không dùng overlay battle của prefab mobile.
+        Transform battle = transform.Find("BattlePanel");
+        if (battle != null) battle.gameObject.SetActive(false);
+
+        Transform skill = transform.Find("SkillMenuPanel");
+        if (skill != null) skill.gameObject.SetActive(false);
     }
 
     bool CanShowPauseButton(InputMode mode)

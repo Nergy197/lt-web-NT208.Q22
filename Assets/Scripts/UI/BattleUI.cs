@@ -397,7 +397,10 @@ public class BattleUI : MonoBehaviour
     void OnAttackPressed()
     {
         if (bm == null) return;
-        bm.SelectBasicAttack(); // BattleManager tự hide menu khi vào target selection
+        if (ShouldUseMobileAutoConfirm())
+            bm.SelectBasicAttackAndConfirm();
+        else
+            bm.SelectBasicAttack();
     }
 
     void OnSkillMenuOpen()
@@ -417,23 +420,50 @@ public class BattleUI : MonoBehaviour
             InputController.Instance.SetMode(InputMode.Battle);
     }
 
-    void OnItemMenuOpen()
+    public void OpenItemMenuUI()
     {
         PanelHelper.Hide(actionMenuPanel);
         PanelHelper.Hide(skillMenuPanel);
         PanelHelper.Show(itemMenuPanel);
+        if (InputController.Instance != null)
+            InputController.Instance.SetMode(InputMode.BattleItemMenu);
+    }
+
+    public void CloseItemMenuUI()
+    {
+        PanelHelper.Hide(itemMenuPanel);
+        PanelHelper.Show(actionMenuPanel);
+        if (InputController.Instance != null)
+            InputController.Instance.SetMode(InputMode.Battle);
+    }
+
+    void OnItemMenuOpen()
+    {
+        OpenItemMenuUI();
     }
 
     void OnItemMenuClose()
     {
-        PanelHelper.Hide(itemMenuPanel);
-        PanelHelper.Show(actionMenuPanel);
+        CloseItemMenuUI();
     }
 
     void OnSkillSelected(int index)
     {
         if (bm == null) return;
-        bm.UseSkill(index); // BattleManager tự hide menu khi vào target selection
+        if (ShouldUseMobileAutoConfirm())
+            bm.UseSkillAndConfirm(index);
+        else
+            bm.UseSkill(index);
+    }
+
+    bool ShouldUseMobileAutoConfirm()
+    {
+#if UNITY_EDITOR
+        // Trong Editor: chỉ bật hành vi mobile khi overlay mobile đang active.
+        return MobileInputUI.Instance != null && MobileInputUI.Instance.gameObject.activeInHierarchy;
+#else
+        return Application.isMobilePlatform;
+#endif
     }
 
     void OnFleePressed()

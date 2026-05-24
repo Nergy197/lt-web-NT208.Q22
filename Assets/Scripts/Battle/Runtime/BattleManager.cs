@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class BattleManager : MonoBehaviour
 {
@@ -241,6 +242,89 @@ public class BattleManager : MonoBehaviour
                 playerTurnCursor.SetActive(false);
             }
         }
+
+        HandleMobileTapTargetSelection();
+    }
+
+    void HandleMobileTapTargetSelection()
+    {
+        if (!ShouldUseMobileTouchFlow()) return;
+        if (!waitingForPlayerAction || !isSelectingTarget || isTargetingAlly) return;
+        if (enemyParty == null) return;
+
+        if (!TryGetTapScreenPosition(out Vector2 screenPos)) return;
+
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        Vector2 worldPos = cam.ScreenToWorldPoint(screenPos);
+        int targetIndex = FindAliveEnemyIndexNear(worldPos, 1.2f);
+        if (targetIndex < 0) return;
+
+        currentTargetIndex = targetIndex;
+        var target = GetEnemyTarget();
+        if (target == null) return;
+
+        BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
+        BattleUI.Instance?.SetTargetName(target.entityName);
+
+        var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        if (dialog != null)
+        {
+            dialog.UpdateBuffDebuff(currentUnit);
+            dialog.UpdateEnemyCombo(target.PlannedAttack);
+        }
+    }
+
+    bool TryGetTapScreenPosition(out Vector2 screenPos)
+    {
+        screenPos = Vector2.zero;
+
+        if (Input.touchCount <= 0) return false;
+
+        Touch t = Input.GetTouch(0);
+        if (t.phase != TouchPhase.Began) return false;
+
+        screenPos = t.position;
+        return true;
+    }
+
+    int FindAliveEnemyIndexNear(Vector2 worldPos, float maxDistance)
+    {
+        var aliveEnemies = new List<EnemyStatus>();
+        foreach (var e in enemyParty.Members)
+            if (e.IsAlive) aliveEnemies.Add(e as EnemyStatus);
+
+        if (aliveEnemies.Count == 0) return -1;
+
+        int best = -1;
+        float bestDist = maxDistance;
+        for (int i = 0; i < aliveEnemies.Count; i++)
+        {
+            var model = aliveEnemies[i]?.SpawnedModel;
+            if (model == null) continue;
+
+            float d = Vector2.Distance(worldPos, model.transform.position);
+            if (d <= bestDist)
+            {
+                bestDist = d;
+                best = i;
+            }
+        }
+
+        return best;
+    }
+
+    bool ShouldUseMobileTouchFlow()
+    {
+#if UNITY_EDITOR
+        return MobileInputUI.Instance != null && MobileInputUI.Instance.gameObject.activeInHierarchy;
+#else
+        return Application.isMobilePlatform;
+#endif
     }
 
     UnitHUD SetupEnemyHUD(GameObject model, Status enemy)
@@ -570,6 +654,12 @@ public class BattleManager : MonoBehaviour
         InputController.Instance?.SetMode(InputMode.BattleSkillMenu);
     }
 
+    public void RequestOpenItemMenu()
+    {
+        if (!waitingForPlayerAction || isSelectingTarget) return;
+        BattleUI.Instance?.OpenItemMenuUI();
+    }
+
     void EnterTargetSelection(int skillIndex)
     {
         pendingSkillIndex = skillIndex;
@@ -600,6 +690,15 @@ public class BattleManager : MonoBehaviour
         EnterTargetSelection(-1);
     }
 
+    /// <summary>
+    /// Dùng cho UI button: chọn đòn đánh thường và xác nhận ngay mục tiêu hiện tại.
+    /// </summary>
+    public void SelectBasicAttackAndConfirm()
+    {
+        SelectBasicAttack();
+        ConfirmAction();
+    }
+
     public void UseSkill(int index)
     {
         if (!waitingForPlayerAction || isSelectingTarget) return;
@@ -609,6 +708,15 @@ public class BattleManager : MonoBehaviour
         if (skill == null) { Log($"[ERROR] Skill[{index}] not found"); return; }
         if (!player.CanUseAP(skill.apCost)) { Log($"[ERROR] Not enough AP"); return; }
         EnterTargetSelection(index);
+    }
+
+    /// <summary>
+    /// Dùng cho UI button: chọn skill và xác nhận ngay mục tiêu hiện tại.
+    /// </summary>
+    public void UseSkillAndConfirm(int index)
+    {
+        UseSkill(index);
+        ConfirmAction();
     }
 
     public void ConfirmAction()

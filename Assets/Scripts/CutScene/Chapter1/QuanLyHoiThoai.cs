@@ -40,7 +40,7 @@ public class QuanLyHoiThoai : MonoBehaviour
         // TẤM KHIÊN 1: Nếu đã xong hết kịch bản thì nghỉ, không nhận phím nữa
         if (daXongHetKichBan) return;
 
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        if (IsAdvancePressed())
         {
             if (daXongCauHienTai)
             {
@@ -74,6 +74,15 @@ public class QuanLyHoiThoai : MonoBehaviour
                 daXongCauHienTai = true;
             }
         }
+    }
+
+    bool IsAdvancePressed()
+    {
+        if (InputController.Instance != null)
+            return InputController.Instance.IsInteractPressed();
+
+        // Fallback khi scene test không có InputController.
+        return Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0);
     }
 
     void HienThiCauTiepTheo()

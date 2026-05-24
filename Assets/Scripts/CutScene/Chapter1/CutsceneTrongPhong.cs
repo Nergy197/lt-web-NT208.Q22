@@ -35,17 +35,26 @@ public class CutsceneTrongPhong : MonoBehaviour
             return;
         }
 
-        // Kiểm tra bấm phím F
+        // Kiểm tra tương tác (mobile button hoặc phím F)
         if (playerScript != null && diemCanhGiuong != null)
         {
             float khoangCach = Vector2.Distance(playerScript.transform.position, diemCanhGiuong.position);
 
-            if (khoangCach <= khoangCachTuongTac && Input.GetKeyDown(KeyCode.F))
+            if (khoangCach <= khoangCachTuongTac && IsInteractPressed())
             {
-                Debug.Log("<color=green>Đã bấm F thành công!</color>");
+                Debug.Log("<color=green>Đã bấm tương tác thành công!</color>");
                 KichHoatHoiThoai();
             }
         }
+    }
+
+    bool IsInteractPressed()
+    {
+        if (InputController.Instance != null)
+            return InputController.Instance.IsInteractPressed();
+
+        // Fallback khi scene test thiếu InputController.
+        return Input.GetKeyDown(KeyCode.F);
     }
 
     void KichHoatHoiThoai()

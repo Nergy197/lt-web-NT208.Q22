@@ -145,6 +145,20 @@ _agents/
 .cursor-chat-history/
 .cursor-tutor/
 
+
+
+####################################
+# Local build/test artifacts
+*.apk
+*.aab
+*.keystore
+
+# Unity build leftovers
+*_BurstDebugInformation_DoNotShip/
+*_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Local temp dir from tooling
+.utmp/
 ####################################
 # NOTE: DO NOT IGNORE .meta FILES!
 # Unity .meta files store GUIDs and
