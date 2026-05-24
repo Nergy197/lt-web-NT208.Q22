@@ -66,6 +66,7 @@ public class PlayerStatus : Status
     private bool parryRequested     = false;
     private float parryCooldownEndTime = 0f;
     public bool WasParried { get; private set; }
+    public bool CanRequestParry => parryWindowOpen && Time.time >= parryCooldownEndTime;
 
     public void OpenParryWindow()
     {

@@ -24,6 +24,12 @@ public class EnemyHPBar : MonoBehaviour
     {
         if (trackedEnemy == null || fillRect == null) return;
 
+        if (PauseMenuUI.IsPaused)
+        {
+            if (gameObject.activeSelf) gameObject.SetActive(false);
+            return;
+        }
+
         // Co dãn chiều rộng fill theo tỉ lệ HP
         float ratio = trackedEnemy.MaxHP > 0
             ? Mathf.Clamp01((float)trackedEnemy.currentHP / trackedEnemy.MaxHP)

@@ -16,6 +16,7 @@ public class SavePoint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = true;
+            MobileInteractRegistry.SetActive(this, true);
             Debug.Log($"[SavePoint] Player dẫm vào {pointId}. Nhấn F để mở Menu Lưu/Hồi máu.");
             
             // Xóa tính năng tự động Lưu và Hồi máu ở đây.
@@ -28,7 +29,13 @@ public class SavePoint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = false;
+            MobileInteractRegistry.SetActive(this, false);
         }
+    }
+
+    private void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     private void Update()

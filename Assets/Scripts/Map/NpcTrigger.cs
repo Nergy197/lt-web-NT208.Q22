@@ -54,6 +54,7 @@ public class NpcTrigger : MonoBehaviour
         _inRange = true;
         if (_triggeredOnce && triggerOnce) return;
         SetPromptVisible(true);
+        MobileInteractRegistry.SetActive(this, true);
     }
 
     void OnTriggerExit2D(Collider2D other)
@@ -61,6 +62,7 @@ public class NpcTrigger : MonoBehaviour
         if (!other.CompareTag("Player")) return;
         _inRange = false;
         SetPromptVisible(false);
+        MobileInteractRegistry.SetActive(this, false);
         if (_isTalking) EndDialogue();
     }
 
@@ -87,6 +89,7 @@ public class NpcTrigger : MonoBehaviour
         if (npcData == null) return;
         _isTalking = true;
         _lineIndex = 0;
+        MobileInteractRegistry.SetActive(this, true);
         SetPromptVisible(false);
 
         bool useRepeat = _triggeredOnce && !triggerOnce;
@@ -114,6 +117,13 @@ public class NpcTrigger : MonoBehaviour
             _triggeredOnce = true;
             QuestAction.Execute(questActions, QuestAction.When.OnDialogueEnd);
         }
+
+        MobileInteractRegistry.SetActive(this, _inRange && !(_triggeredOnce && triggerOnce));
+    }
+
+    void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     string GetCurrentLine()

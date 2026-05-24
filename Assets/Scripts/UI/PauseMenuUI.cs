@@ -9,9 +9,15 @@ using UnityEngine.UI;
 public class PauseMenuUI : MonoBehaviour
 {
     public static PauseMenuUI Instance { get; private set; }
+    public static bool IsPaused { get; private set; }
+    private const int PauseSortingOrder = 30000;
 
     [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetStatics() => Instance = null;
+    static void ResetStatics()
+    {
+        Instance = null;
+        IsPaused = false;
+    }
 
     [Header("Panel")]
     [SerializeField] private GameObject pausePanel;
@@ -37,7 +43,10 @@ public class PauseMenuUI : MonoBehaviour
         Instance = this;
 
         if (pausePanel != null)
+        {
+            EnsurePausePanelOnTop();
             pausePanel.SetActive(false);
+        }
 
         resumeButton?.onClick.AddListener(Resume);
         saveButton?.onClick.AddListener(SaveGame);
@@ -64,6 +73,7 @@ public class PauseMenuUI : MonoBehaviour
             return;
 
         isPaused = true;
+        IsPaused = true;
 
         if (InputController.Instance != null)
         {
@@ -74,7 +84,10 @@ public class PauseMenuUI : MonoBehaviour
         Time.timeScale = 0f;
 
         if (pausePanel != null)
+        {
+            EnsurePausePanelOnTop();
             pausePanel.SetActive(true);
+        }
 
         SetStatus("");
     }
@@ -85,6 +98,7 @@ public class PauseMenuUI : MonoBehaviour
             return;
 
         isPaused = false;
+        IsPaused = false;
         Time.timeScale = 1f;
 
         if (pausePanel != null)
@@ -112,6 +126,7 @@ public class PauseMenuUI : MonoBehaviour
     void BackToMainMenu()
     {
         isPaused = false;
+        IsPaused = false;
         Time.timeScale = 1f;
 
         if (pausePanel != null)
@@ -125,6 +140,12 @@ public class PauseMenuUI : MonoBehaviour
 
     void QuitGame()
     {
+        if (IsBattleContext())
+        {
+            AbandonBattleToMap();
+            return;
+        }
+
         Time.timeScale = 1f;
 
 #if UNITY_EDITOR
@@ -132,6 +153,43 @@ public class PauseMenuUI : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    bool IsBattleContext()
+    {
+        if (InputController.Instance != null)
+        {
+            InputMode mode = InputController.Instance.Mode;
+            if (mode == InputMode.Battle
+                || mode == InputMode.BattleSkillMenu
+                || mode == InputMode.BattleItemMenu)
+                return true;
+        }
+
+        return SceneManager.GetActiveScene().name == "BattleScene";
+    }
+
+    void AbandonBattleToMap()
+    {
+        isPaused = false;
+        IsPaused = false;
+        Time.timeScale = 1f;
+
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
+
+        if (InputController.Instance != null)
+            InputController.Instance.UnbindBattleManager();
+
+        if (MapManager.Instance != null)
+        {
+            MapManager.Instance.AbandonBattleToMap();
+        }
+        else
+        {
+            Debug.LogWarning("[PauseMenuUI] MapManager missing, fallback load MapScene.");
+            SceneManager.LoadScene("MapScene");
+        }
     }
 
     void OnSaveComplete(bool serverBackupOk)
@@ -160,5 +218,23 @@ public class PauseMenuUI : MonoBehaviour
     {
         if (statusText != null)
             statusText.text = message;
+    }
+
+    void EnsurePausePanelOnTop()
+    {
+        if (pausePanel == null)
+            return;
+
+        pausePanel.transform.SetAsLastSibling();
+
+        Canvas canvas = pausePanel.GetComponent<Canvas>();
+        if (canvas == null)
+            canvas = pausePanel.AddComponent<Canvas>();
+
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = PauseSortingOrder;
+
+        if (pausePanel.GetComponent<GraphicRaycaster>() == null)
+            pausePanel.AddComponent<GraphicRaycaster>();
     }
 }

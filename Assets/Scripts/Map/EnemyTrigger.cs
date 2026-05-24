@@ -20,6 +20,7 @@ public class EnemyTrigger : MonoBehaviour
         if (requireInteract)
         {
             isPlayerInRange = true;
+            MobileInteractRegistry.SetActive(this, true);
             Debug.Log($"[EnemyTrigger] Nhấn F để chiến đấu với ({gameObject.name})");
         }
         else
@@ -32,6 +33,7 @@ public class EnemyTrigger : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         isPlayerInRange = false;
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     private void Update()
@@ -65,9 +67,15 @@ public class EnemyTrigger : MonoBehaviour
         }
 
         triggered = true;
+        MobileInteractRegistry.SetActive(this, false);
 
         MapManager.Instance.SetupBattle(new[] { enemyData }, mapLevel);
         Debug.Log($"[EnemyTrigger] Starting battle with {enemyData.entityName} (Lv {mapLevel})");
         MapManager.Instance.StartBattle();
+    }
+
+    private void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 }

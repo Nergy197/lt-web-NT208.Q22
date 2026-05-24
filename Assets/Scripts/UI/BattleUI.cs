@@ -197,12 +197,27 @@ public class BattleUI : MonoBehaviour
     {
         if (bm == null) return;
 
+        if (PauseMenuUI.IsPaused)
+        {
+            SetBattleHudVisible(false);
+            return;
+        }
+
         // Chỉ update HUD khi cả hai party đã được khởi tạo. Nếu chưa, giữ
         // khung HUD ở trạng thái rỗng (đã reset trong Awake) để tránh nhấp nháy.
         if (bm.PlayerParty == null || bm.EnemyParty == null) return;
 
         UpdateAllHUDs();
         UpdateStatusEffects();
+    }
+
+    void SetBattleHudVisible(bool visible)
+    {
+        for (int i = 0; i < playerHUDs.Count; i++)
+            if (playerHUDs[i] != null) playerHUDs[i].gameObject.SetActive(visible);
+
+        for (int i = 0; i < enemyHUDs.Count; i++)
+            if (enemyHUDs[i] != null) enemyHUDs[i].gameObject.SetActive(visible);
     }
 
     /// <summary>
@@ -397,10 +412,7 @@ public class BattleUI : MonoBehaviour
     void OnAttackPressed()
     {
         if (bm == null) return;
-        if (ShouldUseMobileAutoConfirm())
-            bm.SelectBasicAttackAndConfirm();
-        else
-            bm.SelectBasicAttack();
+        bm.SelectBasicAttack(); // Giữ flow như PC: vào chế độ chọn mục tiêu trước.
     }
 
     void OnSkillMenuOpen()
@@ -450,20 +462,7 @@ public class BattleUI : MonoBehaviour
     void OnSkillSelected(int index)
     {
         if (bm == null) return;
-        if (ShouldUseMobileAutoConfirm())
-            bm.UseSkillAndConfirm(index);
-        else
-            bm.UseSkill(index);
-    }
-
-    bool ShouldUseMobileAutoConfirm()
-    {
-#if UNITY_EDITOR
-        // Trong Editor: chỉ bật hành vi mobile khi overlay mobile đang active.
-        return MobileInputUI.Instance != null && MobileInputUI.Instance.gameObject.activeInHierarchy;
-#else
-        return Application.isMobilePlatform;
-#endif
+        bm.UseSkill(index); // Giữ flow như PC: vào chế độ chọn mục tiêu trước.
     }
 
     void OnFleePressed()

@@ -67,6 +67,7 @@ public class TeleportPortal : MonoBehaviour
         if (requireInteract)
         {
             isPlayerInRange = true;
+            MobileInteractRegistry.SetActive(this, true);
             Debug.Log($"[TeleportPortal] Nhấn phím tương tác để qua cổng ({gameObject.name})");
         }
         else
@@ -79,6 +80,7 @@ public class TeleportPortal : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         isPlayerInRange = false;
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     private void Update()
@@ -132,5 +134,10 @@ public class TeleportPortal : MonoBehaviour
         {
             MapManager.Instance.SetMap(targetMapData);
         }
+    }
+
+    private void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 }

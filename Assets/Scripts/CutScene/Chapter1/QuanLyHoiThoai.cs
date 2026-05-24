@@ -26,6 +26,7 @@ public class QuanLyHoiThoai : MonoBehaviour
     {
         daXongHetKichBan = false;
         cauHienTai = 0;
+        MobileInteractRegistry.SetActive(this, true);
 
         foreach (var cau in kichBan)
         {
@@ -113,6 +114,12 @@ public class QuanLyHoiThoai : MonoBehaviour
 
     void KetThucThoai()
     {
+        MobileInteractRegistry.SetActive(this, false);
         Debug.Log("Đã diễn xong kịch bản!");
+    }
+
+    void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 }

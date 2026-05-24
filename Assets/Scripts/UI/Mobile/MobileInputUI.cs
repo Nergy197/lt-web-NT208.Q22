@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 
@@ -23,6 +24,8 @@ public class MobileInputUI : MonoBehaviour
     [Header("Global – Pause")]
     [SerializeField] private Button pauseButton;
     [SerializeField] private Button battleBackButton;
+    [SerializeField] private Button battleConfirmButton;
+    [SerializeField] private Button battleParryButton;
 
     [Header("Map – Joystick & Interact")]
     [SerializeField] private VirtualJoystick joystick;
@@ -33,9 +36,21 @@ public class MobileInputUI : MonoBehaviour
     [SerializeField] private bool forceEnableInEditor = false;
     [Tooltip("Tự tạo nút Back battle nếu prefab chưa wire.")]
     [SerializeField] private bool autoCreateBattleBackButton = true;
+    [Tooltip("Tự tạo các nút tắt battle còn thiếu trên mobile.")]
+    [SerializeField] private bool autoCreateBattleShortcutButtons = true;
+    [Header("Mobile Button Layout")]
+    [Tooltip("Bật nếu muốn script ép vị trí theo các Anchor bên dưới. Tắt để giữ vị trí kéo tay trong prefab.")]
+    [SerializeField] private bool applyConfiguredButtonLayout = false;
+    [SerializeField] private Vector2 interactAnchor = new Vector2(0.9f, 0.08f);
+    [SerializeField] private Vector2 backAnchor = new Vector2(0.9f, 0.17f);
+    [SerializeField] private Vector2 confirmAnchor = new Vector2(0.9f, 0.08f);
+    [SerializeField] private Vector2 parryAnchor = new Vector2(0.9f, 0.08f);
+    [SerializeField] private Vector2 buttonSize = new Vector2(150f, 72f);
 
     private InputMode lastMode = (InputMode)(-1);
     private PlayerMovement playerMovement;
+    private PlayerMovement_Cutscene cutsceneMovement;
+    private bool createdRuntimeButton;
 
     void Awake()
     {
@@ -57,10 +72,13 @@ public class MobileInputUI : MonoBehaviour
 #endif
         DisableLegacyBattleOverlay();
         EnsureBattleBackButton();
+        EnsureBattleShortcutButtons();
+        if (applyConfiguredButtonLayout || createdRuntimeButton)
+            ApplyMobileButtonLayout();
         BindButtons();
 
         if (joystick != null)
-            joystick.OnInputChanged += v => playerMovement?.SetMobileInput(v);
+            joystick.OnInputChanged += SetMobileMovement;
     }
 
     void Update()
@@ -69,46 +87,108 @@ public class MobileInputUI : MonoBehaviour
         if (ic == null) return;
 
         InputMode mode = ic.Mode;
-        if (mode == lastMode) return;
-
-        lastMode = mode;
         RefreshPanels(mode);
+
+        if (mode == lastMode) return;
+        lastMode = mode;
 
         // Cache PlayerMovement khi chuyển sang Map
         if (mode == InputMode.Map || mode == InputMode.Cutscene)
         {
-            if (playerMovement == null)
-                playerMovement = Object.FindFirstObjectByType<PlayerMovement>();
+            CacheMovementTargets();
         }
         else
         {
             // Dừng player khi vào Battle / UI
-            playerMovement?.SetMobileInput(Vector2.zero);
+            SetMobileMovement(Vector2.zero);
         }
     }
 
     void RefreshPanels(InputMode mode)
     {
+        if (ShouldHideGameplayOverlay())
+        {
+            if (mapPanel) mapPanel.SetActive(false);
+            if (pausePanel) pausePanel.SetActive(false);
+            if (pauseButton != null) pauseButton.gameObject.SetActive(false);
+            if (battleBackButton != null) battleBackButton.gameObject.SetActive(false);
+            if (battleConfirmButton != null) battleConfirmButton.gameObject.SetActive(false);
+            if (battleParryButton != null) battleParryButton.gameObject.SetActive(false);
+            return;
+        }
+
         bool isPaused = mode == InputMode.Pause;
         bool isMap    = !isPaused && (mode == InputMode.Map || mode == InputMode.Cutscene);
-        bool isBattleFlow = !isPaused && (mode == InputMode.Battle || mode == InputMode.BattleSkillMenu || mode == InputMode.BattleItemMenu);
+        bool isInSkillOrItemMenu = !isPaused && (mode == InputMode.BattleSkillMenu || mode == InputMode.BattleItemMenu);
+        bool isSelectingTarget = !isPaused
+            && mode == InputMode.Battle
+            && BattleManager.Instance != null
+            && BattleManager.Instance.IsSelectingTarget;
+        bool shouldShowBattleBack = isInSkillOrItemMenu || isSelectingTarget;
+        bool shouldShowBattleConfirm = isSelectingTarget;
+        bool shouldShowBattleParry = !isPaused
+            && mode == InputMode.Battle
+            && BattleManager.Instance != null
+            && !isSelectingTarget
+            && BattleManager.Instance.CanRequestParry();
+
+        bool shouldShowInteract = isMap && MobileInteractRegistry.HasActiveInteraction;
 
         if (mapPanel)       mapPanel.SetActive(isMap);
+        if (joystick != null) joystick.gameObject.SetActive(isMap && CanUseJoystick());
+        if (interactButton != null) interactButton.gameObject.SetActive(shouldShowInteract);
         if (pausePanel)     pausePanel.SetActive(isPaused);
-        if (battleBackButton != null) battleBackButton.gameObject.SetActive(isBattleFlow);
+        if (battleBackButton != null) battleBackButton.gameObject.SetActive(shouldShowBattleBack);
+        if (battleConfirmButton != null) battleConfirmButton.gameObject.SetActive(shouldShowBattleConfirm);
+        if (battleParryButton != null) battleParryButton.gameObject.SetActive(shouldShowBattleParry);
 
         if (pauseButton != null)
             pauseButton.gameObject.SetActive(CanShowPauseButton(mode));
+    }
+
+    bool ShouldHideGameplayOverlay()
+    {
+        return SceneManager.GetActiveScene().name == "StartScene";
     }
 
     void BindButtons()
     {
         pauseButton?.onClick.AddListener(() => PauseMenuUI.Instance?.Toggle());
         battleBackButton?.onClick.AddListener(() => BattleManager.Instance?.BackToActionMenu());
+        battleConfirmButton?.onClick.AddListener(() => BattleManager.Instance?.ConfirmAction());
+        battleParryButton?.onClick.AddListener(() => BattleManager.Instance?.RequestParry());
 
         // Map
         interactButton?.onClick.AddListener(() =>
             InputController.Instance?.QueueMobileInteract());
+    }
+
+    void CacheMovementTargets()
+    {
+        if (playerMovement == null)
+            playerMovement = Object.FindFirstObjectByType<PlayerMovement>();
+
+        if (cutsceneMovement == null)
+            cutsceneMovement = Object.FindFirstObjectByType<PlayerMovement_Cutscene>();
+    }
+
+    void SetMobileMovement(Vector2 input)
+    {
+        playerMovement?.SetMobileInput(input);
+        cutsceneMovement?.SetMobileInput(input);
+    }
+
+    bool CanUseJoystick()
+    {
+        CacheMovementTargets();
+
+        if (playerMovement != null)
+            return true;
+
+        if (cutsceneMovement != null)
+            return cutsceneMovement.canMove;
+
+        return false;
     }
 
     void EnsureBattleBackButton()
@@ -116,18 +196,32 @@ public class MobileInputUI : MonoBehaviour
         if (!autoCreateBattleBackButton || battleBackButton != null)
             return;
 
-        var go = new GameObject("BattleBackButtonRuntime", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+        battleBackButton = CreateRuntimeButton("BattleBackButtonRuntime", "Back", new Color(0.22f, 0.12f, 0.12f, 0.88f));
+    }
+
+    void EnsureBattleShortcutButtons()
+    {
+        if (!autoCreateBattleShortcutButtons)
+            return;
+
+        if (battleConfirmButton == null)
+            battleConfirmButton = CreateRuntimeButton("BattleConfirmButtonRuntime", "OK", new Color(0.12f, 0.2f, 0.12f, 0.88f));
+
+        if (battleParryButton == null)
+            battleParryButton = CreateRuntimeButton("BattleParryButtonRuntime", "Parry", new Color(0.18f, 0.14f, 0.24f, 0.88f));
+    }
+
+    Button CreateRuntimeButton(string objectName, string label, Color color)
+    {
+        var go = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         go.transform.SetParent(transform, false);
+        createdRuntimeButton = true;
 
         var rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.9f, 0.14f);
-        rt.anchorMax = new Vector2(0.9f, 0.14f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(150f, 72f);
-        rt.anchoredPosition = Vector2.zero;
 
         var image = go.GetComponent<Image>();
-        image.color = new Color(0.22f, 0.12f, 0.12f, 0.88f);
+        image.color = color;
 
         var textGo = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
         textGo.transform.SetParent(go.transform, false);
@@ -138,12 +232,34 @@ public class MobileInputUI : MonoBehaviour
         textRt.offsetMax = Vector2.zero;
 
         var text = textGo.GetComponent<TextMeshProUGUI>();
-        text.text = "Back";
+        text.text = label;
         text.alignment = TextAlignmentOptions.Center;
         text.fontSize = 30;
         text.color = Color.white;
 
-        battleBackButton = go.GetComponent<Button>();
+        return go.GetComponent<Button>();
+    }
+
+    void ApplyMobileButtonLayout()
+    {
+        LayoutButton(interactButton, interactAnchor, buttonSize);
+        LayoutButton(battleBackButton, backAnchor, buttonSize);
+        LayoutButton(battleConfirmButton, confirmAnchor, buttonSize);
+        LayoutButton(battleParryButton, parryAnchor, buttonSize);
+    }
+
+    void LayoutButton(Button button, Vector2 anchor, Vector2 size)
+    {
+        if (button == null) return;
+
+        var rt = button.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        rt.anchorMin = anchor;
+        rt.anchorMax = anchor;
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = Vector2.zero;
     }
 
     void DisableLegacyBattleOverlay()

@@ -964,6 +964,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2076900811787239014, guid: ab90b16d1719c8d49aab87c84cee74c9, type: 3}
+      propertyPath: forceEnableInEditor
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3427160121158264053, guid: ab90b16d1719c8d49aab87c84cee74c9, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1047,6 +1051,10 @@ PrefabInstance:
     - target: {fileID: 3682165959122787998, guid: ab90b16d1719c8d49aab87c84cee74c9, type: 3}
       propertyPath: m_Color.a
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3844385840385746421, guid: ab90b16d1719c8d49aab87c84cee74c9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8033849556128503079, guid: ab90b16d1719c8d49aab87c84cee74c9, type: 3}
       propertyPath: m_Name

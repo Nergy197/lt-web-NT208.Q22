@@ -39,6 +39,7 @@ public class CutsceneTrongPhong : MonoBehaviour
         if (playerScript != null && diemCanhGiuong != null)
         {
             float khoangCach = Vector2.Distance(playerScript.transform.position, diemCanhGiuong.position);
+            MobileInteractRegistry.SetActive(this, khoangCach <= khoangCachTuongTac);
 
             if (khoangCach <= khoangCachTuongTac && IsInteractPressed())
             {
@@ -60,6 +61,7 @@ public class CutsceneTrongPhong : MonoBehaviour
     void KichHoatHoiThoai()
     {
         dangTrongCuocThoai = true;
+        MobileInteractRegistry.SetActive(this, false);
         if (playerScript != null)
         {
             playerScript.canMove = false;
@@ -69,6 +71,11 @@ public class CutsceneTrongPhong : MonoBehaviour
 
         if (khungThoaiUI != null) khungThoaiUI.SetActive(true);
         if (heThongThoai != null) heThongThoai.BatDauThoai();
+    }
+
+    void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     void KetThucHoiThoai()

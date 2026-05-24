@@ -162,6 +162,14 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    public void AbandonBattleToMap()
+    {
+        isInBattle = false;
+        currentEnemies.Clear();
+        Debug.Log("[MapManager] Abandon battle -> MapScene");
+        SceneManager.LoadScene("MapScene");
+    }
+
     public void ApplyPlayerEffects(PlayerStatus player)
     {
         if (currentMap == null) return;

@@ -260,8 +260,7 @@ public class BattleManager : MonoBehaviour
         Camera cam = Camera.main;
         if (cam == null) return;
 
-        Vector2 worldPos = cam.ScreenToWorldPoint(screenPos);
-        int targetIndex = FindAliveEnemyIndexNear(worldPos, 1.2f);
+        int targetIndex = FindAliveEnemyIndexNearScreenPoint(cam, screenPos, 220f);
         if (targetIndex < 0) return;
 
         currentTargetIndex = targetIndex;
@@ -292,7 +291,7 @@ public class BattleManager : MonoBehaviour
         return true;
     }
 
-    int FindAliveEnemyIndexNear(Vector2 worldPos, float maxDistance)
+    int FindAliveEnemyIndexNearScreenPoint(Camera cam, Vector2 screenPos, float maxScreenDistancePx)
     {
         var aliveEnemies = new List<EnemyStatus>();
         foreach (var e in enemyParty.Members)
@@ -301,13 +300,14 @@ public class BattleManager : MonoBehaviour
         if (aliveEnemies.Count == 0) return -1;
 
         int best = -1;
-        float bestDist = maxDistance;
+        float bestDist = maxScreenDistancePx;
         for (int i = 0; i < aliveEnemies.Count; i++)
         {
             var model = aliveEnemies[i]?.SpawnedModel;
             if (model == null) continue;
 
-            float d = Vector2.Distance(worldPos, model.transform.position);
+            Vector2 enemyScreenPos = cam.WorldToScreenPoint(model.transform.position);
+            float d = Vector2.Distance(screenPos, enemyScreenPos);
             if (d <= bestDist)
             {
                 bestDist = d;
@@ -633,15 +633,26 @@ public class BattleManager : MonoBehaviour
     // -1 = basicAttack, 0+ = skill index, -2 = chưa chọn
     private int pendingSkillIndex = -2;
     private bool isSelectingTarget = false;
+    public bool IsSelectingTarget => isSelectingTarget;
 
 
     public void BackToActionMenu()
     {
         if (!waitingForPlayerAction) return;
+
+        int previousSkillIndex = pendingSkillIndex;
         isSelectingTarget = false;
         pendingSkillIndex = -2;
         BattleUI.Instance?.HighlightEnemyHUD(-1);
         BattleUI.Instance?.SetTargetName(string.Empty);
+
+        if (previousSkillIndex >= 0)
+        {
+            BattleUI.Instance?.ShowSkillMenuUI(currentUnit as PlayerStatus);
+            InputController.Instance?.SetMode(InputMode.BattleSkillMenu);
+            return;
+        }
+
         BattleUI.Instance?.ShowActionMenu(currentUnit as PlayerStatus);
         InputController.Instance?.SetMode(InputMode.Battle);
     }
@@ -690,15 +701,6 @@ public class BattleManager : MonoBehaviour
         EnterTargetSelection(-1);
     }
 
-    /// <summary>
-    /// Dùng cho UI button: chọn đòn đánh thường và xác nhận ngay mục tiêu hiện tại.
-    /// </summary>
-    public void SelectBasicAttackAndConfirm()
-    {
-        SelectBasicAttack();
-        ConfirmAction();
-    }
-
     public void UseSkill(int index)
     {
         if (!waitingForPlayerAction || isSelectingTarget) return;
@@ -708,15 +710,6 @@ public class BattleManager : MonoBehaviour
         if (skill == null) { Log($"[ERROR] Skill[{index}] not found"); return; }
         if (!player.CanUseAP(skill.apCost)) { Log($"[ERROR] Not enough AP"); return; }
         EnterTargetSelection(index);
-    }
-
-    /// <summary>
-    /// Dùng cho UI button: chọn skill và xác nhận ngay mục tiêu hiện tại.
-    /// </summary>
-    public void UseSkillAndConfirm(int index)
-    {
-        UseSkill(index);
-        ConfirmAction();
     }
 
     public void ConfirmAction()
@@ -750,10 +743,19 @@ public class BattleManager : MonoBehaviour
     public void CancelTargetSelection()
     {
         if (!isSelectingTarget) return;
+        int previousSkillIndex = pendingSkillIndex;
         isSelectingTarget = false;
         pendingSkillIndex = -2;
         BattleUI.Instance?.HighlightEnemyHUD(-1);
         BattleUI.Instance?.SetTargetName(string.Empty);
+
+        if (previousSkillIndex >= 0)
+        {
+            BattleUI.Instance?.ShowSkillMenuUI(currentUnit as PlayerStatus);
+            InputController.Instance?.SetMode(InputMode.BattleSkillMenu);
+            return;
+        }
+
         BattleUI.Instance?.ShowActionMenu(currentUnit as PlayerStatus);
     }
 
@@ -768,6 +770,20 @@ public class BattleManager : MonoBehaviour
                 ps.RequestParry();
         }
         Log("[ACTION] Parry Requested");
+    }
+
+    public bool CanRequestParry()
+    {
+        if (playerParty == null || playerParty.Members == null) return false;
+
+        foreach (var p in playerParty.Members)
+        {
+            var ps = p as PlayerStatus;
+            if (ps != null && ps.IsAlive && ps.CanRequestParry)
+                return true;
+        }
+
+        return false;
     }
 
     public void TryFlee()

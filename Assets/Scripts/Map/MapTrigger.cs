@@ -19,6 +19,7 @@ public class MapTrigger : MonoBehaviour
         if (requireInteract)
         {
             isPlayerInRange = true;
+            MobileInteractRegistry.SetActive(this, true);
             Debug.Log($"[MapTrigger] Nhấn F để tương tác ({gameObject.name})");
         }
         else
@@ -31,6 +32,7 @@ public class MapTrigger : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         isPlayerInRange = false;
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     private void Update()
@@ -52,5 +54,12 @@ public class MapTrigger : MonoBehaviour
 
         if (triggerOnce)
             triggered = true;
+
+        MobileInteractRegistry.SetActive(this, false);
+    }
+
+    private void OnDisable()
+    {
+        MobileInteractRegistry.SetActive(this, false);
     }
 }

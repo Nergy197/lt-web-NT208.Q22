@@ -87,6 +87,7 @@ public class TeleportPillar : MonoBehaviour
     private void OnDisable()
     {
         allPillars.Remove(this);
+        MobileInteractRegistry.SetActive(this, false);
     }
 
     private void Reset()
@@ -107,6 +108,7 @@ public class TeleportPillar : MonoBehaviour
 
         // Luôn set isPlayerInRange — kiểm tra InputMode ở Update() là đủ
         isPlayerInRange = true;
+        MobileInteractRegistry.SetActive(this, true);
         Debug.Log($"[TeleportPillar] ✅ Player trong vùng! Nhấn F để mở menu ({pillarName})");
     }
 
@@ -114,6 +116,7 @@ public class TeleportPillar : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         isPlayerInRange = false;
+        MobileInteractRegistry.SetActive(this, false);
         Debug.Log($"[TeleportPillar] Player rời khỏi vùng ({pillarName})");
     }
 

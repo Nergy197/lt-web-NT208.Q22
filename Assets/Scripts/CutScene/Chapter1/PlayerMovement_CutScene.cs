@@ -8,6 +8,7 @@ public class PlayerMovement_Cutscene : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 movement;
+    private Vector2 mobileMovement;
     private Animator anim;
 
     void Start()
@@ -25,9 +26,16 @@ public class PlayerMovement_Cutscene : MonoBehaviour
             return;
         }
 
-        // Đọc phím bấm (Cho phép đi đủ 4 hướng)
-        movement.x = Input.GetAxisRaw("Horizontal");
-        movement.y = Input.GetAxisRaw("Vertical");
+        // Đọc phím bấm hoặc joystick mobile (Cho phép đi đủ 4 hướng)
+        if (mobileMovement.sqrMagnitude > 0.0001f)
+        {
+            movement = mobileMovement;
+        }
+        else
+        {
+            movement.x = Input.GetAxisRaw("Horizontal");
+            movement.y = Input.GetAxisRaw("Vertical");
+        }
 
         if (movement != Vector2.zero)
         {
@@ -44,5 +52,10 @@ public class PlayerMovement_Cutscene : MonoBehaviour
     void FixedUpdate()
     {
         rb.MovePosition(rb.position + movement.normalized * moveSpeed * Time.fixedDeltaTime);
+    }
+
+    public void SetMobileInput(Vector2 input)
+    {
+        mobileMovement = input;
     }
 }
