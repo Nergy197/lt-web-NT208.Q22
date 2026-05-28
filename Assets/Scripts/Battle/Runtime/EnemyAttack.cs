@@ -113,16 +113,18 @@ public class EnemyAttack : AttackBase
         }
 
         // --- SKILL EFFECTS ---
-        // Effect nhắm vào player (SkillEffectTarget.Enemy) bị bỏ qua nếu player parry.
         if (effects != null && effects.Count > 0)
         {
             foreach (var entry in effects)
             {
                 if (entry?.effect == null) continue;
-                if (anyHitParried && entry.target == SkillEffectTarget.Enemy) continue;
 
                 Status targetStatus = ResolveEffectTarget(entry.target);
                 if (targetStatus == null) continue;
+
+                // Bỏ qua MỌI effect nhắm vào player nếu player đã parry thành công
+                // (dùng targetStatus == player thay vì so sánh enum để bắt cả default case)
+                if (anyHitParried && targetStatus == player) continue;
 
                 targetStatus.ApplyStatusEffect(entry.effect);
                 Debug.Log($"[ENEMY EFFECT] {entry.effect.effectName} -> {targetStatus.entityName} ({entry.target})");

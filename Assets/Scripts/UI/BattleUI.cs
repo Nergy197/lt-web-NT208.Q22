@@ -417,6 +417,9 @@ public class BattleUI : MonoBehaviour
 
     void OnSkillMenuOpen()
     {
+        // Đi qua BattleManager để guard waitingForPlayerAction / isSelectingTarget
+        if (bm != null) { bm.RequestOpenSkillMenu(); return; }
+
         PanelHelper.Hide(actionMenuPanel);
         PanelHelper.Hide(itemMenuPanel);
         PanelHelper.Show(skillMenuPanel);

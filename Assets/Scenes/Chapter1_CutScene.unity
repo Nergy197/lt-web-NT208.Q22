@@ -639,6 +639,50 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 4.2010307, y: 4.294976}
   m_EdgeRadius: 0
+--- !u!1 &93686351
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 93686353}
+  - component: {fileID: 93686352}
+  m_Layer: 0
+  m_Name: Bootstrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &93686352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 93686351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d9c38f5fbb6a4a3782708e961dd0053, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CutsceneBootstrap
+--- !u!4 &93686353
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 93686351}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &101651128
 GameObject:
   m_ObjectHideFlags: 0
@@ -4132,6 +4176,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -5361,7 +5406,7 @@ MonoBehaviour:
     txtNoiDung: {fileID: 817359728}
     noiDungThoai: "Xin ng\u01B0\u1EDDi v\xE0o trong g\u1EA5p"
   tocDoGo: 0.05
-  daXongHetKichBan: 0
+  daXongHetKichBan: 1
 --- !u!114 &1272908248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5383,6 +5428,8 @@ MonoBehaviour:
   diemCanhGiuong: {fileID: 952959201}
   tocDo: 7
   playerScript: {fileID: 1834542949}
+  nextScene: 
+  delayBeforeLoad: 1
 --- !u!1 &1292336296
 GameObject:
   m_ObjectHideFlags: 0
@@ -6990,6 +7037,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -8097,7 +8145,7 @@ MonoBehaviour:
     txtNoiDung: {fileID: 297286985}
     noiDungThoai: "T\u1ED1t... t\u1ED1t l\u1EAFm..."
   tocDoGo: 0.05
-  daXongHetKichBan: 0
+  daXongHetKichBan: 1
 --- !u!61 &1975142946
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8160,7 +8208,7 @@ MonoBehaviour:
   diemCanhGiuong: {fileID: 2130806401}
   khoangCachTuongTac: 6
   khungThoaiUI: {fileID: 932938606}
-  nextScene: Chapter1_Tutorial
+  nextScene: MapScene
   delayBeforeLoad: 1
 --- !u!1 &1986665956
 GameObject:
@@ -8240,6 +8288,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -8587,3 +8636,4 @@ SceneRoots:
   - {fileID: 1220601632}
   - {fileID: 25391906}
   - {fileID: 1786449937}
+  - {fileID: 93686353}

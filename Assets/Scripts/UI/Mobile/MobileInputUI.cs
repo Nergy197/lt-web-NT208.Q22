@@ -41,16 +41,17 @@ public class MobileInputUI : MonoBehaviour
     [Header("Mobile Button Layout")]
     [Tooltip("Bật nếu muốn script ép vị trí theo các Anchor bên dưới. Tắt để giữ vị trí kéo tay trong prefab.")]
     [SerializeField] private bool applyConfiguredButtonLayout = false;
-    [SerializeField] private Vector2 interactAnchor = new Vector2(0.9f, 0.08f);
-    [SerializeField] private Vector2 backAnchor = new Vector2(0.9f, 0.17f);
-    [SerializeField] private Vector2 confirmAnchor = new Vector2(0.9f, 0.08f);
-    [SerializeField] private Vector2 parryAnchor = new Vector2(0.9f, 0.08f);
+    [SerializeField] private Vector2 interactAnchor = new Vector2(0.88f, 0.10f);
+    [SerializeField] private Vector2 backAnchor     = new Vector2(0.88f, 0.28f);
+    [SerializeField] private Vector2 confirmAnchor  = new Vector2(0.88f, 0.10f);
+    [SerializeField] private Vector2 parryAnchor    = new Vector2(0.88f, 0.28f);
     [SerializeField] private Vector2 buttonSize = new Vector2(150f, 72f);
 
     private InputMode lastMode = (InputMode)(-1);
     private PlayerMovement playerMovement;
     private PlayerMovement_Cutscene cutsceneMovement;
     private bool createdRuntimeButton;
+    private bool enemyAttackIncoming = false; // true từ lúc enemy bắt đầu tấn công đến khi xong
 
     void Awake()
     {
@@ -79,7 +80,22 @@ public class MobileInputUI : MonoBehaviour
 
         if (joystick != null)
             joystick.OnInputChanged += SetMobileMovement;
+
+        BattleEvents.OnEnemyAttackAnnounced += OnEnemyAttackAnnounced;
+        BattleEvents.OnAttackFinished        += OnAttackFinished;
     }
+
+    void OnDestroy()
+    {
+        BattleEvents.OnEnemyAttackAnnounced -= OnEnemyAttackAnnounced;
+        BattleEvents.OnAttackFinished        -= OnAttackFinished;
+    }
+
+    void OnEnemyAttackAnnounced(EnemyAttackData attack, EnemyStatus enemy, PlayerStatus target)
+        => enemyAttackIncoming = true;
+
+    void OnAttackFinished()
+        => enemyAttackIncoming = false;
 
     void Update()
     {
@@ -111,6 +127,7 @@ public class MobileInputUI : MonoBehaviour
             if (mapPanel) mapPanel.SetActive(false);
             if (pausePanel) pausePanel.SetActive(false);
             if (pauseButton != null) pauseButton.gameObject.SetActive(false);
+            if (interactButton != null) interactButton.gameObject.SetActive(false);
             if (battleBackButton != null) battleBackButton.gameObject.SetActive(false);
             if (battleConfirmButton != null) battleConfirmButton.gameObject.SetActive(false);
             if (battleParryButton != null) battleParryButton.gameObject.SetActive(false);
@@ -126,11 +143,13 @@ public class MobileInputUI : MonoBehaviour
             && BattleManager.Instance.IsSelectingTarget;
         bool shouldShowBattleBack = isInSkillOrItemMenu || isSelectingTarget;
         bool shouldShowBattleConfirm = isSelectingTarget;
+        // Hiện nút Parry từ khi địch bắt đầu tấn công (không chỉ khi window mở).
+        // RequestParryMobile() sẽ queue nếu bấm trước window — không bị penalty.
         bool shouldShowBattleParry = !isPaused
             && mode == InputMode.Battle
             && BattleManager.Instance != null
             && !isSelectingTarget
-            && BattleManager.Instance.CanRequestParry();
+            && enemyAttackIncoming;
 
         bool shouldShowInteract = isMap && MobileInteractRegistry.HasActiveInteraction;
 
@@ -148,7 +167,9 @@ public class MobileInputUI : MonoBehaviour
 
     bool ShouldHideGameplayOverlay()
     {
-        return SceneManager.GetActiveScene().name == "StartScene";
+        string scene = SceneManager.GetActiveScene().name;
+        // Slideshow thuần (không có player movement) → ẩn toàn bộ mobile UI
+        return scene == "StartScene" || scene == "Chapter0_Introduction";
     }
 
     void BindButtons()
@@ -156,7 +177,7 @@ public class MobileInputUI : MonoBehaviour
         pauseButton?.onClick.AddListener(() => PauseMenuUI.Instance?.Toggle());
         battleBackButton?.onClick.AddListener(() => BattleManager.Instance?.BackToActionMenu());
         battleConfirmButton?.onClick.AddListener(() => BattleManager.Instance?.ConfirmAction());
-        battleParryButton?.onClick.AddListener(() => BattleManager.Instance?.RequestParry());
+        battleParryButton?.onClick.AddListener(() => BattleManager.Instance?.RequestParryMobile());
 
         // Map
         interactButton?.onClick.AddListener(() =>

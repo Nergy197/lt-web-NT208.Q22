@@ -3456,7 +3456,7 @@ MonoBehaviour:
   defaultMap: {fileID: 11400000, guid: 0a884371353272d4d90b5d0ce05955f7, type: 2}
   currentEnemies: []
   isInBattle: 0
-  encounterRate: 0
+  encounterRate: 0.123
 --- !u!4 &1216307299
 Transform:
   m_ObjectHideFlags: 0

@@ -121,9 +121,10 @@ public class GameManager : MonoBehaviour
         }
 
         Instance = this;
-        transform.SetParent(null); // Fix error Destroy 
+        transform.SetParent(null); // Fix error Destroy
         DontDestroyOnLoad(gameObject);
         EnsurePlayerDatabase();
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         // Tự động chọn base URL:
         // - WebGL build: URL tương đối, không cần base
@@ -152,7 +153,7 @@ public class GameManager : MonoBehaviour
     /// <summary>Tắt cảnh báo trình duyệt (gọi khi về menu chính).</summary>
     public void DeactivateBrowserWarning() => DisableBeforeUnloadWarning();
 
-    // ================= AUTO-SAVE ON QUIT / PAUSE =================
+    // ================= AUTO-SAVE =================
 
     void OnApplicationQuit()
     {
@@ -164,11 +165,27 @@ public class GameManager : MonoBehaviour
         if (paused && isLoaded) QuickSaveToLocal();
     }
 
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Auto-save mỗi khi vào MapScene (sau trận, sau cutscene, v.v.)
+        // Đây là autosave đáng tin cậy nhất cho WebGL (OnApplicationQuit không chạy khi đóng tab)
+        if (scene.name == "MapScene" && isLoaded)
+        {
+            QuickSaveToLocal();
+            Debug.Log("[GM] Auto-save khi vào MapScene.");
+        }
+    }
+
     /// <summary>
     /// Lưu nhanh vào PlayerPrefs (đồng bộ, không cần coroutine).
     /// Dùng khi trình duyệt sắp đóng — không kịp gửi lên server.
     /// </summary>
-    void QuickSaveToLocal()
+    public void QuickSaveToLocal()
     {
         if (playerParty == null || playerParty.Members == null || playerParty.Members.Count == 0) return;
 
@@ -305,10 +322,6 @@ public class GameManager : MonoBehaviour
     public bool IsChapter1TutorialCompleted()
     {
         if (chapter1TutorialCompleted) return true;
-
-        var qm = questManager != null ? questManager : QuestManager.Instance;
-        if (qm != null && qm.HasAnyProgress()) return true;
-
         return PlayerPrefs.GetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 0) == 1;
     }
 
@@ -398,8 +411,10 @@ public class GameManager : MonoBehaviour
         }
 
         chapter1TutorialCompleted = save.chapter1TutorialCompleted;
-        if (!chapter1TutorialCompleted)
-            chapter1TutorialCompleted = PlayerPrefs.GetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 0) == 1;
+        int prefsVal = PlayerPrefs.GetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 0);
+        if (!chapter1TutorialCompleted && prefsVal == 1)
+            chapter1TutorialCompleted = true;
+        Debug.Log($"[GameManager] CreatePartyFromJson: chapter1TutorialCompleted(json)={save.chapter1TutorialCompleted} | PrefsKey={prefsVal} | final={chapter1TutorialCompleted}");
 
         // Tải tiến trình quest từ server
         var qm = questManager != null ? questManager : QuestManager.Instance;
@@ -458,16 +473,25 @@ public class GameManager : MonoBehaviour
 
     // ================= START GAME =================
 
+    bool _loadingInProgress;
+
     public void LoadAndStartGame()
     {
+        if (_loadingInProgress)
+        {
+            Debug.LogWarning("[GameManager] LoadAndStartGame đang chạy, bỏ qua lần gọi thứ hai.");
+            return;
+        }
         StartCoroutine(LoadAndStartGameRoutine());
     }
 
     private IEnumerator LoadAndStartGameRoutine()
     {
+        _loadingInProgress = true;
         Debug.Log($"[GameManager] Bắt đầu tiến trình tải data cho Slot {currentSaveSlot}");
         isLoaded = false;
         yield return StartCoroutine(LoadPlayerParty());
+        _loadingInProgress = false;
         StartGame();
     }
 
@@ -482,24 +506,30 @@ public class GameManager : MonoBehaviour
         // Bật cảnh báo trình duyệt khi đang chơi game
         ActivateBrowserWarning();
 
-        // Định tuyến vào Tutorial nếu chưa hoàn thành hướng dẫn và không có điểm lưu (save point)
-        bool tutorialDone = PlayerPrefs.GetInt("tutorialCompleted", 0) == 1;
-        if (!tutorialDone && string.IsNullOrEmpty(pendingSaveScene))
+        bool tutorialDone = IsChapter1TutorialCompleted();
+        bool hasSaveScene  = !string.IsNullOrEmpty(pendingSaveScene);
+
+        Debug.Log($"[GameManager] StartGame → Slot={currentSaveSlot} | chapter1TutorialCompleted={chapter1TutorialCompleted} | " +
+                  $"PrefsKey={PlayerPrefs.GetInt(Chapter1TutorialPrefsKey(currentSaveSlot), 0)} | " +
+                  $"tutorialDone={tutorialDone} | pendingSaveScene='{pendingSaveScene}'");
+
+        // Game mới hoàn toàn → bắt đầu từ Chapter0 (intro lore)
+        if (!tutorialDone && !hasSaveScene)
         {
-            Debug.Log("[GameManager] Hướng dẫn chưa hoàn thành -> Chuyển hướng vào Chapter1_Tutorial");
-            SceneManager.LoadScene("Chapter1_Tutorial");
+            Debug.Log("[GameManager] → Chapter0_Introduction (tutorial chưa hoàn thành, không có save point)");
+            SceneManager.LoadScene("Chapter0_Introduction");
             return;
         }
 
-        if (!string.IsNullOrEmpty(pendingSaveScene))
+        if (hasSaveScene)
         {
-            Debug.Log($"[GameManager] Load Scene: {pendingSaveScene} (Điểm Save: {pendingSavePointId})");
+            Debug.Log($"[GameManager] → {pendingSaveScene} (load từ save point '{pendingSavePointId}')");
             SceneManager.LoadScene(pendingSaveScene);
         }
         else
         {
-            Debug.Log("[GameManager] Load Scene theo cốt truyện: Chapter1_CutScene");
-            SceneManager.LoadScene("Chapter1_CutScene");
+            Debug.Log("[GameManager] → MapScene (tutorial done nhưng không có save point)");
+            SceneManager.LoadScene("MapScene");
         }
     }
 
@@ -660,17 +690,20 @@ public class GameManager : MonoBehaviour
 
     public void DeleteSaveSlot(int slotIndex)
     {
-        string key = "PlayerSave_" + slotIndex;
-        if (PlayerPrefs.HasKey(key))
-        {
-            PlayerPrefs.DeleteKey(key);
-            PlayerPrefs.Save();
-            Debug.Log($"[GameManager] Đã xoá hoàn toàn save ở Slot {slotIndex} trên bộ nhớ máy.");
-        }
-        else
-        {
-            Debug.Log($"[GameManager] Slot {slotIndex} đang trống, không có gì để xoá.");
-        }
+        // Xóa cả hai key dù save chính có tồn tại hay không (tránh leftover tutorial key)
+        PlayerPrefs.DeleteKey("PlayerSave_" + slotIndex);
+        PlayerPrefs.DeleteKey(Chapter1TutorialPrefsKey(slotIndex));
+        PlayerPrefs.Save();
+        Debug.Log($"[GameManager] Đã xoá Slot {slotIndex} (save + tutorial key).");
+    }
+
+    /// <summary>Debug only — xóa TOÀN BỘ PlayerPrefs để test fresh.</summary>
+    [ContextMenu("DEBUG: Clear All Save Data")]
+    public void DebugClearAllSaveData()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        Debug.LogWarning("[GameManager] ĐÃ XÓA TOÀN BỘ PlayerPrefs!");
     }
 
     // ================= START MENU HELPERS =================

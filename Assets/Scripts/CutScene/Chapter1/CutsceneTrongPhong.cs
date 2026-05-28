@@ -35,6 +35,9 @@ public class CutsceneTrongPhong : MonoBehaviour
             return;
         }
 
+        // Chờ GiaNoCutscene giải phóng player trước (tránh ăn flag interact của dialogue đầu)
+        if (playerScript != null && !playerScript.canMove) return;
+
         // Kiểm tra tương tác (mobile button hoặc phím F)
         if (playerScript != null && diemCanhGiuong != null)
         {
@@ -95,6 +98,13 @@ public class CutsceneTrongPhong : MonoBehaviour
 
     IEnumerator LoadSceneDelayed()
     {
+        // Lưu game trước khi chuyển sang MapScene
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.QuickSaveToLocal();
+            Debug.Log("[CutsceneTrongPhong] Đã lưu game sau cutscene.");
+        }
+
         yield return new WaitForSeconds(delayBeforeLoad);
         SceneManager.LoadScene(nextScene);
     }

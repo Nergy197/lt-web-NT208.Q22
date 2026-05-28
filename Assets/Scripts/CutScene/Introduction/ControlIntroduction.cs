@@ -19,7 +19,7 @@ public class DieuKhienCutscene : MonoBehaviour
     public float tocDoFadeAnh = 1.5f; // Tốc độ hiện/ẩn của ảnh
     public float tocDoFadeChu = 1.0f; // Tốc độ hiện/ẩn của chữ (thoại và chữ chuyển cảnh)
     public float thoiGianNghi = 3f;
-    public string tenSceneTiepTheo = "TutorialScene";
+    public string tenSceneTiepTheo = "Chapter1_Tutorial";
 
     public Sprite[] danhSachAnh;
     private string[] danhSachCauThoai;

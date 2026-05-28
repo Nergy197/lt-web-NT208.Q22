@@ -62,8 +62,9 @@ public class PlayerStatus : Status
             Debug.LogError($"{entityName} has NO BASIC ATTACK");
     }
 
-    private bool parryWindowOpen    = false;
-    private bool parryRequested     = false;
+    private bool parryWindowOpen       = false;
+    private bool parryRequested        = false;
+    private bool parryQueuedFromMobile = false; // Bấm trước window trên mobile — không bị penalty
     private float parryCooldownEndTime = 0f;
     public bool WasParried { get; private set; }
     public bool CanRequestParry => parryWindowOpen && Time.time >= parryCooldownEndTime;
@@ -71,14 +72,26 @@ public class PlayerStatus : Status
     public void OpenParryWindow()
     {
         parryWindowOpen = true;
-        parryRequested  = false;
         WasParried      = false;
+
+        // Nếu mobile đã bấm sẵn trước khi window mở → tự động kích hoạt
+        if (parryQueuedFromMobile)
+        {
+            parryRequested        = true;
+            parryQueuedFromMobile = false;
+        }
+        else
+        {
+            parryRequested = false;
+        }
+
         BattleEvents.RaiseParryWindowOpened(this);
     }
 
     public void CloseParryWindow()
     {
-        parryWindowOpen = false;
+        parryWindowOpen       = false;
+        parryQueuedFromMobile = false;
     }
 
     public void RequestParry()
@@ -87,13 +100,32 @@ public class PlayerStatus : Status
 
         if (!parryWindowOpen)
         {
-            // Bấm khi cửa sổ chưa mở → bị phạt không được trong 1 giây.
+            // Bấm khi cửa sổ chưa mở → bị phạt không được trong 1 giây (keyboard).
             parryCooldownEndTime = Time.time + 1.0f;
             Debug.Log($"[PENALTY] {entityName} bấm hụt! Bị khóa 1 giây.");
             return;
         }
 
         parryRequested = true;
+    }
+
+    /// <summary>
+    /// Dành riêng cho mobile: bấm nút Parry trước khi cửa sổ mở — không bị penalty.
+    /// Parry sẽ tự kích hoạt khi OpenParryWindow() được gọi.
+    /// </summary>
+    public void RequestParryMobile()
+    {
+        if (Time.time < parryCooldownEndTime) return;
+
+        if (parryWindowOpen)
+        {
+            parryRequested = true;
+            return;
+        }
+
+        // Queue để tự động parry khi window mở — không phạt
+        parryQueuedFromMobile = true;
+        Debug.Log($"[MOBILE PARRY] {entityName} bấm sẵn — chờ cửa sổ mở.");
     }
 
     /// <summary>
@@ -151,7 +183,7 @@ public class PlayerStatus : Status
     public override void ResetForBattle(float baseDelay)
     {
         base.ResetForBattle(baseDelay);
-        currentAP = 0; // AP tích lũy trong battle, bắt đầu từ 0
+        currentAP = 0;
     }
 
     public PlayerStatus(

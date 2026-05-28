@@ -200,9 +200,16 @@ public class BattleManager : MonoBehaviour
 
     void Update()
     {
+        UpdateTargetCursor();
+        UpdatePlayerTurnCursor();
+        HandleMobileTapTargetSelection();
+    }
+
+    void UpdateTargetCursor()
+    {
         if (targetCursor == null) return;
 
-        if (!waitingForPlayerAction)
+        if (!waitingForPlayerAction || !isSelectingTarget)
         {
             if (targetCursor.activeSelf) targetCursor.SetActive(false);
             return;
@@ -215,8 +222,7 @@ public class BattleManager : MonoBehaviour
             if (!targetCursor.activeSelf) targetCursor.SetActive(true);
             var tv = currentSelectedTarget.SpawnedModel.GetComponent<UnitVisual>();
             Vector3 center = tv != null ? tv.SpriteCenter : currentSelectedTarget.SpawnedModel.transform.position;
-            // cursorOffset.x là khoảng cách trước mặt — tự đổi dấu theo hướng sprite
-            float facing = tv != null ? tv.FacingSign : 1f;
+            float facing = currentSelectedTarget.SpawnedModel.transform.position.x > 0f ? -1f : 1f;
             Vector3 offset = new Vector3(cursorOffset.x * facing, cursorOffset.y, cursorOffset.z);
             targetCursor.transform.position = center + offset;
         }
@@ -224,26 +230,25 @@ public class BattleManager : MonoBehaviour
         {
             if (targetCursor.activeSelf) targetCursor.SetActive(false);
         }
+    }
 
-        // Cursor chỉ vào player đang hành động
-        if (playerTurnCursor != null)
+    void UpdatePlayerTurnCursor()
+    {
+        if (playerTurnCursor == null) return;
+
+        if (waitingForPlayerAction && currentUnit != null && currentUnit.SpawnedModel != null)
         {
-            if (waitingForPlayerAction && currentUnit != null && currentUnit.SpawnedModel != null)
-            {
-                playerTurnCursor.SetActive(true);
-                var pv = currentUnit.SpawnedModel.GetComponent<UnitVisual>();
-                Vector3 center = pv != null ? pv.SpriteCenter : currentUnit.SpawnedModel.transform.position;
-                float facing = pv != null ? pv.FacingSign : 1f;
-                Vector3 offset = new Vector3(playerCursorOffset.x * facing, playerCursorOffset.y, playerCursorOffset.z);
-                playerTurnCursor.transform.position = center + offset;
-            }
-            else
-            {
-                playerTurnCursor.SetActive(false);
-            }
+            playerTurnCursor.SetActive(true);
+            var pv = currentUnit.SpawnedModel.GetComponent<UnitVisual>();
+            Vector3 center = pv != null ? pv.SpriteCenter : currentUnit.SpawnedModel.transform.position;
+            float facing = currentUnit.SpawnedModel.transform.position.x > 0f ? -1f : 1f;
+            Vector3 offset = new Vector3(playerCursorOffset.x * facing, playerCursorOffset.y, playerCursorOffset.z);
+            playerTurnCursor.transform.position = center + offset;
         }
-
-        HandleMobileTapTargetSelection();
+        else
+        {
+            playerTurnCursor.SetActive(false);
+        }
     }
 
     void HandleMobileTapTargetSelection()
@@ -263,7 +268,16 @@ public class BattleManager : MonoBehaviour
         int targetIndex = FindAliveEnemyIndexNearScreenPoint(cam, screenPos, 220f);
         if (targetIndex < 0) return;
 
+        if (mobileTargetSelected && targetIndex == currentTargetIndex)
+        {
+            // Tap 2: cùng mục tiêu → confirm
+            ConfirmAction();
+            return;
+        }
+
+        // Tap 1: chọn mục tiêu, chờ tap 2 để confirm
         currentTargetIndex = targetIndex;
+        mobileTargetSelected = true;
         var target = GetEnemyTarget();
         if (target == null) return;
 
@@ -282,13 +296,31 @@ public class BattleManager : MonoBehaviour
     {
         screenPos = Vector2.zero;
 
-        if (Input.touchCount <= 0) return false;
+        // New Input System: touchscreen
+        var touchscreen = UnityEngine.InputSystem.Touchscreen.current;
+        if (touchscreen != null)
+        {
+            foreach (var touch in touchscreen.touches)
+            {
+                if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+                {
+                    screenPos = touch.position.ReadValue();
+                    return true;
+                }
+            }
+        }
 
-        Touch t = Input.GetTouch(0);
-        if (t.phase != TouchPhase.Began) return false;
+#if UNITY_EDITOR
+        // Editor: dùng click chuột trái để test mobile tap
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        {
+            screenPos = mouse.position.ReadValue();
+            return true;
+        }
+#endif
 
-        screenPos = t.position;
-        return true;
+        return false;
     }
 
     int FindAliveEnemyIndexNearScreenPoint(Camera cam, Vector2 screenPos, float maxScreenDistancePx)
@@ -306,7 +338,11 @@ public class BattleManager : MonoBehaviour
             var model = aliveEnemies[i]?.SpawnedModel;
             if (model == null) continue;
 
-            Vector2 enemyScreenPos = cam.WorldToScreenPoint(model.transform.position);
+            // Dùng SpriteCenter (visual center) thay vì transform.position (pivot/gốc)
+            // để hit detection khớp với vị trí thực tế nhìn thấy trên màn hình
+            var tv = model.GetComponent<UnitVisual>();
+            Vector3 worldCenter = tv != null ? tv.SpriteCenter : model.transform.position;
+            Vector2 enemyScreenPos = cam.WorldToScreenPoint(worldCenter);
             float d = Vector2.Distance(screenPos, enemyScreenPos);
             if (d <= bestDist)
             {
@@ -590,6 +626,10 @@ public class BattleManager : MonoBehaviour
         waitingForAttackFinish = false;
         Log("[TURN] Waiting Player Action");
 
+        // Đảm bảo mode luôn là Battle khi bắt đầu lượt — tránh bị kẹt ở BattleSkillMenu/BattleItemMenu
+        // từ lượt trước (ví dụ flee từ item menu, hoặc back không đúng cách).
+        InputController.Instance?.SetMode(InputMode.Battle);
+
         PlanEnemyActions(); // Ensure all enemies have a plan before player decides
 
         var playerUnit = currentUnit as PlayerStatus;
@@ -634,6 +674,7 @@ public class BattleManager : MonoBehaviour
     private int pendingSkillIndex = -2;
     private bool isSelectingTarget = false;
     public bool IsSelectingTarget => isSelectingTarget;
+    private bool mobileTargetSelected = false; // tap 1: chọn target; tap 2: confirm
 
 
     public void BackToActionMenu()
@@ -642,6 +683,8 @@ public class BattleManager : MonoBehaviour
 
         int previousSkillIndex = pendingSkillIndex;
         isSelectingTarget = false;
+        mobileTargetSelected = false;
+
         pendingSkillIndex = -2;
         BattleUI.Instance?.HighlightEnemyHUD(-1);
         BattleUI.Instance?.SetTargetName(string.Empty);
@@ -675,6 +718,8 @@ public class BattleManager : MonoBehaviour
     {
         pendingSkillIndex = skillIndex;
         isSelectingTarget = true;
+        mobileTargetSelected = false;
+
         BattleUI.Instance?.HideActionMenu();
         BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
         var t = GetEnemyTarget();
@@ -745,6 +790,8 @@ public class BattleManager : MonoBehaviour
         if (!isSelectingTarget) return;
         int previousSkillIndex = pendingSkillIndex;
         isSelectingTarget = false;
+        mobileTargetSelected = false;
+
         pendingSkillIndex = -2;
         BattleUI.Instance?.HighlightEnemyHUD(-1);
         BattleUI.Instance?.SetTargetName(string.Empty);
@@ -770,6 +817,20 @@ public class BattleManager : MonoBehaviour
                 ps.RequestParry();
         }
         Log("[ACTION] Parry Requested");
+    }
+
+    /// <summary>
+    /// Dành riêng cho nút Parry trên mobile — không penalty nếu bấm trước cửa sổ mở.
+    /// </summary>
+    public void RequestParryMobile()
+    {
+        foreach (var p in playerParty.Members)
+        {
+            var ps = p as PlayerStatus;
+            if (ps != null && ps.IsAlive)
+                ps.RequestParryMobile();
+        }
+        Log("[ACTION] Mobile Parry Queued/Requested");
     }
 
     public bool CanRequestParry()
@@ -1014,6 +1075,13 @@ public class BattleManager : MonoBehaviour
     {
         Log("[BATTLE] End");
 
+        // Xóa tất cả buff/debuff của player khi trận kết thúc
+        if (playerParty != null)
+        {
+            foreach (var member in playerParty.Members)
+                member.ClearAllEffects();
+        }
+
         if (playerFled)
         {
             EventManager.Publish(GameEvent.BattleFlee);
@@ -1078,6 +1146,14 @@ public class BattleManager : MonoBehaviour
 
         if (InputController.Instance != null)
             InputController.Instance.UnbindBattleManager();
+
+        // Tutorial scene: nếu thắng, TutorialController đã xử lý load CutScene qua BattleWin event.
+        // Không để BattleManager load MapScene đè lên.
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Chapter1_Tutorial" && playerWon)
+        {
+            Log("[BATTLE] Tutorial — player thắng, nhường TutorialController load CutScene.");
+            return;
+        }
 
         if (MapManager.Instance != null)
         {

@@ -20,7 +20,7 @@ public class QuanLyHoiThoai : MonoBehaviour
     private bool dangGoChu = false;
     private bool daXongCauHienTai = false;
 
-    [HideInInspector] public bool daXongHetKichBan = false;
+    [HideInInspector] public bool daXongHetKichBan = true;
 
     public void BatDauThoai()
     {

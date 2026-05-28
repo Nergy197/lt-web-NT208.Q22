@@ -150,6 +150,8 @@ public class TeleportPillar : MonoBehaviour
             return;
         }
 
+        HealParty();
+
         List<TeleportPillar> destinations = new List<TeleportPillar>();
         foreach (var pillar in allPillars)
         {
@@ -163,9 +165,24 @@ public class TeleportPillar : MonoBehaviour
         }
         else
         {
-            // Fallback: nếu chỉ có 1 trụ duy nhất thì mở danh sách map như cũ
             TeleportMenuUI.Instance.OpenMapMenu(this);
         }
+    }
+
+    private void HealParty()
+    {
+        var gm = GameManager.Instance;
+        if (gm?.playerParty == null) return;
+
+        bool anyHealed = false;
+        foreach (var member in gm.playerParty.Members)
+        {
+            if (!member.IsAlive) { member.Revive(member.MaxHP); anyHealed = true; }
+            if (member.currentHP < member.MaxHP) { member.HealFull(); anyHealed = true; }
+        }
+
+        if (anyHealed)
+            Debug.Log($"[TeleportPillar] Đã hồi máu toàn bộ party tại '{pillarName}'.");
     }
 
     // ================= GIZMO (EDITOR) =================

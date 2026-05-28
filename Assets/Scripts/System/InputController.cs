@@ -83,13 +83,13 @@ public class InputController : MonoBehaviour
 
     void BindBattleInput()
     {
-        Input.Battle.BasicAttack.performed   += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.SelectBasicAttack(); };
+        Input.Battle.BasicAttack.performed   += _ => { if (ShouldIgnoreBattleGameplayInput() || Mode == InputMode.BattleItemMenu) return; battle?.SelectBasicAttack(); };
         Input.Battle.NextTarget.performed    += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.ChangeTargetInput(1); };
         Input.Battle.PrevTarget.performed    += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.ChangeTargetInput(-1); };
-        Input.Battle.Parry.performed         += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.RequestParry(); };
-        Input.Battle.OpenSkillMenu.performed += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.RequestOpenSkillMenu(); };
+        Input.Battle.Parry.performed         += _ => { if (ShouldIgnoreBattleGameplayInput() || Mode == InputMode.BattleItemMenu) return; battle?.RequestParry(); };
+        Input.Battle.OpenSkillMenu.performed += _ => { if (ShouldIgnoreBattleGameplayInput() || Mode == InputMode.BattleItemMenu) return; battle?.RequestOpenSkillMenu(); };
         Input.Battle.OpenItemMenu.performed  += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.RequestOpenItemMenu(); };
-        Input.Battle.Flee.performed          += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.TryFlee(); };
+        Input.Battle.Flee.performed          += _ => { if (ShouldIgnoreBattleGameplayInput() || Mode == InputMode.BattleItemMenu) return; battle?.TryFlee(); };
         Input.Battle.Confirm.performed       += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.ConfirmAction(); };
         Input.Battle.Cancel.performed        += _ => { if (ShouldIgnoreBattleGameplayInput()) return; battle?.BackToActionMenu(); };
     }

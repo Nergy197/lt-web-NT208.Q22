@@ -31,6 +31,10 @@ public class PlayerMovement_Cutscene : MonoBehaviour
         {
             movement = mobileMovement;
         }
+        else if (InputController.Instance != null)
+        {
+            movement = InputController.Instance.Input.Map.Moves.ReadValue<Vector2>();
+        }
         else
         {
             movement.x = Input.GetAxisRaw("Horizontal");

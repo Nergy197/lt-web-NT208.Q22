@@ -237,10 +237,16 @@ public class StartMenuUI : MonoBehaviour
     {
         GameManager.Instance.currentSaveSlot = slotIndex;
 
+        Debug.Log($"[StartMenu] OnSlotSelected: slot={slotIndex} isNewGame={isNewGame}");
+
         if (isNewGame)
         {
-            Debug.Log($"[StartMenu] New Game ở slot {slotIndex}");
+            Debug.Log($"[StartMenu] → PrepareNewGame (slot trống)");
             GameManager.Instance.PrepareNewGame();
+        }
+        else
+        {
+            Debug.Log($"[StartMenu] → LoadGame (slot có data)");
         }
 
         GameManager.Instance.LoadAndStartGame();

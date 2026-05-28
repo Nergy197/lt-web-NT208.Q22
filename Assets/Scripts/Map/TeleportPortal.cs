@@ -90,21 +90,21 @@ public class TeleportPortal : MonoBehaviour
         if (IsInputBlocked()) return;
         if (InputController.Instance == null) return;
 
+        // Kiểm tra SavePoint TRƯỚC khi tiêu thụ interact flag, tránh ăn mất flag của SavePoint.
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            Collider2D playerCol = player.GetComponent<Collider2D>();
+            if (IsSavePointOverlapping(playerCol))
+            {
+                Debug.Log($"[TeleportPortal] Nhường quyền Interact cho SavePoint (chồng vùng).");
+                return;
+            }
+        }
+
         if (InputController.Instance.IsInteractPressed())
         {
-            // Nếu có SavePoint chồng lên vùng này → nhường phím F cho SavePoint, không teleport.
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                Collider2D playerCol = player.GetComponent<Collider2D>();
-                if (IsSavePointOverlapping(playerCol))
-                {
-                    Debug.Log($"[TeleportPortal] Nhường quyền Interact cho SavePoint (chồng vùng).");
-                    return;
-                }
-
-                Teleport(player.transform);
-            }
+            if (player != null) Teleport(player.transform);
         }
     }
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Đồng bộ hướng dẫn với trạng thái thực tế của trận đấu.
@@ -12,11 +13,14 @@ using UnityEngine;
 public class TutorialController : MonoBehaviour
 {
     [SerializeField] private TutorialPromptUI promptUI;
+    [SerializeField] private string nextScene = "Chapter1_CutScene";
+    [SerializeField] private float delayAfterComplete = 2f;
 
     // ── State ─────────────────────────────────────────────────────────────────
-    int  step          = 0;     // 0 = chờ khởi động
-    bool isEnemyTurn   = false; // true khi đang trong lượt địch
-    bool parryDone     = false;
+    int  step             = 0;     // 0 = chờ khởi động
+    bool isEnemyTurn      = false; // true khi đang trong lượt địch
+    bool parryDone        = false;
+    bool cutscenePending  = false; // true khi đang chờ load cutscene sau BattleWin
 
     // ── Nội dung hướng dẫn ───────────────────────────────────────────────────
 
@@ -58,6 +62,7 @@ public class TutorialController : MonoBehaviour
         BattleEvents.OnParryWindowOpened    += HandleParryWindowOpened;
         BattleEvents.OnParrySuccess         += HandleParrySuccess;
         BattleEvents.OnAttackFinished       += HandleAttackFinished;
+        EventManager.Subscribe(GameEvent.BattleWin, HandleBattleWin);
     }
 
     void OnDisable()
@@ -69,6 +74,7 @@ public class TutorialController : MonoBehaviour
         BattleEvents.OnParryWindowOpened    -= HandleParryWindowOpened;
         BattleEvents.OnParrySuccess         -= HandleParrySuccess;
         BattleEvents.OnAttackFinished       -= HandleAttackFinished;
+        EventManager.Unsubscribe(GameEvent.BattleWin, HandleBattleWin);
     }
 
     // ── Turn events (đồng bộ với BattleManager) ───────────────────────────────
@@ -198,15 +204,43 @@ public class TutorialController : MonoBehaviour
                 {
                     // Người chơi hành động (skill hoặc đánh thường) → hoàn thành
                     step = 4;
-                    PlayerPrefs.SetInt("tutorialCompleted", 1);
-                    PlayerPrefs.Save();
                     promptUI.Show(
                         "Xuất sắc! Bạn đã nắm được các thao tác cơ bản!\n" +
-                        "Hãy tiếp tục chiến đấu và hạ gục kẻ địch!");
-                    StartCoroutine(HideAfter(6f));
+                        "Chuẩn bị chuyển sang màn tiếp theo...");
+                    StartCoroutine(FinishTutorial());
                 }
                 break;
         }
+    }
+
+    // Gọi khi player hoàn thành bước 3 (dùng skill) — chỉ hiện thông báo,
+    // việc chuyển scene sẽ do HandleBattleWin xử lý sau khi thắng.
+    IEnumerator FinishTutorial()
+    {
+        promptUI?.Show(
+            "Xuất sắc! Bạn đã nắm được các thao tác cơ bản!\n" +
+            "Hãy tiêu diệt kẻ địch để tiếp tục!");
+        yield break;
+    }
+
+    void HandleBattleWin(object payload)
+    {
+        if (cutscenePending) return;
+        cutscenePending = true;
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.MarkChapter1TutorialCompleted();
+        QuestManager.Instance?.TryStartChapter1Quests();
+
+        promptUI?.Show("Chiến thắng! Chuẩn bị chuyển sang màn tiếp theo...");
+        StartCoroutine(LoadCutscene());
+    }
+
+    IEnumerator LoadCutscene()
+    {
+        yield return new WaitForSeconds(delayAfterComplete);
+        promptUI?.Hide();
+        SceneManager.LoadScene(nextScene);
     }
 
     IEnumerator HideAfter(float delay)

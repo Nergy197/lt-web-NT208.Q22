@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 public class TutorialChapter1Exit : MonoBehaviour
 {
     [Header("Chuyển scene")]
-    public string nextScene = "MapScene";
+    public string nextScene = "Chapter1_CutScene";
     public float delayBeforeLoad = 0.5f;
 
     bool _completed;
