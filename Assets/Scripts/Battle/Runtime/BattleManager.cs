@@ -141,6 +141,10 @@ public class BattleManager : MonoBehaviour
         if (InputController.Instance != null)
             InputController.Instance.BindBattleManager(this);
 
+#if UNITY_EDITOR
+        SetupEditorClickCapture();
+#endif
+
         InitBattle();
     }
 
@@ -209,7 +213,10 @@ public class BattleManager : MonoBehaviour
     {
         if (targetCursor == null) return;
 
-        if (!waitingForPlayerAction || !isSelectingTarget)
+        bool cursorShouldShow = waitingForPlayerAction && isSelectingTarget
+            && (!ShouldUseMobileTouchFlow() || mobileTargetSelected);
+
+        if (!cursorShouldShow)
         {
             if (targetCursor.activeSelf) targetCursor.SetActive(false);
             return;
@@ -251,22 +258,54 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    private bool _dbgLoggedOnce = false;
+
     void HandleMobileTapTargetSelection()
     {
         if (!ShouldUseMobileTouchFlow()) return;
         if (!waitingForPlayerAction || !isSelectingTarget || isTargetingAlly) return;
         if (enemyParty == null) return;
 
+        // Log một lần khi vào trạng thái selecting để xác nhận function chạy được tới đây
+        if (!_dbgLoggedOnce)
+        {
+            _dbgLoggedOnce = true;
+            var m = UnityEngine.InputSystem.Mouse.current;
+            Debug.Log($"[MOBILE-DBG] SelectingTarget active | Mouse.current={(m == null ? "NULL" : "OK")} | isPressed={(m?.leftButton.isPressed)}");
+        }
+
         if (!TryGetTapScreenPosition(out Vector2 screenPos)) return;
 
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        // Bỏ qua tap trong grace period ngay sau khi chọn action, bất kể thứ tự frame Update/EventSystem
+        if (Time.unscaledTime < mobileSkipTapsUntil)
+        {
+            Debug.Log($"[MOBILE-DBG] Grace period còn {mobileSkipTapsUntil - Time.unscaledTime:F3}s → skip tap tại {screenPos}");
             return;
+        }
 
         Camera cam = Camera.main;
-        if (cam == null) return;
+        if (cam == null) { Debug.Log("[MOBILE-DBG] Camera.main null"); return; }
 
-        int targetIndex = FindAliveEnemyIndexNearScreenPoint(cam, screenPos, 220f);
-        if (targetIndex < 0) return;
+        float depth = Mathf.Abs(cam.transform.position.z);
+        Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
+        Debug.Log($"[MOBILE-DBG] Tap screen={screenPos} → world={worldPos:F2} (cam.z={cam.transform.position.z:F1}, depth={depth:F1})");
+
+        int targetIndex = FindAliveEnemyIndexNearScreenPoint(cam, screenPos, 0f);
+        if (targetIndex < 0)
+        {
+            // Log vị trí các enemy để so sánh với worldPos
+            var alive = new System.Collections.Generic.List<EnemyStatus>();
+            foreach (var e in enemyParty.Members) if (e.IsAlive) alive.Add(e as EnemyStatus);
+            foreach (var e in alive)
+            {
+                if (e?.SpawnedModel == null) { Debug.Log($"[MOBILE-DBG] Enemy '{e?.entityName}' SpawnedModel=NULL"); continue; }
+                var srs = e.SpawnedModel.GetComponentsInChildren<SpriteRenderer>();
+                foreach (var sr in srs)
+                    Debug.Log($"[MOBILE-DBG] Enemy '{e.entityName}' SR bounds={sr.bounds.min:F2}→{sr.bounds.max:F2} | model.pos={e.SpawnedModel.transform.position:F2}");
+            }
+            Debug.Log($"[MOBILE-DBG] Không tìm thấy enemy tại tap position");
+            return;
+        }
 
         if (mobileTargetSelected && targetIndex == currentTargetIndex)
         {
@@ -296,7 +335,7 @@ public class BattleManager : MonoBehaviour
     {
         screenPos = Vector2.zero;
 
-        // New Input System: touchscreen
+        // New Input System: touchscreen (device thật hoặc simulator)
         var touchscreen = UnityEngine.InputSystem.Touchscreen.current;
         if (touchscreen != null)
         {
@@ -311,11 +350,28 @@ public class BattleManager : MonoBehaviour
         }
 
 #if UNITY_EDITOR
-        // Editor: dùng click chuột trái để test mobile tap
-        var mouse = UnityEngine.InputSystem.Mouse.current;
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        // Luôn sync _prevMousePressed trước để tránh false-positive ở Pointer fallback
+        // khi EventSystem branch đã return true ở frame trước mà không update state.
+        var pointer = UnityEngine.InputSystem.Pointer.current;
+        bool isNowPressed = pointer?.press.isPressed ?? false;
+
+        // Primary: EventSystem click capture (reliable, không phụ thuộc Game View focus)
+        if (!float.IsNaN(_pendingEditorTap.x))
         {
-            screenPos = mouse.position.ReadValue();
+            screenPos = _pendingEditorTap;
+            _pendingEditorTap = new Vector2(float.NaN, float.NaN);
+            _prevMousePressed = isNowPressed; // sync để Pointer fallback không double-fire
+            Debug.Log($"[MOBILE-DBG] Tap via EventSystem at {screenPos}");
+            return true;
+        }
+
+        // Fallback: Pointer.current edge detection (khi canvas chưa init)
+        bool tapped = !_prevMousePressed && isNowPressed;
+        _prevMousePressed = isNowPressed;
+        if (tapped)
+        {
+            screenPos = Input.mousePosition;
+            Debug.Log($"[MOBILE-DBG] Tap via Pointer fallback at {screenPos}");
             return true;
         }
 #endif
@@ -323,35 +379,77 @@ public class BattleManager : MonoBehaviour
         return false;
     }
 
-    int FindAliveEnemyIndexNearScreenPoint(Camera cam, Vector2 screenPos, float maxScreenDistancePx)
+#if UNITY_EDITOR
+    private bool _prevMousePressed = false;
+    private Vector2 _pendingEditorTap = new Vector2(float.NaN, float.NaN);
+
+    void SetupEditorClickCapture()
+    {
+        // Tạo invisible panel bắt click qua EventSystem — reliable trong Unity 6 Play Focused mode.
+        // Chỉ dùng trong Editor để test mobile flow. Panel nằm dưới mọi UI button nên không chặn click UI.
+        var canvas = Object.FindFirstObjectByType<Canvas>();
+        if (canvas == null) return;
+
+        var go = new GameObject("_EditorMobileClickCapture",
+            typeof(RectTransform), typeof(CanvasRenderer),
+            typeof(UnityEngine.UI.Image));
+        go.transform.SetParent(canvas.transform, false);
+        go.transform.SetAsFirstSibling(); // dưới toàn bộ UI khác
+
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+
+        var img = go.GetComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0, 0, 0, 0); // hoàn toàn trong suốt
+        img.raycastTarget = true;
+
+        var cap = go.AddComponent<EditorMobileClickCapture>();
+        cap.Init(pos => _pendingEditorTap = pos);
+    }
+#endif
+
+    int FindAliveEnemyIndexNearScreenPoint(Camera cam, Vector2 screenPos, float _unused = 0f)
     {
         var aliveEnemies = new List<EnemyStatus>();
         foreach (var e in enemyParty.Members)
             if (e.IsAlive) aliveEnemies.Add(e as EnemyStatus);
-
         if (aliveEnemies.Count == 0) return -1;
 
-        int best = -1;
-        float bestDist = maxScreenDistancePx;
+        // Camera orthographic 2D: chuyển screen → world bằng cách depth = khoảng cách đến z=0
+        float depth = Mathf.Abs(cam.transform.position.z);
+        Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
+
+        // Pass 1: kiểm tra chính xác sprite bounds
         for (int i = 0; i < aliveEnemies.Count; i++)
         {
             var model = aliveEnemies[i]?.SpawnedModel;
             if (model == null) continue;
-
-            // Dùng SpriteCenter (visual center) thay vì transform.position (pivot/gốc)
-            // để hit detection khớp với vị trí thực tế nhìn thấy trên màn hình
-            var tv = model.GetComponent<UnitVisual>();
-            Vector3 worldCenter = tv != null ? tv.SpriteCenter : model.transform.position;
-            Vector2 enemyScreenPos = cam.WorldToScreenPoint(worldCenter);
-            float d = Vector2.Distance(screenPos, enemyScreenPos);
-            if (d <= bestDist)
+            var renderers = model.GetComponentsInChildren<SpriteRenderer>();
+            foreach (var sr in renderers)
             {
-                bestDist = d;
-                best = i;
+                if (sr == null || !sr.enabled) continue;
+                Bounds b = sr.bounds;
+                if (worldPos.x >= b.min.x && worldPos.x <= b.max.x &&
+                    worldPos.y >= b.min.y && worldPos.y <= b.max.y)
+                    return i;
             }
         }
 
-        return best;
+        // Pass 2 (fallback): gần nhất trong vòng 1.5 world units
+        float bestDist = 1.5f;
+        int bestIdx = -1;
+        for (int i = 0; i < aliveEnemies.Count; i++)
+        {
+            var model = aliveEnemies[i]?.SpawnedModel;
+            if (model == null) continue;
+            float dist = Vector2.Distance(
+                new Vector2(worldPos.x, worldPos.y),
+                new Vector2(model.transform.position.x, model.transform.position.y));
+            if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+        }
+        return bestIdx;
     }
 
     bool ShouldUseMobileTouchFlow()
@@ -638,9 +736,14 @@ public class BattleManager : MonoBehaviour
         if (BattleUI.Instance != null && playerUnit != null)
         {
             BattleUI.Instance.ShowActionMenu(playerUnit);
-            BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
-            var target = GetEnemyTarget();
+            // Mobile: không highlight enemy khi chưa chọn action
+            if (!ShouldUseMobileTouchFlow())
+                BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
+            else
+                BattleUI.Instance.HighlightEnemyHUD(-1);
+            var target = ShouldUseMobileTouchFlow() ? null : GetEnemyTarget();
             if (target != null) BattleUI.Instance.SetTargetName(target.entityName);
+            else BattleUI.Instance.SetTargetName(string.Empty);
             
             var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
             if (dialog != null)
@@ -674,16 +777,20 @@ public class BattleManager : MonoBehaviour
     private int pendingSkillIndex = -2;
     private bool isSelectingTarget = false;
     public bool IsSelectingTarget => isSelectingTarget;
-    private bool mobileTargetSelected = false; // tap 1: chọn target; tap 2: confirm
+    public bool IsMobileTargetSelected => mobileTargetSelected;
+    private bool mobileTargetSelected = false;      // tap 1: chọn target; tap 2: confirm
+    private float mobileSkipTapsUntil = -1f;       // bỏ qua mọi tap trong grace period sau khi chọn action
 
 
     public void BackToActionMenu()
     {
         if (!waitingForPlayerAction) return;
+        Debug.Log($"[MOBILE-DBG] BackToActionMenu called | isSelectingTarget={isSelectingTarget} | mobileTargetSelected={mobileTargetSelected}");
 
         int previousSkillIndex = pendingSkillIndex;
-        isSelectingTarget = false;
+        isSelectingTarget  = false;
         mobileTargetSelected = false;
+        mobileSkipTapsUntil  = -1f;
 
         pendingSkillIndex = -2;
         BattleUI.Instance?.HighlightEnemyHUD(-1);
@@ -719,20 +826,37 @@ public class BattleManager : MonoBehaviour
         pendingSkillIndex = skillIndex;
         isSelectingTarget = true;
         mobileTargetSelected = false;
+        mobileSkipTapsUntil = Time.unscaledTime + 0.15f; // bỏ qua tap trong 150ms để tránh consume touch của nút action
+
+        _dbgLoggedOnce = false;
+        bool isMobile = ShouldUseMobileTouchFlow();
+        Debug.Log($"[MOBILE-DBG] EnterTargetSelection skill={skillIndex} | mobileFlow={isMobile} | MobileUI={(MobileInputUI.Instance != null ? MobileInputUI.Instance.gameObject.activeInHierarchy.ToString() : "Instance null")}");
 
         BattleUI.Instance?.HideActionMenu();
-        BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
-        var t = GetEnemyTarget();
-        if (t != null) 
+
+        if (isMobile)
         {
-            BattleUI.Instance?.SetTargetName(t.entityName);
-            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
-            if (dialog != null)
+            // Mobile: không tự chọn enemy — player phải tap để target (tap 1)
+            BattleUI.Instance?.HighlightEnemyHUD(-1);
+            BattleUI.Instance?.SetTargetName(string.Empty);
+        }
+        else
+        {
+            // PC: tự highlight enemy hiện tại để A/D điều hướng
+            BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
+            var t = GetEnemyTarget();
+            if (t != null)
             {
-                dialog.UpdateBuffDebuff(currentUnit);
-                dialog.UpdateEnemyCombo(t.PlannedAttack);
+                BattleUI.Instance?.SetTargetName(t.entityName);
+                var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+                if (dialog != null)
+                {
+                    dialog.UpdateBuffDebuff(currentUnit);
+                    dialog.UpdateEnemyCombo(t.PlannedAttack);
+                }
             }
         }
+
         // Đảm bảo mode Battle để Confirm/Cancel hoạt động dù vào từ SkillMenu
         InputController.Instance?.SetMode(InputMode.Battle);
         Log("[TARGET] A/D: đổi mục tiêu | Enter: xác nhận | Esc: huỷ");
@@ -789,8 +913,9 @@ public class BattleManager : MonoBehaviour
     {
         if (!isSelectingTarget) return;
         int previousSkillIndex = pendingSkillIndex;
-        isSelectingTarget = false;
+        isSelectingTarget  = false;
         mobileTargetSelected = false;
+        mobileSkipTapsUntil  = -1f;
 
         pendingSkillIndex = -2;
         BattleUI.Instance?.HighlightEnemyHUD(-1);
@@ -1167,3 +1292,16 @@ public class BattleManager : MonoBehaviour
         }
     }
 }
+
+#if UNITY_EDITOR
+/// <summary>
+/// Invisible fullscreen panel component dùng để bắt click qua EventSystem trong Unity 6 Editor.
+/// Reliable hơn Input System polling vì không phụ thuộc vào Game View focus state.
+/// </summary>
+class EditorMobileClickCapture : MonoBehaviour, UnityEngine.EventSystems.IPointerDownHandler
+{
+    System.Action<Vector2> _onTap;
+    public void Init(System.Action<Vector2> onTap) => _onTap = onTap;
+    public void OnPointerDown(UnityEngine.EventSystems.PointerEventData e) => _onTap?.Invoke(e.position);
+}
+#endif

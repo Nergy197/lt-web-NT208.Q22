@@ -42,7 +42,7 @@ public class MobileInputUI : MonoBehaviour
     [Tooltip("Bật nếu muốn script ép vị trí theo các Anchor bên dưới. Tắt để giữ vị trí kéo tay trong prefab.")]
     [SerializeField] private bool applyConfiguredButtonLayout = false;
     [SerializeField] private Vector2 interactAnchor = new Vector2(0.88f, 0.10f);
-    [SerializeField] private Vector2 backAnchor     = new Vector2(0.88f, 0.28f);
+    [SerializeField] private Vector2 backAnchor     = new Vector2(0.12f, 0.10f); // góc trái dưới, tránh đè lên enemy (luôn ở phải)
     [SerializeField] private Vector2 confirmAnchor  = new Vector2(0.88f, 0.10f);
     [SerializeField] private Vector2 parryAnchor    = new Vector2(0.88f, 0.28f);
     [SerializeField] private Vector2 buttonSize = new Vector2(150f, 72f);
@@ -141,8 +141,11 @@ public class MobileInputUI : MonoBehaviour
             && mode == InputMode.Battle
             && BattleManager.Instance != null
             && BattleManager.Instance.IsSelectingTarget;
+        // Confirm chỉ hiện SAU khi tap 1 đã chọn được target — tránh nút chặn click chọn enemy
+        bool shouldShowBattleConfirm = isSelectingTarget
+            && BattleManager.Instance != null
+            && BattleManager.Instance.IsMobileTargetSelected;
         bool shouldShowBattleBack = isInSkillOrItemMenu || isSelectingTarget;
-        bool shouldShowBattleConfirm = isSelectingTarget;
         // Hiện nút Parry từ khi địch bắt đầu tấn công (không chỉ khi window mở).
         // RequestParryMobile() sẽ queue nếu bấm trước window — không bị penalty.
         bool shouldShowBattleParry = !isPaused

@@ -15,9 +15,8 @@ MonoBehaviour:
   mapName: "\u0110\u1ED3ng c\u1ECF"
   mapId: 1
   battleBackgroundPrefab: {fileID: 0}
-  enemyLevel: 10
+  enemyLevel: 1
   possibleEnemies:
-  - {fileID: 11400000, guid: b4200fd5dd9ad4a6abce15116b7d1b95, type: 2}
   - {fileID: 11400000, guid: 8ce766c612a9549e181b9543a26ecd6e, type: 2}
   enemyBuffs: []
   enemyDebuffs: []

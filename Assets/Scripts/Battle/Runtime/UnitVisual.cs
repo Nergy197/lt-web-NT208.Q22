@@ -94,16 +94,30 @@ public class UnitVisual : MonoBehaviour
         // Offset giữa transform pivot và sprite center — cố định suốt coroutine
         // Dùng để tính đúng vị trí transform cần đến, tránh drift theo trục Y
         Vector3 spriteOffset  = SpriteCenter - transform.position;
-        Vector3 direction     = (targetCenter - SpriteCenter).normalized;
-        // Vị trí sprite center khi dừng lại (cạnh sprite chạm cạnh target + gap)
+        Vector3 rawDir        = targetCenter - SpriteCenter;
+        Vector3 direction     = rawDir.sqrMagnitude > 0.0001f ? rawDir.normalized : Vector3.right;
+
+        // Đã trong tầm tấn công — không cần dash
+        if (Vector3.Distance(SpriteCenter, targetCenter) <= stopDist)
+            yield break;
+
         Vector3 stopSpritePos = targetCenter - direction * stopDist;
-        // Vị trí transform tương ứng
         Vector3 moveTarget    = stopSpritePos - spriteOffset;
 
+        float dashTimeout = 4f;
+        float elapsed = 0f;
         while (true)
         {
             if (Vector3.Distance(SpriteCenter, targetCenter) <= stopDist)
                 break;
+
+            elapsed += Time.deltaTime;
+            if (elapsed >= dashTimeout)
+            {
+                Debug.LogWarning($"[VISUAL] DashToward timeout ({dashTimeout}s) — snap to stop position");
+                transform.position = moveTarget;
+                break;
+            }
 
             transform.position = Vector3.MoveTowards(
                 transform.position, moveTarget, dashSpeed * Time.deltaTime);
@@ -114,8 +128,22 @@ public class UnitVisual : MonoBehaviour
     /// <summary>Quay về vị trí ban đầu sau khi tấn công xong.</summary>
     public IEnumerator ReturnToOrigin()
     {
+        if (!originRecorded)
+        {
+            // originPosition chưa được ghi — snap về vị trí hiện tại, không cần di chuyển
+            yield break;
+        }
+
+        float returnTimeout = 4f;
+        float elapsed = 0f;
         while (Vector3.Distance(transform.position, originPosition) > 0.02f)
         {
+            elapsed += Time.deltaTime;
+            if (elapsed >= returnTimeout)
+            {
+                Debug.LogWarning($"[VISUAL] ReturnToOrigin timeout ({returnTimeout}s) — snap");
+                break;
+            }
             transform.position = Vector3.MoveTowards(
                 transform.position, originPosition, returnSpeed * Time.deltaTime);
             yield return null;
