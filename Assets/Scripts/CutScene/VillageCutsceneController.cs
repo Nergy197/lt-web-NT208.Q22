@@ -4,38 +4,33 @@ using TMPro;
 
 /// <summary>
 /// Cutscene làng hoang tàn.
-/// Mọi thứ (scale background, scale nhân vật, vị trí) chỉnh tay trong Editor.
-/// Script chỉ lo: kích hoạt khi player vào trigger + cuộn camera từ phải sang trái.
+/// Tự động nhân bản background thành N bản nối tiếp nhau,
+/// camera cuộn liên tục từ phải sang trái không giật.
 ///
 /// Setup:
-///   1. Chỉnh VillageBackground scale/position cho vừa ý trong Scene view
+///   1. Chỉnh VillageBackground scale/position cho vừa ý
 ///   2. Chỉnh nhân vật scale/position cho vừa ý
-///   3. Chỉnh Main Camera Orthographic Size cho vừa background
+///   3. Chỉnh Main Camera Orthographic Size cho vừa chiều cao background
 ///   4. Kéo các field vào Inspector
-///   5. Đặt CameraStartX = X bên phải background, CameraEndX = X bên trái
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class VillageCutsceneController : MonoBehaviour
 {
     [Header("References")]
     public Camera cam;
-    [Tooltip("cm vcam1 — tắt khi cutscene chạy")]
-    public GameObject virtualCamera;
+    public SpriteRenderer background;
     public Animator characterAnimator;
     public Transform character;
 
-    [Header("UI cần ẩn")]
-    public GameObject[] uiToHide;
-
-    [Header("Camera Scroll — chỉnh tay")]
-    [Tooltip("X bắt đầu (bên phải background) — chỉnh trong Scene view")]
-    public float cameraStartX = 10f;
-    [Tooltip("X kết thúc (bên trái background) — chỉnh trong Scene view")]
-    public float cameraEndX = -10f;
-    [Tooltip("Y cố định của camera trong cutscene")]
-    public float cameraY = 0f;
+    [Header("Scroll Settings")]
+    [Tooltip("Số lần lặp background (4 = 4 bản nối tiếp nhau)")]
+    public int loopCount = 4;
     [Tooltip("Tốc độ cuộn sang trái")]
     public float scrollSpeed = 2f;
+    [Tooltip("Y cố định của camera")]
+    public float cameraY = 0f;
+    [Tooltip("Offset X nhân vật so với tâm camera")]
+    public float characterOffsetX = 7f;
 
     [Header("Scene tiếp theo")]
     public string nextScene = "";
@@ -62,20 +57,34 @@ public class VillageCutsceneController : MonoBehaviour
 
     IEnumerator PlayCutscene()
     {
-        // Tắt Cinemachine
-        if (virtualCamera != null) virtualCamera.SetActive(false);
-        foreach (var comp in cam.GetComponents<Behaviour>())
-            if (comp.GetType().Name == "CinemachineBrain")
-                comp.enabled = false;
+        // Tắt PlayerMovement
+        if (character != null)
+            foreach (var comp in character.GetComponents<MonoBehaviour>())
+                if (comp.GetType().Name == "PlayerMovement") comp.enabled = false;
 
-        // Ẩn UI
-        foreach (var ui in uiToHide)
-            if (ui != null) ui.SetActive(false);
+        // Tính chiều rộng 1 bản background
+        float bgWidth = background.bounds.size.x;
 
-        // Đặt camera vào vị trí bắt đầu
-        cam.transform.position = new Vector3(cameraStartX, cameraY, cam.transform.position.z);
+        // Nhân bản background nối tiếp nhau
+        // Bản gốc ở vị trí index 0, các bản copy ở bên phải
+        float originX = background.transform.position.x;
+        float originY = background.transform.position.y;
 
-        // Bật animation đi
+        for (int i = 1; i < loopCount; i++)
+        {
+            SpriteRenderer copy = Instantiate(background, transform);
+            copy.transform.position = new Vector3(originX + bgWidth * i, originY, background.transform.position.z);
+        }
+
+        // Camera bắt đầu ở cạnh phải của toàn bộ dải background
+        float totalWidth = bgWidth * loopCount;
+        float camHalfW = cam.orthographicSize * cam.aspect;
+        float startX = originX + totalWidth / 2f - camHalfW;
+        float endX   = originX - totalWidth / 2f + camHalfW;
+
+        cam.transform.position = new Vector3(startX, cameraY != 0 ? cameraY : originY, cam.transform.position.z);
+
+        // Animation đi trái
         if (characterAnimator != null)
         {
             characterAnimator.SetFloat("MoveX", -1f);
@@ -86,17 +95,17 @@ public class VillageCutsceneController : MonoBehaviour
         _elapsed = 0f;
         _dialogueIndex = 0;
 
-        while (cam.transform.position.x > cameraEndX)
+        // Cuộn liên tục, không giật
+        while (cam.transform.position.x > endX)
         {
             Vector3 pos = cam.transform.position;
-            pos.x = Mathf.Max(pos.x - scrollSpeed * Time.deltaTime, cameraEndX);
+            pos.x = Mathf.Max(pos.x - scrollSpeed * Time.deltaTime, endX);
             cam.transform.position = pos;
 
-            // Nhân vật đi theo camera (giữ nguyên Y và scale đã set sẵn)
             if (character != null)
             {
                 Vector3 cp = character.position;
-                cp.x = cam.transform.position.x - 2f;
+                cp.x = cam.transform.position.x + characterOffsetX;
                 character.position = cp;
             }
 
@@ -117,9 +126,7 @@ public class VillageCutsceneController : MonoBehaviour
         if (dialogueLines == null || dialogueTimes == null) return;
         if (_dialogueIndex >= dialogueLines.Length || _dialogueIndex >= dialogueTimes.Length) return;
         if (_elapsed >= dialogueTimes[_dialogueIndex])
-        {
             ShowDialogue(dialogueLines[_dialogueIndex++]);
-        }
     }
 
     void ShowDialogue(string line)
