@@ -137,6 +137,10 @@ public class InputController : MonoBehaviour
         }
 
         // Mouse click lên UI button không được trigger gameplay battle input.
-        return EventSystem.current.IsPointerOverGameObject();
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null && mouse.leftButton.isPressed)
+            return EventSystem.current.IsPointerOverGameObject();
+
+        return false;
     }
 }

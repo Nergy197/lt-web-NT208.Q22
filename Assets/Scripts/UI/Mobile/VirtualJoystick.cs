@@ -46,6 +46,8 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     void ProcessDrag(PointerEventData data)
     {
+        if (radius <= 0f) return; // canvas chưa layout xong → tránh chia cho 0
+
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 bg, data.position, data.pressEventCamera, out Vector2 local))
             return;

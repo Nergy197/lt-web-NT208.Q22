@@ -268,7 +268,7 @@ public class StartMenuUI : MonoBehaviour
         if (transferCodeButton == null && mainMenuPanel != null)
         {
             transferCodeButton = MakeButton(mainMenuPanel.transform, "TransferCodeBtn",
-                "⚙ Mã chuyển máy", new Vector2(280f, 50f), new Color(0.2f, 0.2f, 0.3f, 0.9f));
+                "⚙ Mã chuyển máy", new Vector2(360f, 60f), new Color(0.2f, 0.2f, 0.3f, 0.9f));
 
             var rt = transferCodeButton.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0f);

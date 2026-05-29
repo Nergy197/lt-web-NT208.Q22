@@ -181,6 +181,7 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.LogWarning($"[BATTLE] Attack coroutine không kết thúc sau {timeout}s — ép tiếp tục.");
                 waitingForAttackFinish = false;
+                BattleEvents.RaiseAttackFinished(); // notify MobileInputUI, BattleInfoDialogUI, etc.
                 break;
             }
             yield return null;

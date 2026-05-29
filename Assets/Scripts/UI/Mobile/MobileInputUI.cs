@@ -53,6 +53,19 @@ public class MobileInputUI : MonoBehaviour
     private bool createdRuntimeButton;
     private bool enemyAttackIncoming = false; // true từ lúc enemy bắt đầu tấn công đến khi xong
 
+#if UNITY_EDITOR
+    // Tự tạo MobileInputCanvas nếu scene hiện tại không có (tiện test từ bất kỳ scene nào).
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void EditorAutoBootstrap()
+    {
+        if (Instance != null) return;
+        var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
+            "Assets/Prefabs/UI/Mobile/MobileInputCanvas.prefab");
+        if (prefab != null)
+            Instantiate(prefab);
+    }
+#endif
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -143,7 +156,6 @@ public class MobileInputUI : MonoBehaviour
             && BattleManager.Instance.IsSelectingTarget;
         // Confirm chỉ hiện SAU khi tap 1 đã chọn được target — tránh nút chặn click chọn enemy
         bool shouldShowBattleConfirm = isSelectingTarget
-            && BattleManager.Instance != null
             && BattleManager.Instance.IsMobileTargetSelected;
         bool shouldShowBattleBack = isInSkillOrItemMenu || isSelectingTarget;
         // Hiện nút Parry từ khi địch bắt đầu tấn công (không chỉ khi window mở).
@@ -204,7 +216,9 @@ public class MobileInputUI : MonoBehaviour
 
     bool CanUseJoystick()
     {
-        CacheMovementTargets();
+        // Retry khi chưa cache (ví dụ: test trực tiếp từ scene không có mode transition).
+        if (playerMovement == null && cutsceneMovement == null)
+            CacheMovementTargets();
 
         if (playerMovement != null)
             return true;
