@@ -1,16 +1,16 @@
 using UnityEngine;
 
 /// <summary>
-/// Bootstrap cho BattleScene — đảm bảo các singleton tối thiểu tồn tại
-/// khi mở thẳng BattleScene trong Editor mà không qua MapScene.
+/// Bootstrap cho Chapter5a_Battle — đảm bảo các singleton tối thiểu tồn tại
+/// khi mở thẳng Chapter5a_Battle trong Editor mà không qua Chapter5_MapBattle.
 ///
 /// Trong build thực, GameManager/InputController đã được tạo từ StartScene
 /// và DontDestroyOnLoad → bootstrap tự bỏ qua.
 /// </summary>
-public class BattleSceneBootstrap : MonoBehaviour
+public class Chapter5a_BattleBootstrap : MonoBehaviour
 {
     [Header("Debug Enemy Spawn")]
-    [Tooltip("MapData dùng để lấy possibleEnemies + enemyLevel khi test BattleScene trực tiếp.")]
+    [Tooltip("MapData dùng để lấy possibleEnemies + enemyLevel khi test Chapter5a_Battle trực tiếp.")]
     [SerializeField] private Mapdata debugMapData;
 
     [Tooltip("Số enemy tối thiểu spawn trong trận test.")]

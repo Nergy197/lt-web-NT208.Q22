@@ -3,13 +3,13 @@ using UnityEditor;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
-public class MapSceneSetupTool : EditorWindow
+public class Chapter5_MapBattleSetupTool : EditorWindow
 {
     [MenuItem("Tools/Map Scene Setup")]
-    public static void Open() => GetWindow<MapSceneSetupTool>("Map Scene Setup");
+    public static void Open() => GetWindow<Chapter5_MapBattleSetupTool>("Map Scene Setup");
 
     private MapManager mapManager;
-    private MapSceneBootstrap bootstrap;
+    private Chapter5_MapBattleBootstrap bootstrap;
     private Vector2 scroll;
 
     void OnFocus() => Scan();
@@ -17,7 +17,7 @@ public class MapSceneSetupTool : EditorWindow
     void Scan()
     {
         mapManager = FindFirstObjectByType<MapManager>();
-        bootstrap  = FindFirstObjectByType<MapSceneBootstrap>();
+        bootstrap  = FindFirstObjectByType<Chapter5_MapBattleBootstrap>();
     }
 
     void OnGUI()
@@ -88,8 +88,8 @@ public class MapSceneSetupTool : EditorWindow
 
         EditorGUILayout.Space(8);
 
-        // ── MapSceneBootstrap ─────────────────────────────────────────────────
-        DrawSection("MapSceneBootstrap (cho test từ MapScene)");
+        // ── Chapter5_MapBattleBootstrap ─────────────────────────────────────────────────
+        DrawSection("Chapter5_MapBattleBootstrap (cho test từ Chapter5_MapBattle)");
 
         if (bootstrap == null)
         {
@@ -97,10 +97,10 @@ public class MapSceneSetupTool : EditorWindow
             if (GUILayout.Button("Tạo Bootstrap GameObject"))
             {
                 var go = new GameObject("Bootstrap");
-                bootstrap = go.AddComponent<MapSceneBootstrap>();
+                bootstrap = go.AddComponent<Chapter5_MapBattleBootstrap>();
                 if (mapManager?.currentMap != null)
                     bootstrap.debugMapData = mapManager.currentMap;
-                Undo.RegisterCreatedObjectUndo(go, "Create MapSceneBootstrap");
+                Undo.RegisterCreatedObjectUndo(go, "Create Chapter5_MapBattleBootstrap");
                 Selection.activeGameObject = go;
             }
         }
@@ -187,7 +187,7 @@ public class MapSceneSetupTool : EditorWindow
         if (bootstrap == null)
         {
             var go = new GameObject("Bootstrap");
-            bootstrap = go.AddComponent<MapSceneBootstrap>();
+            bootstrap = go.AddComponent<Chapter5_MapBattleBootstrap>();
             Undo.RegisterCreatedObjectUndo(go, "Create Bootstrap");
         }
 

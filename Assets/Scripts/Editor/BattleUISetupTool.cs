@@ -10,14 +10,14 @@ public class BattleUISetupTool : EditorWindow
     [MenuItem("Tools/Setup Battle Info Dialog")]
     public static void SetupBattleInfoDialog()
     {
-        // Kiem tra xem dang o BattleScene chua
+        // Kiem tra xem dang o Chapter5a_Battle chua
         Scene currentScene = EditorSceneManager.GetActiveScene();
-        if (currentScene.name != "BattleScene")
+        if (currentScene.name != "Chapter5a_Battle")
         {
-            if (EditorUtility.DisplayDialog("Chuyen Scene", "Ban dang khong o BattleScene. Ban co muon mo BattleScene bay gio khong?", "Co", "Khong"))
+            if (EditorUtility.DisplayDialog("Chuyen Scene", "Ban dang khong o Chapter5a_Battle. Ban co muon mo Chapter5a_Battle bay gio khong?", "Co", "Khong"))
             {
                 EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
-                EditorSceneManager.OpenScene("Assets/Scenes/BattleScene.unity");
+                EditorSceneManager.OpenScene("Assets/Scenes/Chapter5a_Battle.unity");
             }
             else
             {
@@ -29,7 +29,7 @@ public class BattleUISetupTool : EditorWindow
         BattleUI battleUI = Object.FindFirstObjectByType<BattleUI>();
         if (battleUI == null)
         {
-            EditorUtility.DisplayDialog("Loi", "Khong tim thay BattleUI trong Scene! Kiem tra lai BattleScene.", "OK");
+            EditorUtility.DisplayDialog("Loi", "Khong tim thay BattleUI trong Scene! Kiem tra lai Chapter5a_Battle.", "OK");
             return;
         }
 

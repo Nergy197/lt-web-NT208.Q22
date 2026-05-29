@@ -172,7 +172,7 @@ public class MobileInputUI : MonoBehaviour
     {
         string scene = SceneManager.GetActiveScene().name;
         // Slideshow thuần (không có player movement) → ẩn toàn bộ mobile UI
-        return scene == "StartScene" || scene == "Chapter0_Introduction";
+        return scene == "Chapter0_Login" || scene == "Chapter1_Introduction";
     }
 
     void BindButtons()
@@ -288,7 +288,7 @@ public class MobileInputUI : MonoBehaviour
 
     void DisableLegacyBattleOverlay()
     {
-        // Cách A: Battle dùng UI trong BattleScene, không dùng overlay battle của prefab mobile.
+        // Cách A: Battle dùng UI trong Chapter5a_Battle, không dùng overlay battle của prefab mobile.
         Transform battle = transform.Find("BattlePanel");
         if (battle != null) battle.gameObject.SetActive(false);
 

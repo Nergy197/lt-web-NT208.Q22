@@ -11,7 +11,7 @@ public class CutsceneTrongPhong : MonoBehaviour
     public GameObject khungThoaiUI;
 
     [Header("Chuyển Scene sau khi xong")]
-    public string nextScene = "MapScene";
+    public string nextScene = "Chapter5_MapBattle";
     public float delayBeforeLoad = 1f;
 
     private bool dangTrongCuocThoai = false;
@@ -98,7 +98,7 @@ public class CutsceneTrongPhong : MonoBehaviour
 
     IEnumerator LoadSceneDelayed()
     {
-        // Lưu game trước khi chuyển sang MapScene
+        // Lưu game trước khi chuyển sang Chapter5_MapBattle
         if (GameManager.Instance != null)
         {
             GameManager.Instance.QuickSaveToLocal();

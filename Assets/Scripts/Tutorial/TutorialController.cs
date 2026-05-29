@@ -13,7 +13,7 @@ using UnityEngine.SceneManagement;
 public class TutorialController : MonoBehaviour
 {
     [SerializeField] private TutorialPromptUI promptUI;
-    [SerializeField] private string nextScene = "Chapter1_CutScene";
+    [SerializeField] private string nextScene = "Chapter3_FatherWill";
     [SerializeField] private float delayAfterComplete = 2f;
 
     // ── State ─────────────────────────────────────────────────────────────────

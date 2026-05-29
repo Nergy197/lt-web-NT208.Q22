@@ -108,7 +108,7 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[BATTLE] GameManager chưa sẵn sàng — không thể vào trận. Quay lại MapScene.");
+                Debug.LogError("[BATTLE] GameManager chưa sẵn sàng — không thể vào trận. Quay lại Chapter5_MapBattle.");
                 FailSafeBackToMap();
                 yield break;
             }
@@ -149,7 +149,7 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Quay về MapScene khi battle không thể bắt đầu hợp lệ. Reset cờ
+    /// Quay về Chapter5_MapBattle khi battle không thể bắt đầu hợp lệ. Reset cờ
     /// MapManager.isInBattle để random encounter tiếp tục hoạt động.
     /// </summary>
     void FailSafeBackToMap()
@@ -162,7 +162,7 @@ public class BattleManager : MonoBehaviour
         }
         if (InputController.Instance != null)
             InputController.Instance.UnbindBattleManager();
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MapScene");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Chapter5_MapBattle");
     }
 
     void OnDestroy()
@@ -540,7 +540,7 @@ public class BattleManager : MonoBehaviour
             Log("[BATTLE] debugPlayerData chưa gán — dùng player fallback không có prefab/skill.");
         }
 
-        // Ưu tiên enemy từ MapData (nạp qua BattleSceneBootstrap)
+        // Ưu tiên enemy từ MapData (nạp qua Chapter5a_BattleBootstrap)
         if (MapManager.Instance != null &&
             MapManager.Instance.currentEnemies != null &&
             MapManager.Instance.currentEnemies.Count > 0)
@@ -560,7 +560,7 @@ public class BattleManager : MonoBehaviour
         e1.battlePrefab = debugEnemyPrefab;
         if (debugEnemyAttack != null) e1.AddAttack(debugEnemyAttack);
         enemyParty.AddMember(e1);
-        Log("[BATTLE] debugEnemyPrefab fallback — gán debugMapData vào BattleSceneBootstrap để dùng enemy thật.");
+        Log("[BATTLE] debugEnemyPrefab fallback — gán debugMapData vào Chapter5a_BattleBootstrap để dùng enemy thật.");
     }
 
     void InitBattle()
@@ -1273,8 +1273,8 @@ public class BattleManager : MonoBehaviour
             InputController.Instance.UnbindBattleManager();
 
         // Tutorial scene: nếu thắng, TutorialController đã xử lý load CutScene qua BattleWin event.
-        // Không để BattleManager load MapScene đè lên.
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Chapter1_Tutorial" && playerWon)
+        // Không để BattleManager load Chapter5_MapBattle đè lên.
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Chapter2_Tutorial" && playerWon)
         {
             Log("[BATTLE] Tutorial — player thắng, nhường TutorialController load CutScene.");
             return;
@@ -1286,9 +1286,9 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            // Không có MapManager (ví dụ khi test BattleScene độc lập) → load thẳng MapScene.
-            Debug.LogWarning("[BATTLE] EndBattle: MapManager.Instance == null, fallback load MapScene.");
-            UnityEngine.SceneManagement.SceneManager.LoadScene("MapScene");
+            // Không có MapManager (ví dụ khi test Chapter5a_Battle độc lập) → load thẳng Chapter5_MapBattle.
+            Debug.LogWarning("[BATTLE] EndBattle: MapManager.Instance == null, fallback load Chapter5_MapBattle.");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Chapter5_MapBattle");
         }
     }
 }

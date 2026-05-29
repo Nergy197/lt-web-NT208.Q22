@@ -162,10 +162,10 @@ public class CreateGameContentTool
     // ==========================================
     // TOOL 3: NHÂN BẢN MAP SCENE CÓ SẴN
     // ==========================================
-    [MenuItem("Tools/3. Tạo Map Mới (Copy y chang MapScene hiện tại)")]
-    public static void DuplicateMapScene()
+    [MenuItem("Tools/3. Tạo Map Mới (Copy y chang Chapter5_MapBattle hiện tại)")]
+    public static void DuplicateChapter5_MapBattle()
     {
-        string sourcePath = "Assets/Scenes/MapScene.unity";
+        string sourcePath = "Assets/Scenes/Chapter5_MapBattle.unity";
 
         if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
         {
@@ -175,7 +175,7 @@ public class CreateGameContentTool
 
         if (!File.Exists(sourcePath))
         {
-            Debug.LogError($"Không tìm thấy file gốc tại {sourcePath}. Vui lòng đảm bảo bạn đang có một scene tên là MapScene.unity nằm trong thư mục Assets/Scenes.");
+            Debug.LogError($"Không tìm thấy file gốc tại {sourcePath}. Vui lòng đảm bảo bạn đang có một scene tên là Chapter5_MapBattle.unity nằm trong thư mục Assets/Scenes.");
             return;
         }
 

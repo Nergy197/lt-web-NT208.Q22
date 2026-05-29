@@ -9,7 +9,7 @@ public class Mapdata : ScriptableObject
     public int mapId;
 
     [Header("=== BATTLE BACKGROUND ===")]
-    [Tooltip("Prefab nền chiến đấu cho map này. Nếu null, BattleScene sẽ dùng background mặc định (Tutorial).")]
+    [Tooltip("Prefab nền chiến đấu cho map này. Nếu null, Chapter5a_Battle sẽ dùng background mặc định (Tutorial).")]
     public GameObject battleBackgroundPrefab;
 
     [Header("=== DIFFICULTY / ENEMY LEVEL ===")]

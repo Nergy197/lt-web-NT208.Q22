@@ -135,7 +135,7 @@ public class PauseMenuUI : MonoBehaviour
         if (InputController.Instance != null)
             InputController.Instance.SetMode(InputMode.UI);
 
-        SceneManager.LoadScene("StartScene");
+        SceneManager.LoadScene("Chapter0_Login");
     }
 
     void QuitGame()
@@ -166,7 +166,7 @@ public class PauseMenuUI : MonoBehaviour
                 return true;
         }
 
-        return SceneManager.GetActiveScene().name == "BattleScene";
+        return SceneManager.GetActiveScene().name == "Chapter5a_Battle";
     }
 
     void AbandonBattleToMap()
@@ -187,8 +187,8 @@ public class PauseMenuUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[PauseMenuUI] MapManager missing, fallback load MapScene.");
-            SceneManager.LoadScene("MapScene");
+            Debug.LogWarning("[PauseMenuUI] MapManager missing, fallback load Chapter5_MapBattle.");
+            SceneManager.LoadScene("Chapter5_MapBattle");
         }
     }
 

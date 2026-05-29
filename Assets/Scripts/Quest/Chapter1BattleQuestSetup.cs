@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Tự cấu hình BattleQuestTrigger cho Q002 (thua bắt buộc → O4 + về MapScene).
-/// Gắn vào BattleScene (cùng object BattleSceneBootstrap hoặc QuestSystems).
+/// Tự cấu hình BattleQuestTrigger cho Q002 (thua bắt buộc → O4 + về Chapter5_MapBattle).
+/// Gắn vào Chapter5a_Battle (cùng object Chapter5a_BattleBootstrap hoặc QuestSystems).
 /// </summary>
 [DefaultExecutionOrder(-50)]
 public class Chapter1BattleQuestSetup : MonoBehaviour
 {
     [SerializeField] string questId = "Q002";
     [SerializeField] string lossObjectiveId = "O4";
-    [SerializeField] string returnScene = "MapScene";
+    [SerializeField] string returnScene = "Chapter5_MapBattle";
 
     void Awake()
     {

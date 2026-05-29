@@ -650,7 +650,7 @@ public class QuestSetupTool
         Debug.Log(
             "=== Quest Self-Test Checklist ===\n" +
             "1. New Game: CutScene → Tutorial, KHÔNG có Q001 active\n" +
-            "2. Thắng tutorial: vào MapScene, Q001 active + tracker hiện\n" +
+            "2. Thắng tutorial: vào Chapter5_MapBattle, Q001 active + tracker hiện\n" +
             "3. Complete Q001 zone/NPC → chain Q002\n" +
             "4. Battle Q002 thua → O4 + về Map\n" +
             "5. Save/Continue giữ quest + tutorial flag\n" +

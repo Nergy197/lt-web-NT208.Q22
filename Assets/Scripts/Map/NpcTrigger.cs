@@ -3,7 +3,7 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Gắn vào GameObject NPC trên MapScene.
+/// Gắn vào GameObject NPC trên Chapter5_MapBattle.
 /// Khi player đến gần và nhấn F → hiện dialogue → kích hoạt Quest Actions.
 ///
 /// Setup:

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Tạo QuestTrackerUnderMinimapUI trên Canvas nếu scene chưa có (MapScene).
+/// Tạo QuestTrackerUnderMinimapUI trên Canvas nếu scene chưa có (Chapter5_MapBattle).
 /// Thay thế việc bắt buộc chạy Tools/Quest System/6 thủ công mỗi lần.
 /// </summary>
 public static class QuestMapUIEnsurer
@@ -79,6 +79,6 @@ public static class QuestMapUIEnsurer
         tracker.showWhenNoQuest = true;
 
         tracker.RefreshUI();
-        Debug.Log("[QuestUI] Đã tạo QuestTrackerUnderMinimapUI trên MapScene.");
+        Debug.Log("[QuestUI] Đã tạo QuestTrackerUnderMinimapUI trên Chapter5_MapBattle.");
     }
 }

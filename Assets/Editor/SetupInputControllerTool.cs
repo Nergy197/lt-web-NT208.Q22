@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SetupInputControllerTool : EditorWindow
 {
-    [MenuItem("Tools/Setup InputController for MapScene")]
+    [MenuItem("Tools/Setup InputController for Chapter5_MapBattle")]
     public static void AddInputControllerToScene()
     {
         // Kiểm tra xem đã có InputController trong scene chưa
@@ -21,11 +21,11 @@ public class SetupInputControllerTool : EditorWindow
         // Thêm script InputController
         icObj.AddComponent<InputController>();
 
-        // Thêm MapSceneBootstrap nếu chưa có
-        if (FindFirstObjectByType<MapSceneBootstrap>() == null)
+        // Thêm Chapter5_MapBattleBootstrap nếu chưa có
+        if (FindFirstObjectByType<Chapter5_MapBattleBootstrap>() == null)
         {
             GameObject bootstrapObj = new GameObject("Bootstrap");
-            bootstrapObj.AddComponent<MapSceneBootstrap>();
+            bootstrapObj.AddComponent<Chapter5_MapBattleBootstrap>();
             Undo.RegisterCreatedObjectUndo(bootstrapObj, "Create Bootstrap");
         }
 

@@ -6,14 +6,14 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Copy BattleScene → Chapter1_Tutorial, cấu hình BattleManager cho tutorial,
+/// Copy Chapter5a_Battle → Chapter2_Tutorial, cấu hình BattleManager cho tutorial,
 /// rồi thêm TutorialController + TutorialPromptUI.
 /// Menu: Tools/Tutorial/Setup Tutorial Scene
 /// </summary>
 public class TutorialSceneSetupHelper : EditorWindow
 {
-    const string BATTLE_SCENE   = "Assets/Scenes/BattleScene.unity";
-    const string TUTORIAL_SCENE = "Assets/Scenes/Chapter1_Tutorial.unity";
+    const string BATTLE_SCENE   = "Assets/Scenes/Chapter5a_Battle.unity";
+    const string TUTORIAL_SCENE = "Assets/Scenes/Chapter2_Tutorial.unity";
     const string PLAYER_DATA    = "Assets/Data/Characters/Data_TranQuocTuan.asset";
     const string ENEMY_ATTACK   = "Assets/Data/Tutorial/TutorialEnemyAttack.asset";
     const string ENEMY_PREFAB   = "Assets/Prefabs/BinhLinh_Combat.prefab";
@@ -32,9 +32,9 @@ public class TutorialSceneSetupHelper : EditorWindow
         EditorGUILayout.LabelField("Tutorial Scene Setup", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
             "Tool này sẽ:\n" +
-            "1. Copy nguyên bản BattleScene → Chapter1_Tutorial (xóa bản cũ).\n" +
+            "1. Copy nguyên bản Chapter5a_Battle → Chapter2_Tutorial (xóa bản cũ).\n" +
             "2. Gán BattleManager: BinhLinh_Combat, TutorialEnemyAttack, TranQuocTuan data.\n" +
-            "3. Xóa BattleSceneBootstrap.debugMapData (buộc dùng demo mode).\n" +
+            "3. Xóa Chapter5a_BattleBootstrap.debugMapData (buộc dùng demo mode).\n" +
             "4. Thêm Tutorial root object với TutorialController.\n" +
             "5. Thêm TutorialPromptPanel vào canvas, wire TutorialPromptUI.",
             MessageType.Info);
@@ -56,10 +56,10 @@ public class TutorialSceneSetupHelper : EditorWindow
         }
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-        // ── 1. Copy BattleScene → Tutorial ───────────────────────────────────
+        // ── 1. Copy Chapter5a_Battle → Tutorial ───────────────────────────────────
         File.Copy(BATTLE_SCENE, TUTORIAL_SCENE, overwrite: true);
         AssetDatabase.Refresh();
-        Log("Copy BattleScene → Chapter1_Tutorial.");
+        Log("Copy Chapter5a_Battle → Chapter2_Tutorial.");
 
         var scene = EditorSceneManager.OpenScene(TUTORIAL_SCENE, OpenSceneMode.Single);
         if (!scene.IsValid())
@@ -86,15 +86,15 @@ public class TutorialSceneSetupHelper : EditorWindow
         EditorUtility.SetDirty(bm);
         Log("BattleManager đã được cấu hình.");
 
-        // ── 3. BattleSceneBootstrap: xóa debugMapData ────────────────────────
-        var bootstrap = Object.FindFirstObjectByType<BattleSceneBootstrap>();
+        // ── 3. Chapter5a_BattleBootstrap: xóa debugMapData ────────────────────────
+        var bootstrap = Object.FindFirstObjectByType<Chapter5a_BattleBootstrap>();
         if (bootstrap != null)
         {
             var bsSO = new SerializedObject(bootstrap);
             bsSO.FindProperty("debugMapData").objectReferenceValue = null;
             bsSO.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(bootstrap);
-            Log("BattleSceneBootstrap.debugMapData = null (dùng demo mode).");
+            Log("Chapter5a_BattleBootstrap.debugMapData = null (dùng demo mode).");
         }
 
         // ── 4. Tìm BattleUI_Canvas ────────────────────────────────────────────
@@ -171,7 +171,7 @@ public class TutorialSceneSetupHelper : EditorWindow
         Log("Scene đã lưu.");
 
         EditorUtility.DisplayDialog("Hoàn tất",
-            "Chapter1_Tutorial đã được setup từ BattleScene!\n\n" +
+            "Chapter2_Tutorial đã được setup từ Chapter5a_Battle!\n\n" +
             "✓ BattleManager: BinhLinh + TutorialEnemyAttack + TranQuocTuan\n" +
             "✓ TutorialController + TutorialPromptUI đã wire\n" +
             "✓ Demo mode bật (không cần MapManager)",

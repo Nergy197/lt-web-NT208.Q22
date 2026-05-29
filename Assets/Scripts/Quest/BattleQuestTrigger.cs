@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gắn vào GameObject trong BattleScene để kích hoạt quest actions khi trận đấu kết thúc.
+/// Gắn vào GameObject trong Chapter5a_Battle để kích hoạt quest actions khi trận đấu kết thúc.
 /// Thay thế cho việc hardcode quest objectives trong BattleManager.
 ///
 /// Setup:
-///   1. Gắn script này vào một GameObject trong BattleScene
+///   1. Gắn script này vào một GameObject trong Chapter5a_Battle
 ///   2. Kéo QuestSO và cấu hình actions trong Inspector
 ///   3. Chọn TriggerOn = OnBattleWin hoặc OnBattleLoss
 /// </summary>

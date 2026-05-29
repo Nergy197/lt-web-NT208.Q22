@@ -9,13 +9,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// Rebuild toàn bộ BattleScene từ một scene trống.
+/// Rebuild toàn bộ Chapter5a_Battle từ một scene trống.
 /// Menu: Tools/Battle/Rebuild Battle Scene
 /// </summary>
-public class BattleSceneRebuildTool : EditorWindow
+public class Chapter5a_BattleRebuildTool : EditorWindow
 {
-    const string BATTLE_SCENE      = "Assets/Scenes/BattleScene.unity";
-    const string TUTORIAL_SCENE    = "Assets/Scenes/Chapter1_Tutorial.unity";
+    const string BATTLE_SCENE      = "Assets/Scenes/Chapter5a_Battle.unity";
+    const string TUTORIAL_SCENE    = "Assets/Scenes/Chapter2_Tutorial.unity";
     const string DAMAGE_POPUP_PATH = "Assets/Prefabs/UI/DamagePopup.prefab";
 
     const string GRP_SYSTEMS    = "[Systems]";
@@ -35,7 +35,7 @@ public class BattleSceneRebuildTool : EditorWindow
     [MenuItem("Tools/Battle/Rebuild Battle Scene")]
     public static void Open()
     {
-        var w = GetWindow<BattleSceneRebuildTool>("Rebuild Battle Scene");
+        var w = GetWindow<Chapter5a_BattleRebuildTool>("Rebuild Battle Scene");
         w.minSize = new Vector2(440, 400);
         w.Show();
     }
@@ -44,22 +44,22 @@ public class BattleSceneRebuildTool : EditorWindow
     {
         EditorGUILayout.LabelField("Rebuild Battle Scene", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Tạo lại BattleScene hoàn chỉnh:\n" +
+            "Tạo lại Chapter5a_Battle hoàn chỉnh:\n" +
             "  1. Dọn sạch Canvas/Tutorial cũ\n" +
-            "  2. Copy Canvas UI từ Chapter1_Tutorial\n" +
+            "  2. Copy Canvas UI từ Chapter2_Tutorial\n" +
             "     (background tự load từ MapData lúc runtime)\n" +
             "  3. Tạo HUD mới (Slider) + wire toàn bộ BattleUI\n" +
             "  4. Tạo spawn anchors + TargetCursor → wire BattleManager\n" +
-            "  5. Tạo BattleRunner, BattleSceneBootstrap,\n" +
+            "  5. Tạo BattleRunner, Chapter5a_BattleBootstrap,\n" +
             "     BattleBackgroundController, BattleDebugUI,\n" +
             "     EventSystem, Camera\n" +
             "  6. Tổ chức hierarchy\n\n" +
-            "Mở BattleScene trước, hoặc tool tự mở.",
+            "Mở Chapter5a_Battle trước, hoặc tool tự mở.",
             MessageType.Info);
 
         EditorGUILayout.Space(6);
         optCleanup      = EditorGUILayout.Toggle("1. Dọn rác cũ",                                 optCleanup);
-        optCopyUI       = EditorGUILayout.Toggle("2. Copy Canvas UI từ Chapter1_Tutorial",         optCopyUI);
+        optCopyUI       = EditorGUILayout.Toggle("2. Copy Canvas UI từ Chapter2_Tutorial",         optCopyUI);
         optWireUI       = EditorGUILayout.Toggle("3. Tạo HUD + wire BattleUI",                    optWireUI);
         EditorGUILayout.HelpBox(
             "   HUD player/enemy tạo mới hoàn toàn — data nạp runtime từ MapData.",
@@ -83,8 +83,8 @@ public class BattleSceneRebuildTool : EditorWindow
     {
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-        Scene battle = EnsureBattleSceneOpen();
-        if (!battle.IsValid()) { Debug.LogError("[Rebuild] Không mở được BattleScene."); return; }
+        Scene battle = EnsureChapter5a_BattleOpen();
+        if (!battle.IsValid()) { Debug.LogError("[Rebuild] Không mở được Chapter5a_Battle."); return; }
 
         // ── 1. Dọn ──────────────────────────────────────────────────────────
         if (optCleanup)
@@ -159,9 +159,9 @@ public class BattleSceneRebuildTool : EditorWindow
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog("Hoàn tất",
-            "BattleScene đã được rebuild!\n\n" +
+            "Chapter5a_Battle đã được rebuild!\n\n" +
             "Việc còn lại:\n" +
-            "• BattleSceneBootstrap → gán debugMapData (MapData asset)\n" +
+            "• Chapter5a_BattleBootstrap → gán debugMapData (MapData asset)\n" +
             "• BattleManager → gán debug prefabs nếu muốn demo mode\n" +
             "• BattleBackgroundController → gán defaultBackgroundPrefab\n" +
             "• Kiểm tra BattleUI Inspector — field nào còn None cần wire thủ công",
@@ -180,7 +180,7 @@ public class BattleSceneRebuildTool : EditorWindow
 
             // Xoá tutorial junk
             if (root.name.StartsWith("TutorialCopy_") ||
-                root.name == "Chapter1_Tutorial")
+                root.name == "Chapter2_Tutorial")
             {
                 Undo.DestroyObjectImmediate(root);
                 continue;
@@ -822,12 +822,12 @@ public class BattleSceneRebuildTool : EditorWindow
 
     static void EnsureBootstrap(Scene scene)
     {
-        if (Object.FindFirstObjectByType<BattleSceneBootstrap>() != null) return;
-        var go = new GameObject("BattleSceneBootstrap");
-        go.AddComponent<BattleSceneBootstrap>();
+        if (Object.FindFirstObjectByType<Chapter5a_BattleBootstrap>() != null) return;
+        var go = new GameObject("Chapter5a_BattleBootstrap");
+        go.AddComponent<Chapter5a_BattleBootstrap>();
         SceneManager.MoveGameObjectToScene(go, scene);
         Undo.RegisterCreatedObjectUndo(go, "Create Bootstrap");
-        Debug.Log("[Rebuild] Tạo BattleSceneBootstrap — nhớ gán debugMapData.");
+        Debug.Log("[Rebuild] Tạo Chapter5a_BattleBootstrap — nhớ gán debugMapData.");
     }
 
     static void EnsureBackgroundController(Scene scene)
@@ -907,7 +907,7 @@ public class BattleSceneRebuildTool : EditorWindow
         if (go.GetComponent<EventSystem>() != null) return ui;
 
         if (HasType(go, typeof(BattleManager), typeof(BattleRunner),
-                        typeof(BattleSceneBootstrap), typeof(MapManager),
+                        typeof(Chapter5a_BattleBootstrap), typeof(MapManager),
                         typeof(GameManager), typeof(InputController),
                         typeof(QuestManager), typeof(BattleBackgroundController)))
             return sys;
@@ -1000,7 +1000,7 @@ public class BattleSceneRebuildTool : EditorWindow
         return false;
     }
 
-    static Scene EnsureBattleSceneOpen()
+    static Scene EnsureChapter5a_BattleOpen()
     {
         var active = SceneManager.GetActiveScene();
         if (active.path == BATTLE_SCENE) return active;

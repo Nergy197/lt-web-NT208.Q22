@@ -1,13 +1,13 @@
 using UnityEngine;
 
 /// <summary>
-/// Bootstrapper cho MapScene — khởi động các singleton cần thiết
-/// khi test trực tiếp từ MapScene (không đi qua StartScene).
-/// Gắn vào một GameObject rỗng tên "Bootstrap" trong MapScene.
+/// Bootstrapper cho Chapter5_MapBattle — khởi động các singleton cần thiết
+/// khi test trực tiếp từ Chapter5_MapBattle (không đi qua StartScene).
+/// Gắn vào một GameObject rỗng tên "Bootstrap" trong Chapter5_MapBattle.
 /// </summary>
-public class MapSceneBootstrap : MonoBehaviour
+public class Chapter5_MapBattleBootstrap : MonoBehaviour
 {
-    [Header("Chỉ dùng khi test trực tiếp MapScene")]
+    [Header("Chỉ dùng khi test trực tiếp Chapter5_MapBattle")]
     [Tooltip("Kéo QuestManager prefab/GameObject vào đây")]
     public QuestManager questManagerPrefab;
 

@@ -1,32 +1,32 @@
 using UnityEngine;
 
 /// <summary>
-/// Quản lý background cho BattleScene tại runtime.
+/// Quản lý background cho Chapter5a_Battle tại runtime.
 ///
 /// Hành vi:
 /// - Nếu <see cref="MapManager.Instance.currentMap.battleBackgroundPrefab"/> được set,
 ///   instantiate prefab đó dưới <see cref="backgroundParent"/>.
 /// - Nếu null hoặc MapManager không tồn tại, fallback về <see cref="defaultBackgroundPrefab"/>
-///   (gán trong Inspector — thường là background copy từ Chapter1_Tutorial).
-/// - Nếu BattleScene đã có sẵn background baked (ví dụ TutorialCopy_* root từ
+///   (gán trong Inspector — thường là background copy từ Chapter2_Tutorial).
+/// - Nếu Chapter5a_Battle đã có sẵn background baked (ví dụ TutorialCopy_* root từ
 ///   editor tool), giữ nguyên nếu <see cref="preserveSceneBaked"/> bật và không
 ///   có prefab nào để spawn.
 ///
-/// Gắn component này vào một GameObject trống trong BattleScene (ví dụ
+/// Gắn component này vào một GameObject trống trong Chapter5a_Battle (ví dụ
 /// "BattleBackground" parent ở root). Sau này khi map data có prefab riêng,
-/// background sẽ tự đổi mà không cần chỉnh BattleScene.
+/// background sẽ tự đổi mà không cần chỉnh Chapter5a_Battle.
 /// </summary>
 public class BattleBackgroundController : MonoBehaviour
 {
     [Header("Background Source")]
     [Tooltip("Prefab fallback khi map data chưa có battleBackgroundPrefab.\n" +
-             "Tạm thời dùng prefab dựng từ visual roots của Chapter1_Tutorial.")]
+             "Tạm thời dùng prefab dựng từ visual roots của Chapter2_Tutorial.")]
     [SerializeField] private GameObject defaultBackgroundPrefab;
 
     [Tooltip("Parent để chứa background instance. Để null sẽ dùng chính transform của component này.")]
     [SerializeField] private Transform backgroundParent;
 
-    [Tooltip("Nếu BattleScene đã có background baked sẵn (ví dụ TutorialCopy_* root) " +
+    [Tooltip("Nếu Chapter5a_Battle đã có background baked sẵn (ví dụ TutorialCopy_* root) " +
              "và không có prefab nào cấu hình, giữ nguyên thay vì xoá.")]
     [SerializeField] private bool preserveSceneBaked = true;
 

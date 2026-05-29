@@ -141,8 +141,8 @@ public class MapManager : MonoBehaviour
         if (playerObj != null && GameManager.Instance != null)
             GameManager.Instance.SetLastMapPosition(playerObj.transform.position);
 
-        Debug.Log($"[MapManager] → BattleScene | {currentEnemies.Count} enemy | lv={EffectiveBattleLevel} | map='{currentMap?.mapName ?? "none"}'");
-        SceneManager.LoadScene("BattleScene");
+        Debug.Log($"[MapManager] → Chapter5a_Battle | {currentEnemies.Count} enemy | lv={EffectiveBattleLevel} | map='{currentMap?.mapName ?? "none"}'");
+        SceneManager.LoadScene("Chapter5a_Battle");
     }
 
     public void EndBattle(bool playerWon = true)
@@ -158,7 +158,7 @@ public class MapManager : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene("MapScene");
+            SceneManager.LoadScene("Chapter5_MapBattle");
         }
     }
 
@@ -166,8 +166,8 @@ public class MapManager : MonoBehaviour
     {
         isInBattle = false;
         currentEnemies.Clear();
-        Debug.Log("[MapManager] Abandon battle -> MapScene");
-        SceneManager.LoadScene("MapScene");
+        Debug.Log("[MapManager] Abandon battle -> Chapter5_MapBattle");
+        SceneManager.LoadScene("Chapter5_MapBattle");
     }
 
     public void ApplyPlayerEffects(PlayerStatus player)

@@ -172,12 +172,12 @@ public class GameManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Auto-save mỗi khi vào MapScene (sau trận, sau cutscene, v.v.)
+        // Auto-save mỗi khi vào Chapter5_MapBattle (sau trận, sau cutscene, v.v.)
         // Đây là autosave đáng tin cậy nhất cho WebGL (OnApplicationQuit không chạy khi đóng tab)
-        if (scene.name == "MapScene" && isLoaded)
+        if (scene.name == "Chapter5_MapBattle" && isLoaded)
         {
             QuickSaveToLocal();
-            Debug.Log("[GM] Auto-save khi vào MapScene.");
+            Debug.Log("[GM] Auto-save khi vào Chapter5_MapBattle.");
         }
     }
 
@@ -219,7 +219,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // Tránh tự động Load Slot 0 khi đang ở Menu Chính (Menu sẽ tự gọi LoadAndStartGame sau)
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "StartScene")
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Chapter0_Login")
         {
             StartCoroutine(LoadPlayerParty());
         }
@@ -311,7 +311,7 @@ public class GameManager : MonoBehaviour
         isLoaded = true;
         Debug.Log("PLAYER READY");
 
-        // Quest: chỉ load progress — Q001 start sau Chapter1_Tutorial (TryStartChapter1Quests)
+        // Quest: chỉ load progress — Q001 start sau Chapter2_Tutorial (TryStartChapter1Quests)
         var qm = questManager != null ? questManager : QuestManager.Instance;
         if (qm != null && !qm.HasAnyProgress())
             qm.LoadProgress();
@@ -426,7 +426,7 @@ public class GameManager : MonoBehaviour
 
     /// <summary>
     /// Đảm bảo playerDatabase có đủ PlayerData (Hero, v.v.).
-    /// Cần khi test MapScene trực tiếp — bootstrap tạo GameManager trống.
+    /// Cần khi test Chapter5_MapBattle trực tiếp — bootstrap tạo GameManager trống.
     /// </summary>
     public void EnsurePlayerDatabase()
     {
@@ -517,7 +517,7 @@ public class GameManager : MonoBehaviour
         if (!tutorialDone && !hasSaveScene)
         {
             Debug.Log("[GameManager] → Chapter0_Introduction (tutorial chưa hoàn thành, không có save point)");
-            SceneManager.LoadScene("Chapter0_Introduction");
+            SceneManager.LoadScene("Chapter1_Introduction");
             return;
         }
 
@@ -528,8 +528,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[GameManager] → MapScene (tutorial done nhưng không có save point)");
-            SceneManager.LoadScene("MapScene");
+            Debug.Log("[GameManager] → Chapter5_MapBattle (tutorial done nhưng không có save point)");
+            SceneManager.LoadScene("Chapter5_MapBattle");
         }
     }
 
@@ -592,8 +592,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[GM] No save point found, respawn at MapScene default.");
-            SceneManager.LoadScene("MapScene");
+            Debug.Log("[GM] No save point found, respawn at Chapter5_MapBattle default.");
+            SceneManager.LoadScene("Chapter5_MapBattle");
         }
     }
 

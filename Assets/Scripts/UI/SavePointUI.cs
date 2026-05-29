@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Panel UI xuất hiện khi player bước vào SavePoint.
-/// Kéo thả Panel GameObject trong BattleScene Canvas vào Inspector.
+/// Kéo thả Panel GameObject trong Chapter5a_Battle Canvas vào Inspector.
 /// </summary>
 public class SavePointUI : MonoBehaviour
 {

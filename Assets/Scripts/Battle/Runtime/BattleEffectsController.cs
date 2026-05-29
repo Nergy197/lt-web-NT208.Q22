@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Holder cho sound effects và hiệu ứng battle.
-/// Kéo component này vào một GameObject trong BattleScene,
+/// Kéo component này vào một GameObject trong Chapter5a_Battle,
 /// sau đó gán AudioClip / AudioSource tương ứng khi có asset.
 /// </summary>
 public class BattleEffectsController : MonoBehaviour

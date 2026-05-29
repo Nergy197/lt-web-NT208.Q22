@@ -63,7 +63,7 @@ public class QuestManager : MonoBehaviour
     public bool HasAnyProgress() =>
         ActiveQuests.Count > 0 || CompletedQuests.Count > 0;
 
-    /// <summary>Start Q001+ sau Chapter1_Tutorial; bỏ qua nếu đã có progress hoặc chưa xong tutorial.</summary>
+    /// <summary>Start Q001+ sau Chapter2_Tutorial; bỏ qua nếu đã có progress hoặc chưa xong tutorial.</summary>
     public void TryStartChapter1Quests()
     {
         if (HasAnyProgress())
