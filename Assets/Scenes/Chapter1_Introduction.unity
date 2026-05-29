@@ -154,7 +154,7 @@ MonoBehaviour:
   tocDoFadeAnh: 1
   tocDoFadeChu: 0.5
   thoiGianNghi: 3
-  tenSceneTiepTheo: Chapter1_Tutorial
+  tenSceneTiepTheo: Chapter2_Tutorial
   danhSachAnh:
   - {fileID: 7028616704906629411, guid: c355d7fa3a2563346b03e7a5b5d5c547, type: 3}
   - {fileID: 8288426215254106694, guid: dc24c7f96456e8b49a87461b72266d98, type: 3}

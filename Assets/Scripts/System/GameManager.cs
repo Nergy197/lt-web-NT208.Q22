@@ -506,6 +506,11 @@ public class GameManager : MonoBehaviour
         // Bật cảnh báo trình duyệt khi đang chơi game
         ActivateBrowserWarning();
 
+        // Reset về Map mode trước khi load scene — tránh mobile UI bị kẹt ở
+        // InputMode.UI (set khi BackToMainMenu) và không bao giờ reset nếu
+        // BattleManager khởi tạo chậm hoặc lỗi ở lần chơi thứ hai.
+        InputController.Instance?.SetMode(InputMode.Map);
+
         bool tutorialDone = IsChapter1TutorialCompleted();
         bool hasSaveScene  = !string.IsNullOrEmpty(pendingSaveScene);
 

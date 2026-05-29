@@ -8208,7 +8208,7 @@ MonoBehaviour:
   diemCanhGiuong: {fileID: 2130806401}
   khoangCachTuongTac: 6
   khungThoaiUI: {fileID: 932938606}
-  nextScene: MapScene
+  nextScene: Chapter5_MapBattle
   delayBeforeLoad: 1
 --- !u!1 &1986665956
 GameObject:

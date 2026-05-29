@@ -7359,7 +7359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialController
   promptUI: {fileID: 96359822}
-  nextScene: Chapter1_CutScene
+  nextScene: Chapter3_FatherWill
   delayAfterComplete: 2
 --- !u!4 &2140941080
 Transform:
