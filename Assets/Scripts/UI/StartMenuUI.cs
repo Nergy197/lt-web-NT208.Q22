@@ -43,6 +43,11 @@ public class StartMenuUI : MonoBehaviour
 
     void Start()
     {
+        // Đảm bảo Input System và TimeScale sạch khi vào menu
+        // (có thể bị kẹt nếu BackToMainMenu từ Pause trong gameplay)
+        Time.timeScale = 1f;
+        InputController.Instance?.SetMode(InputMode.Map);
+
         // Gắn sự kiện nút cơ bản
         if (startGameButton != null)  startGameButton.onClick.AddListener(OnStartGameClicked);
         if (quitButton != null)       quitButton.onClick.AddListener(OnQuitClicked);

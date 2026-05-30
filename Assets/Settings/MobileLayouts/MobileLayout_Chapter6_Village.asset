@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 151ebd45eeb094dae98b76886b531d91, type: 3}
+  m_Name: MobileLayout_Chapter6_Village
+  m_EditorClassIdentifier: Assembly-CSharp::MobileSceneLayout
+  referenceResolution: {x: 1920, y: 1080}
+  matchWidthOrHeight: 0.5
+  elements:
+  - path: MapPanel/JoystickBackground
+    anchorMin: {x: 0, y: 0}
+    anchorMax: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: 170, y: 170}
+    size: {x: 300, y: 300}
+    active: 1
+  - path: MapPanel/JoystickBackground/JoystickHandle
+    anchorMin: {x: 0.5, y: 0.5}
+    anchorMax: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: 0, y: 0}
+    size: {x: 150, y: 150}
+    active: 1
+  - path: PauseButton
+    anchorMin: {x: 0.5, y: 0.5}
+    anchorMax: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: 585, y: 416.5}
+    size: {x: 147.988, y: 125.188}
+    active: 1
+  - path: InteractButton
+    anchorMin: {x: 1, y: 0}
+    anchorMax: {x: 1, y: 0}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: -180, y: 180}
+    size: {x: 200, y: 200}
+    active: 0
+  - path: BattleBackButton
+    anchorMin: {x: 0.5, y: 0.5}
+    anchorMax: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: -66, y: -11}
+    size: {x: 160, y: 60}
+    active: 0
+  - path: BattleConfirmButton
+    anchorMin: {x: 0.5, y: 0.5}
+    anchorMax: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: -67, y: -76}
+    size: {x: 160, y: 60}
+    active: 0
+  - path: BattleParryButton
+    anchorMin: {x: 0.5, y: 0.5}
+    anchorMax: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0.5}
+    position: {x: 662, y: -299}
+    size: {x: 200, y: 200}
+    active: 0

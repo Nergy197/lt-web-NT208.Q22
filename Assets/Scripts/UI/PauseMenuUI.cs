@@ -132,8 +132,10 @@ public class PauseMenuUI : MonoBehaviour
         if (pausePanel != null)
             pausePanel.SetActive(false);
 
+        // Giữ Map mode (không dùng UI) để InputSystemUIInputModule
+        // vẫn nhận pointer events khi Chapter0_Login load xong.
         if (InputController.Instance != null)
-            InputController.Instance.SetMode(InputMode.UI);
+            InputController.Instance.SetMode(InputMode.Map);
 
         SceneManager.LoadScene("Chapter0_Login");
     }

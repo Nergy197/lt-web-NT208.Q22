@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 /// <summary>
 /// Overlay mobile: joystick di chuyển + các nút battle.
@@ -30,6 +31,12 @@ public class MobileInputUI : MonoBehaviour
     [Header("Map – Joystick & Interact")]
     [SerializeField] private VirtualJoystick joystick;
     [SerializeField] private Button interactButton;
+
+    [Header("Scene Layout Presets")]
+    [Tooltip("Thư mục chứa preset layout per-scene (trong Resources). Để trống để dùng layout prefab cố định.")]
+    [SerializeField] private string layoutPresetFolder = "MobileLayouts";
+    [Tooltip("Tự động load preset layout tương ứng với scene đang active.")]
+    [SerializeField] private bool autoApplySceneLayout = true;
 
     [Header("Settings")]
     [Tooltip("Bật để test giao diện mobile ngay trong Editor")]
@@ -66,12 +73,16 @@ public class MobileInputUI : MonoBehaviour
     }
 #endif
 
+    // Cache preset per scene name để tránh load lại mỗi frame
+    readonly Dictionary<string, MobileSceneLayout> _presetCache = new();
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     void Start()
@@ -96,12 +107,79 @@ public class MobileInputUI : MonoBehaviour
 
         BattleEvents.OnEnemyAttackAnnounced += OnEnemyAttackAnnounced;
         BattleEvents.OnAttackFinished        += OnAttackFinished;
+
+        // Tắt Canvas/GR ngay nếu scene hiện tại không cần mobile UI
+        SetCanvasActive(!ShouldHideGameplayOverlay());
     }
 
     void OnDestroy()
     {
         BattleEvents.OnEnemyAttackAnnounced -= OnEnemyAttackAnnounced;
         BattleEvents.OnAttackFinished        -= OnAttackFinished;
+        SceneManager.sceneLoaded            -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        bool excluded = scene.name == "Chapter0_Login" || scene.name == "Chapter1_Introduction";
+        // Tắt hoàn toàn Canvas + GraphicRaycaster ở scene không dùng mobile UI
+        // để tránh block input của scene đó.
+        SetCanvasActive(!excluded);
+
+        if (!excluded && autoApplySceneLayout)
+            ApplySceneLayoutPreset(scene.name);
+    }
+
+    void SetCanvasActive(bool active)
+    {
+        var canvas = GetComponent<Canvas>();
+        if (canvas) canvas.enabled = active;
+        var gr = GetComponent<GraphicRaycaster>();
+        if (gr) gr.enabled = active;
+    }
+
+    // ── Per-scene layout preset ───────────────────────────────────────────────
+
+    void ApplySceneLayoutPreset(string sceneName)
+    {
+        if (!_presetCache.TryGetValue(sceneName, out var preset))
+        {
+            // Load từ Resources/MobileLayouts/MobileLayout_<SceneName>
+            string resPath = string.IsNullOrEmpty(layoutPresetFolder)
+                ? $"MobileLayout_{sceneName}"
+                : $"{layoutPresetFolder}/MobileLayout_{sceneName}";
+            preset = Resources.Load<MobileSceneLayout>(resPath);
+            _presetCache[sceneName] = preset; // null cũng cache để không load lại
+        }
+
+        if (preset == null) return;
+
+        // Apply CanvasScaler
+        var scaler = GetComponent<CanvasScaler>();
+        if (scaler != null)
+        {
+            scaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(preset.referenceResolution.x, preset.referenceResolution.y);
+            scaler.matchWidthOrHeight  = preset.matchWidthOrHeight;
+        }
+
+        // Apply từng element
+        foreach (var el in preset.elements)
+        {
+            var t = el.path == "" ? transform : transform.Find(el.path);
+            if (t == null) continue;
+
+            t.gameObject.SetActive(el.active);
+
+            var rt = t.GetComponent<RectTransform>();
+            if (rt == null) continue;
+
+            rt.anchorMin        = el.anchorMin;
+            rt.anchorMax        = el.anchorMax;
+            rt.pivot            = el.pivot;
+            rt.anchoredPosition = el.position;
+            rt.sizeDelta        = el.size;
+        }
     }
 
     void OnEnemyAttackAnnounced(EnemyAttackData attack, EnemyStatus enemy, PlayerStatus target)

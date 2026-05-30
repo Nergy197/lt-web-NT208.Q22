@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
@@ -35,6 +36,14 @@ public class QuestUI : MonoBehaviour
     [Tooltip("Container chứa các nút branch")]
     public Transform branchButtonContainer;
 
+    // ─── Scene exclusion ─────────────────────────────────────────────────
+
+    static readonly HashSet<string> HIDDEN_IN_SCENES = new()
+        { "Chapter0_Login", "Chapter5a_Battle" };
+
+    bool IsExcludedScene() =>
+        HIDDEN_IN_SCENES.Contains(SceneManager.GetActiveScene().name);
+
     // ─── Runtime ─────────────────────────────────────────────────────────
 
     string _currentQuestId;
@@ -44,13 +53,18 @@ public class QuestUI : MonoBehaviour
 
     void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         QuestEvents.OnQuestStarted       += OnQuestStarted;
         QuestEvents.OnObjectiveCompleted += OnObjectiveCompleted;
         QuestEvents.OnQuestCompleted     += OnQuestCompleted;
+
+        if (IsExcludedScene())
+            HideAll();
     }
 
     void OnDisable()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         QuestEvents.OnQuestStarted       -= OnQuestStarted;
         QuestEvents.OnObjectiveCompleted -= OnObjectiveCompleted;
         QuestEvents.OnQuestCompleted     -= OnQuestCompleted;
@@ -58,6 +72,19 @@ public class QuestUI : MonoBehaviour
         // Đảm bảo Time.timeScale được restore nếu branch panel đang mở khi scene chuyển
         if (Time.timeScale == 0f)
             Time.timeScale = 1f;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (HIDDEN_IN_SCENES.Contains(scene.name))
+            HideAll();
+    }
+
+    void HideAll()
+    {
+        SetQuestPanelVisible(false);
+        if (branchPanel != null) branchPanel.SetActive(false);
+        if (Time.timeScale == 0f) Time.timeScale = 1f;
     }
 
     // ─── Event handlers ──────────────────────────────────────────────────

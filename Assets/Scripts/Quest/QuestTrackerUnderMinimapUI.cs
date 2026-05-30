@@ -1,9 +1,17 @@
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class QuestTrackerUnderMinimapUI : MonoBehaviour
 {
+    static readonly HashSet<string> HIDDEN_IN_SCENES = new()
+        { "Chapter0_Login", "Chapter5a_Battle" };
+
+    bool IsExcludedScene() =>
+        HIDDEN_IN_SCENES.Contains(SceneManager.GetActiveScene().name);
+
     [Header("UI Refs")]
     public GameObject panel;
     public TMP_Text questTitleText;
@@ -16,17 +24,32 @@ public class QuestTrackerUnderMinimapUI : MonoBehaviour
 
     void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         QuestEvents.OnQuestStarted += OnQuestChanged;
         QuestEvents.OnObjectiveCompleted += OnObjectiveCompleted;
         QuestEvents.OnQuestCompleted += OnQuestChanged;
-        RefreshUI();
+
+        // Kiểm tra ngay scene hiện tại (kể cả khi object đã DontDestroyOnLoad)
+        if (IsExcludedScene())
+            SetVisible(false);
+        else
+            RefreshUI();
     }
 
     void OnDisable()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         QuestEvents.OnQuestStarted -= OnQuestChanged;
         QuestEvents.OnObjectiveCompleted -= OnObjectiveCompleted;
         QuestEvents.OnQuestCompleted -= OnQuestChanged;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (HIDDEN_IN_SCENES.Contains(scene.name))
+            SetVisible(false);
+        else
+            RefreshUI();
     }
 
     private void OnQuestChanged(QuestSO _) => RefreshUI();
