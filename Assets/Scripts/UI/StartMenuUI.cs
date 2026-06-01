@@ -191,6 +191,7 @@ public class StartMenuUI : MonoBehaviour
 
     void PopulateSaveSlots()
     {
+        if (GameManager.Instance == null) return;
         PlayerSave[] slots = GameManager.Instance.GetAllSaveSlotsMetadata();
 
         foreach (Transform child in slotsContainer) Destroy(child.gameObject);
