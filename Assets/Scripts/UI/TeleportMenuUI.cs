@@ -209,6 +209,7 @@ public class TeleportMenuUI : MonoBehaviour
         }
 
         panel.SetActive(true);
+        SFXManager.Instance?.PlayPanelOpen();
         InputController.Instance?.SetMode(InputMode.UI);
 
         Debug.Log($"[TeleportMenuUI] Mở pillar menu: {(sourcePillar != null ? sourcePillar.pillarName : "?")} ({destinations?.Count ?? 0} trụ)");
@@ -288,6 +289,7 @@ public class TeleportMenuUI : MonoBehaviour
 
         // Mở panel + chặn di chuyển
         panel.SetActive(true);
+        SFXManager.Instance?.PlayPanelOpen();
         InputController.Instance?.SetMode(InputMode.UI);
 
         Debug.Log($"[TeleportMenuUI] Mở map menu từ trụ: {(sourcePillar != null ? sourcePillar.pillarName : "?")} ({mapCount} map)");
@@ -297,6 +299,8 @@ public class TeleportMenuUI : MonoBehaviour
 
     public void Close()
     {
+        SFXManager.Instance?.PlayPanelClose();
+
         if (panel != null) panel.SetActive(false);
         ClearButtons();
         currentPillar = null;

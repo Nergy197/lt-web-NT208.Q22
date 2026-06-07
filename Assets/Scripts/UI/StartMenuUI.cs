@@ -109,6 +109,8 @@ public class StartMenuUI : MonoBehaviour
     void OnOpenTransferPanel()
     {
         if (transferCodePanel == null) return;
+
+        SFXManager.Instance?.PlayPanelOpen();
         transferCodePanel.SetActive(true);
 
         if (currentIdLabel != null && GameManager.Instance != null)
@@ -140,6 +142,8 @@ public class StartMenuUI : MonoBehaviour
 
     void OnCloseTransferPanel()
     {
+        SFXManager.Instance?.PlayPanelClose();
+
         if (transferCodePanel != null) transferCodePanel.SetActive(false);
         if (saveSlotsPanel != null && saveSlotsPanel.activeSelf) PopulateSaveSlots();
     }
@@ -162,8 +166,12 @@ public class StartMenuUI : MonoBehaviour
 
     void OnStartGameClicked()
     {
+        SFXManager.Instance?.PlayButtonClick();
+
         mainMenuPanel.SetActive(false);
         saveSlotsPanel.SetActive(true);
+
+        SFXManager.Instance?.PlayPanelOpen();
 
         Transform titleObj = transform.Find("Title");
         if (titleObj != null) titleObj.gameObject.SetActive(false);
@@ -173,6 +181,8 @@ public class StartMenuUI : MonoBehaviour
 
     void OnCloseSlotsPanel()
     {
+        SFXManager.Instance?.PlayPanelClose();
+
         mainMenuPanel.SetActive(true);
         saveSlotsPanel.SetActive(false);
 

@@ -83,6 +83,8 @@ public class PauseMenuUI : MonoBehaviour
 
         Time.timeScale = 0f;
 
+        SFXManager.Instance?.PlayPanelOpen();
+
         if (pausePanel != null)
         {
             EnsurePausePanelOnTop();
@@ -100,6 +102,8 @@ public class PauseMenuUI : MonoBehaviour
         isPaused = false;
         IsPaused = false;
         Time.timeScale = 1f;
+
+        SFXManager.Instance?.PlayPanelClose();
 
         if (pausePanel != null)
             pausePanel.SetActive(false);

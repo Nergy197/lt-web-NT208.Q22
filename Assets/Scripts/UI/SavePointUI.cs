@@ -62,6 +62,9 @@ public class SavePointUI : MonoBehaviour
         currentPoint = point;
         panel.SetActive(true);
 
+        // SFX mở panel
+        SFXManager.Instance?.PlayPanelOpen();
+
         // Chặn di chuyển player khi menu đang mở
         InputController.Instance?.SetMode(InputMode.UI);
 
@@ -72,6 +75,9 @@ public class SavePointUI : MonoBehaviour
     public void OnClose()
     {
         panel?.SetActive(false);
+
+        // SFX đóng panel
+        SFXManager.Instance?.PlayPanelClose();
 
         // Trả lại quyền kiểm soát di chuyển
         InputController.Instance?.SetMode(InputMode.Map);
@@ -142,6 +148,9 @@ public class SavePointUI : MonoBehaviour
         // Lưu Save Point (hồi máu + lưu local + backup server) — CHỈ gọi 1 lần
         // SaveRoutine() bên trong đã tự gọi QuestManager.SaveProgress()
         GameManager.Instance.SaveAtPoint(currentPoint.pointId, sceneName);
+
+        // SFX lưu thành công
+        SFXManager.Instance?.PlaySaveSuccess();
 
         SetStatus("Đã lưu thành công!");
 
