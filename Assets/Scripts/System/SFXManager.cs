@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 /// <summary>
 /// Singleton SFX Manager — tồn tại xuyên suốt mọi scene.
@@ -6,6 +9,8 @@ using UnityEngine;
 ///
 /// Thiết kế tối giản: chỉ dùng 1 AudioSource pool nhỏ cho PlayOneShot,
 /// không có hệ thống phức tạp. Bạn tự chọn file âm thanh cho từng slot.
+///
+/// Tự động gắn click sound cho TẤT CẢ Button trong game (kể cả button tạo động).
 /// </summary>
 public class SFXManager : MonoBehaviour
 {
@@ -70,6 +75,9 @@ public class SFXManager : MonoBehaviour
 
     private AudioSource sfxSource;
 
+    // Theo dõi button đã hook để không gắn listener trùng
+    private readonly HashSet<int> hookedButtonIds = new HashSet<int>();
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -89,6 +97,52 @@ public class SFXManager : MonoBehaviour
 
         sfxSource.playOnAwake = false;
         sfxSource.spatialBlend = 0f; // 2D sound
+
+        // Hook scene loaded để gắn SFX cho button mới mỗi khi đổi scene
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        // Quét định kỳ để bắt button tạo động (save slots, teleport, v.v.)
+        InvokeRepeating(nameof(HookAllButtons), 0.5f, 1f);
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Clear danh sách vì button cũ đã bị destroy
+        hookedButtonIds.Clear();
+        HookAllButtons();
+    }
+
+    // =====================================================================
+    //  AUTO-HOOK BUTTON CLICK SFX
+    // =====================================================================
+
+    /// <summary>
+    /// Tìm tất cả Button trong scene (kể cả inactive) và gắn click SFX
+    /// nếu chưa được gắn. Gọi tự động khi scene load + mỗi 1 giây.
+    /// </summary>
+    void HookAllButtons()
+    {
+        if (buttonClick == null) return;
+
+        Button[] allButtons = Resources.FindObjectsOfTypeAll<Button>();
+        foreach (Button btn in allButtons)
+        {
+            if (btn == null) continue;
+
+            // Bỏ qua button nằm trong prefab (chưa được instantiate vào scene)
+            if (btn.gameObject.scene.name == null || !btn.gameObject.scene.isLoaded) continue;
+
+            int id = btn.GetInstanceID();
+            if (hookedButtonIds.Contains(id)) continue;
+
+            hookedButtonIds.Add(id);
+            btn.onClick.AddListener(PlayButtonClick);
+        }
     }
 
     void OnEnable()
@@ -144,7 +198,12 @@ public class SFXManager : MonoBehaviour
     void OnBattleWin(object _)   => Play(battleWin);
     void OnBattleLose(object _)  => Play(battleLose);
     void OnBattleFlee(object _)  => Play(battleFlee);
-    void OnUnitDied(object _)    => Play(unitDied);
+    void OnUnitDied(object payload)
+    {
+        // Chỉ phát khi enemy chết, bỏ qua player
+        if (payload is PlayerStatus) return;
+        Play(unitDied);
+    }
     void OnLevelUp(object _)     => Play(levelUp);
     void OnEncounter(object _)   => Play(encounterTrigger);
 
