@@ -119,6 +119,62 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &59185001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 59185003}
+  - component: {fileID: 59185002}
+  m_Layer: 0
+  m_Name: SFXManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &59185002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59185001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4c06d835dfca9744a16ed24e43151ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SFXManager
+  buttonClick: {fileID: 8300000, guid: bacfcc3e1fcb1f7428d5066cff4cb89f, type: 3}
+  panelOpen: {fileID: 0}
+  panelClose: {fileID: 0}
+  battleStart: {fileID: 8300000, guid: 7cce82aedd02caf4cb9e56d4fb688581, type: 3}
+  battleWin: {fileID: 8300000, guid: 6caa13d905b88ff40a1a2d58669b0657, type: 3}
+  battleLose: {fileID: 8300000, guid: 19f50ff99e6cb5c43bce324edffa3ec3, type: 3}
+  battleFlee: {fileID: 8300000, guid: 1a1e57712e70bdd498e97b7717d50a10, type: 3}
+  unitDied: {fileID: 8300000, guid: 4179420f4e482f04583a68a80bb16b88, type: 3}
+  levelUp: {fileID: 8300000, guid: 323c9ac4294d42a4da51ff35c65ad4b1, type: 3}
+  saveSuccess: {fileID: 8300000, guid: 0780619c217b4ac4a98af3718405af49, type: 3}
+  encounterTrigger: {fileID: 0}
+  masterVolume: 1
+--- !u!4 &59185003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59185001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 522.2532, y: 199.86537, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &91554801
 GameObject:
   m_ObjectHideFlags: 0
@@ -7339,3 +7395,4 @@ SceneRoots:
   - {fileID: 1093377028}
   - {fileID: 1661835453}
   - {fileID: 1444171746}
+  - {fileID: 59185003}
