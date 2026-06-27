@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -69,7 +69,10 @@ public class QuanLyHoiThoai : MonoBehaviour
             {
                 StopAllCoroutines();
                 if (cauHienTai < kichBan.Length)
+                {
                     kichBan[cauHienTai].txtNoiDung.text = kichBan[cauHienTai].noiDungThoai;
+                    kichBan[cauHienTai].txtNoiDung.maxVisibleCharacters = 99999;
+                }
 
                 dangGoChu = false;
                 daXongCauHienTai = true;
@@ -100,11 +103,14 @@ public class QuanLyHoiThoai : MonoBehaviour
     {
         dangGoChu = true;
         daXongCauHienTai = false;
-        cau.txtNoiDung.text = "";
+        
+        cau.txtNoiDung.text = cau.noiDungThoai;
+        cau.txtNoiDung.ForceMeshUpdate();
+        int totalChars = cau.txtNoiDung.textInfo.characterCount;
 
-        foreach (char c in cau.noiDungThoai.ToCharArray())
+        for (int i = 0; i <= totalChars; i++)
         {
-            cau.txtNoiDung.text += c;
+            cau.txtNoiDung.maxVisibleCharacters = i;
             yield return new WaitForSeconds(tocDoGo);
         }
 
