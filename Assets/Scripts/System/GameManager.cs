@@ -127,8 +127,11 @@ public class GameManager : MonoBehaviour
         // Tự động chọn base URL:
         // - WebGL build: URL tương đối, không cần base
         // - Unity Editor / Standalone: dùng localhost
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_EDITOR
             backendBaseURL = "http://localhost:3000";
+#elif UNITY_ANDROID || UNITY_IOS || UNITY_STANDALONE
+            // URL server localtunnel để APK có thể gọi được qua Internet
+            backendBaseURL = "https://ntugame-nergy.loca.lt";
 #else
             backendBaseURL = ""; // WebGL: relative URL
 #endif

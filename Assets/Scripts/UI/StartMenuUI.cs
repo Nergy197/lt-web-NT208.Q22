@@ -155,6 +155,7 @@ public class StartMenuUI : MonoBehaviour
     {
         string url = GameManager.Instance.backendBaseURL + "/player/check/" + UnityWebRequest.EscapeURL(code);
         UnityWebRequest req = UnityWebRequest.Get(url);
+        req.SetRequestHeader("Bypass-Tunnel-Reminder", "true"); // Bypass localtunnel warning page
         yield return req.SendWebRequest();
 
         if (confirmTransferButton != null) confirmTransferButton.interactable = true;

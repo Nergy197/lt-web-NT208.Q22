@@ -53,6 +53,7 @@ public static class SaveService
             req.uploadHandler = new UploadHandlerRaw(body);
             req.downloadHandler = new DownloadHandlerBuffer();
             req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Bypass-Tunnel-Reminder", "true"); // Bypass localtunnel warning page
 
             yield return req.SendWebRequest();
 
@@ -71,6 +72,7 @@ public static class SaveService
     {
         using (UnityWebRequest req = UnityWebRequest.Get(url))
         {
+            req.SetRequestHeader("Bypass-Tunnel-Reminder", "true"); // Bypass localtunnel warning page
             yield return req.SendWebRequest();
             onResult?.Invoke(req.result == UnityWebRequest.Result.Success ? req.downloadHandler.text : null);
         }
