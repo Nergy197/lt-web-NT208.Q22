@@ -18,12 +18,18 @@ public class Party
 
     private int maxMembers;
 
+    /// <summary>Số thành viên tối đa của party người chơi. Nguồn chân lý duy nhất — dùng chung với GameManager.</summary>
+    public const int PlayerMaxMembers = 2;
+    public const int EnemyMaxMembers = 3;
+
+    public int MaxMembers => maxMembers;
+
     // ================= CONSTRUCTOR =================
 
     public Party(PartyType type)
     {
         Type = type;
-        maxMembers = (type == PartyType.Player) ? 2 : 3;
+        maxMembers = (type == PartyType.Player) ? PlayerMaxMembers : EnemyMaxMembers;
     }
 
     // ================= MEMBER =================
@@ -31,13 +37,23 @@ public class Party
     public bool AddMember(Status status)
     {
         if (status == null)
+        {
+            UnityEngine.Debug.LogWarning($"[Party] AddMember bị từ chối: status null ({Type}).");
             return false;
+        }
 
         if (members.Count >= maxMembers)
+        {
+            UnityEngine.Debug.LogWarning(
+                $"[Party] AddMember bị từ chối: '{status.entityName}' — party {Type} đã đầy ({members.Count}/{maxMembers}).");
             return false;
+        }
 
         if (members.Contains(status))
+        {
+            UnityEngine.Debug.LogWarning($"[Party] AddMember bị từ chối: '{status.entityName}' đã có trong party {Type}.");
             return false;
+        }
 
         // gán party type cho status (RẤT QUAN TRỌNG)
         status.PartyType = Type;

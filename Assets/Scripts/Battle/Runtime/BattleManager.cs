@@ -28,8 +28,8 @@ public class BattleManager : MonoBehaviour
     private bool playerWon = false;
     private bool playerFled = false;
 
-    private int currentTargetIndex = 0;
-    private int currentAllyTargetIndex = 0;
+    // Logic chọn mục tiêu (index địch/đồng minh + resolve) tách sang BattleTargeting.
+    private readonly BattleTargeting targeting = new BattleTargeting();
 
     [Header("Spawn Positions")]
     [SerializeField] private Transform playerSpawnAnchor;
@@ -74,6 +74,16 @@ public class BattleManager : MonoBehaviour
         Debug.Log(msg);
         if (BattleDebugUI.Instance != null)
             BattleDebugUI.Instance.Log(msg);
+    }
+
+    // Cache BattleInfoDialogUI để tránh quét scene mỗi lần đổi target/đầu lượt.
+    // Lazy: tự tìm lại nếu null (dialog có thể được tạo sau khi battle khởi tạo).
+    private BattleInfoDialogUI _battleDialog;
+    BattleInfoDialogUI GetBattleDialog()
+    {
+        if (_battleDialog == null)
+            _battleDialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        return _battleDialog;
     }
 
     IEnumerator Start()
@@ -193,7 +203,7 @@ public class BattleManager : MonoBehaviour
         waitingForAttackFinish = false;
         Log("[ATTACK] Finished");
         
-        var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        var dialog = GetBattleDialog();
         if (dialog != null)
         {
             var p = GetAlivePlayer();
@@ -272,7 +282,7 @@ public class BattleManager : MonoBehaviour
         {
             _dbgLoggedOnce = true;
             var m = UnityEngine.InputSystem.Mouse.current;
-            Debug.Log($"[MOBILE-DBG] SelectingTarget active | Mouse.current={(m == null ? "NULL" : "OK")} | isPressed={(m?.leftButton.isPressed)}");
+            GameLog.Verbose($"[MOBILE-DBG] SelectingTarget active | Mouse.current={(m == null ? "NULL" : "OK")} | isPressed={(m?.leftButton.isPressed)}");
         }
 
         if (!TryGetTapScreenPosition(out Vector2 screenPos)) return;
@@ -280,16 +290,16 @@ public class BattleManager : MonoBehaviour
         // Bỏ qua tap trong grace period ngay sau khi chọn action, bất kể thứ tự frame Update/EventSystem
         if (Time.unscaledTime < mobileSkipTapsUntil)
         {
-            Debug.Log($"[MOBILE-DBG] Grace period còn {mobileSkipTapsUntil - Time.unscaledTime:F3}s → skip tap tại {screenPos}");
+            GameLog.Verbose($"[MOBILE-DBG] Grace period còn {mobileSkipTapsUntil - Time.unscaledTime:F3}s → skip tap tại {screenPos}");
             return;
         }
 
         Camera cam = Camera.main;
-        if (cam == null) { Debug.Log("[MOBILE-DBG] Camera.main null"); return; }
+        if (cam == null) { GameLog.Verbose("[MOBILE-DBG] Camera.main null"); return; }
 
         float depth = Mathf.Abs(cam.transform.position.z);
         Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
-        Debug.Log($"[MOBILE-DBG] Tap screen={screenPos} → world={worldPos:F2} (cam.z={cam.transform.position.z:F1}, depth={depth:F1})");
+        GameLog.Verbose($"[MOBILE-DBG] Tap screen={screenPos} → world={worldPos:F2} (cam.z={cam.transform.position.z:F1}, depth={depth:F1})");
 
         int targetIndex = FindAliveEnemyIndexNearScreenPoint(cam, screenPos, 0f);
         if (targetIndex < 0)
@@ -299,16 +309,16 @@ public class BattleManager : MonoBehaviour
             foreach (var e in enemyParty.Members) if (e.IsAlive) alive.Add(e as EnemyStatus);
             foreach (var e in alive)
             {
-                if (e?.SpawnedModel == null) { Debug.Log($"[MOBILE-DBG] Enemy '{e?.entityName}' SpawnedModel=NULL"); continue; }
+                if (e?.SpawnedModel == null) { GameLog.Verbose($"[MOBILE-DBG] Enemy '{e?.entityName}' SpawnedModel=NULL"); continue; }
                 var srs = e.SpawnedModel.GetComponentsInChildren<SpriteRenderer>();
                 foreach (var sr in srs)
-                    Debug.Log($"[MOBILE-DBG] Enemy '{e.entityName}' SR bounds={sr.bounds.min:F2}→{sr.bounds.max:F2} | model.pos={e.SpawnedModel.transform.position:F2}");
+                    GameLog.Verbose($"[MOBILE-DBG] Enemy '{e.entityName}' SR bounds={sr.bounds.min:F2}→{sr.bounds.max:F2} | model.pos={e.SpawnedModel.transform.position:F2}");
             }
-            Debug.Log($"[MOBILE-DBG] Không tìm thấy enemy tại tap position");
+            GameLog.Verbose($"[MOBILE-DBG] Không tìm thấy enemy tại tap position");
             return;
         }
 
-        if (mobileTargetSelected && targetIndex == currentTargetIndex)
+        if (mobileTargetSelected && targetIndex == targeting.EnemyIndex)
         {
             // Tap 2: cùng mục tiêu → confirm
             ConfirmAction();
@@ -316,15 +326,15 @@ public class BattleManager : MonoBehaviour
         }
 
         // Tap 1: chọn mục tiêu, chờ tap 2 để confirm
-        currentTargetIndex = targetIndex;
+        targeting.EnemyIndex = targetIndex;
         mobileTargetSelected = true;
         var target = GetEnemyTarget();
         if (target == null) return;
 
-        BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
+        BattleUI.Instance?.HighlightEnemyHUD(targeting.EnemyIndex);
         BattleUI.Instance?.SetTargetName(target.entityName);
 
-        var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        var dialog = GetBattleDialog();
         if (dialog != null)
         {
             dialog.UpdateBuffDebuff(currentUnit);
@@ -362,7 +372,7 @@ public class BattleManager : MonoBehaviour
             screenPos = _pendingEditorTap;
             _pendingEditorTap = new Vector2(float.NaN, float.NaN);
             _prevMousePressed = isNowPressed; // sync để Pointer fallback không double-fire
-            Debug.Log($"[MOBILE-DBG] Tap via EventSystem at {screenPos}");
+            GameLog.Verbose($"[MOBILE-DBG] Tap via EventSystem at {screenPos}");
             return true;
         }
 
@@ -372,7 +382,7 @@ public class BattleManager : MonoBehaviour
         if (tapped)
         {
             screenPos = Input.mousePosition;
-            Debug.Log($"[MOBILE-DBG] Tap via Pointer fallback at {screenPos}");
+            GameLog.Verbose($"[MOBILE-DBG] Tap via Pointer fallback at {screenPos}");
             return true;
         }
 #endif
@@ -592,7 +602,7 @@ public class BattleManager : MonoBehaviour
         Log("[BATTLE] Init Complete");
         PlanEnemyActions(); // Lên kế hoạch ngay từ đầu trận
 
-        var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+        var dialog = GetBattleDialog();
         if (dialog != null)
         {
             var p = GetAlivePlayer();
@@ -723,6 +733,7 @@ public class BattleManager : MonoBehaviour
     {
         waitingForPlayerAction = true;
         waitingForAttackFinish = false;
+        isTargetingAlly = false;
         Log("[TURN] Waiting Player Action");
 
         // Đảm bảo mode luôn là Battle khi bắt đầu lượt — tránh bị kẹt ở BattleSkillMenu/BattleItemMenu
@@ -739,14 +750,14 @@ public class BattleManager : MonoBehaviour
             BattleUI.Instance.ShowActionMenu(playerUnit);
             // Mobile: không highlight enemy khi chưa chọn action
             if (!ShouldUseMobileTouchFlow())
-                BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
+                BattleUI.Instance.HighlightEnemyHUD(targeting.EnemyIndex);
             else
                 BattleUI.Instance.HighlightEnemyHUD(-1);
             var target = ShouldUseMobileTouchFlow() ? null : GetEnemyTarget();
             if (target != null) BattleUI.Instance.SetTargetName(target.entityName);
             else BattleUI.Instance.SetTargetName(string.Empty);
             
-            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            var dialog = GetBattleDialog();
             if (dialog != null)
             {
                 dialog.UpdateBuffDebuff(playerUnit);
@@ -782,14 +793,24 @@ public class BattleManager : MonoBehaviour
     private bool mobileTargetSelected = false;      // tap 1: chọn target; tap 2: confirm
     private float mobileSkipTapsUntil = -1f;       // bỏ qua mọi tap trong grace period sau khi chọn action
 
+    /// <summary>Skill nhắm đồng minh: chỉ có hiệu ứng SelectedAlly và không gây damage (heal/buff).</summary>
+    static bool IsAllyTargetSkill(PlayerAttackData skill)
+    {
+        if (skill == null) return false;
+        if (skill.hits != null && skill.hits.Count > 0) return false; // có damage → coi là đòn đánh địch
+        if (skill.effects == null) return false;
+        return skill.effects.Exists(e => e != null && e.target == SkillEffectTarget.SelectedAlly);
+    }
+
 
     public void BackToActionMenu()
     {
         if (!waitingForPlayerAction) return;
-        Debug.Log($"[MOBILE-DBG] BackToActionMenu called | isSelectingTarget={isSelectingTarget} | mobileTargetSelected={mobileTargetSelected}");
+        GameLog.Verbose($"[MOBILE-DBG] BackToActionMenu called | isSelectingTarget={isSelectingTarget} | mobileTargetSelected={mobileTargetSelected}");
 
         int previousSkillIndex = pendingSkillIndex;
         isSelectingTarget  = false;
+        isTargetingAlly    = false;
         mobileTargetSelected = false;
         mobileSkipTapsUntil  = -1f;
 
@@ -829,13 +850,34 @@ public class BattleManager : MonoBehaviour
         mobileTargetSelected = false;
         mobileSkipTapsUntil = Time.unscaledTime + 0.15f; // bỏ qua tap trong 150ms để tránh consume touch của nút action
 
+        // Skill heal/buff nhắm đồng minh → chuyển sang chế độ chọn ally
+        var actingPlayer = currentUnit as PlayerStatus;
+        isTargetingAlly = skillIndex >= 0 && actingPlayer != null
+            && IsAllyTargetSkill(actingPlayer.GetSkillByIndex(skillIndex));
+
         _dbgLoggedOnce = false;
         bool isMobile = ShouldUseMobileTouchFlow();
-        Debug.Log($"[MOBILE-DBG] EnterTargetSelection skill={skillIndex} | mobileFlow={isMobile} | MobileUI={(MobileInputUI.Instance != null ? MobileInputUI.Instance.gameObject.activeInHierarchy.ToString() : "Instance null")}");
+        GameLog.Verbose($"[MOBILE-DBG] EnterTargetSelection skill={skillIndex} | ally={isTargetingAlly} | mobileFlow={isMobile} | MobileUI={(MobileInputUI.Instance != null ? MobileInputUI.Instance.gameObject.activeInHierarchy.ToString() : "Instance null")}");
 
         BattleUI.Instance?.HideActionMenu();
 
-        if (isMobile)
+        if (isTargetingAlly)
+        {
+            // Mặc định nhắm đồng minh HP thấp nhất (heal hữu ích nhất).
+            // PC: A/D đổi ally. Mobile: chưa hỗ trợ tap-chọn-ally nên hiện confirm ngay với mặc định này.
+            targeting.AllyIndex = targeting.IndexOfLowestHpAlly();
+            BattleUI.Instance?.HighlightEnemyHUD(-1);
+            var ally = GetAllyTarget();
+            if (ally != null)
+            {
+                BattleUI.Instance?.HighlightActivePlayerHUD(ally.BattleSlotId);
+                BattleUI.Instance?.SetTargetName(ally.entityName);
+                var dialog = GetBattleDialog();
+                if (dialog != null) { dialog.UpdateBuffDebuff(ally); dialog.UpdateEnemyCombo(null); }
+            }
+            if (isMobile) mobileTargetSelected = true;
+        }
+        else if (isMobile)
         {
             // Mobile: không tự chọn enemy — player phải tap để target (tap 1)
             BattleUI.Instance?.HighlightEnemyHUD(-1);
@@ -844,12 +886,12 @@ public class BattleManager : MonoBehaviour
         else
         {
             // PC: tự highlight enemy hiện tại để A/D điều hướng
-            BattleUI.Instance?.HighlightEnemyHUD(currentTargetIndex);
+            BattleUI.Instance?.HighlightEnemyHUD(targeting.EnemyIndex);
             var t = GetEnemyTarget();
             if (t != null)
             {
                 BattleUI.Instance?.SetTargetName(t.entityName);
-                var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+                var dialog = GetBattleDialog();
                 if (dialog != null)
                 {
                     dialog.UpdateBuffDebuff(currentUnit);
@@ -888,25 +930,29 @@ public class BattleManager : MonoBehaviour
         isSelectingTarget = false;
 
         var player = currentUnit as PlayerStatus;
-        var enemy  = GetEnemyTarget();
-        if (player == null || enemy == null) { Log("[ERROR] Invalid target"); return; }
+        if (player == null) { Log("[ERROR] Invalid target"); return; }
+
+        // Skill heal/buff → target là đồng minh; còn lại → enemy.
+        Status target = isTargetingAlly ? (Status)GetAllyTarget() : GetEnemyTarget();
+        if (target == null) { Log("[ERROR] Invalid target"); isTargetingAlly = false; return; }
 
         if (pendingSkillIndex == -1)
         {
-            Log("[ACTION] Attack → " + enemy.entityName);
+            Log("[ACTION] Attack → " + target.entityName);
             waitingForAttackFinish = true;
-            player.BasicAttack.CreateInstance().Use(player, enemy);
+            player.BasicAttack.CreateInstance().Use(player, target);
         }
         else
         {
             var skill = player.GetSkillByIndex(pendingSkillIndex);
-            if (skill == null || !player.CanUseAP(skill.apCost)) return;
-            Log($"[ACTION] Skill[{pendingSkillIndex}] → {skill.attackName}");
+            if (skill == null || !player.CanUseAP(skill.apCost)) { isTargetingAlly = false; return; }
+            Log($"[ACTION] Skill[{pendingSkillIndex}] → {skill.attackName} ({target.entityName})");
             waitingForAttackFinish = true;
-            skill.CreateInstance().Use(player, enemy);
+            skill.CreateInstance().Use(player, target);
         }
 
         pendingSkillIndex = -2;
+        isTargetingAlly = false;
         waitingForPlayerAction = false;
     }
 
@@ -915,6 +961,7 @@ public class BattleManager : MonoBehaviour
         if (!isSelectingTarget) return;
         int previousSkillIndex = pendingSkillIndex;
         isSelectingTarget  = false;
+        isTargetingAlly    = false;
         mobileTargetSelected = false;
         mobileSkipTapsUntil  = -1f;
 
@@ -1008,16 +1055,18 @@ public class BattleManager : MonoBehaviour
     public void SetEnemyTarget(PlayerStatus target)
     {
         if (target == null) return;
-        // Tim index cua target trong danh sach alive players
+        // Tim index cua target trong danh sach alive players.
+        // Ghi vào enemyChosenPlayerIndex (KHÔNG phải targeting.AllyIndex) để không
+        // làm nhiễu lựa chọn heal đồng minh của người chơi.
         var alive = new List<PlayerStatus>();
         foreach (var p in playerParty.Members)
             if (p.IsAlive) alive.Add(p as PlayerStatus);
-        
+
         for (int i = 0; i < alive.Count; i++)
         {
             if (alive[i] == target)
             {
-                currentAllyTargetIndex = i;
+                enemyChosenPlayerIndex = i;
                 break;
             }
         }
@@ -1088,8 +1137,8 @@ public class BattleManager : MonoBehaviour
         if (alive.Count == 0) return null;
 
         // Auto-clamp khi target vừa chết để không bao giờ trả về null khi còn địch.
-        currentTargetIndex = Mathf.Clamp(currentTargetIndex, 0, alive.Count - 1);
-        return alive[currentTargetIndex];
+        targeting.EnemyIndex = Mathf.Clamp(targeting.EnemyIndex, 0, alive.Count - 1);
+        return alive[targeting.EnemyIndex];
     }
 
     PlayerStatus GetAlivePlayer()
@@ -1109,8 +1158,8 @@ public class BattleManager : MonoBehaviour
 
         if (alive.Count == 0) return null;
 
-        currentAllyTargetIndex = Mathf.Clamp(currentAllyTargetIndex, 0, alive.Count - 1);
-        return alive[currentAllyTargetIndex];
+        targeting.AllyIndex = Mathf.Clamp(targeting.AllyIndex, 0, alive.Count - 1);
+        return alive[targeting.AllyIndex];
     }
 
     private float _lastTargetChangeTime = -1f;
@@ -1134,34 +1183,34 @@ public class BattleManager : MonoBehaviour
         // Mặc định cycle qua danh sách địch.
         if (!isTargetingAlly && aliveEnemies.Count > 0)
         {
-            currentTargetIndex = (currentTargetIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
-            Log("[TARGET ENEMY] → " + aliveEnemies[currentTargetIndex].entityName);
+            targeting.EnemyIndex = (targeting.EnemyIndex + dir + aliveEnemies.Count) % aliveEnemies.Count;
+            Log("[TARGET ENEMY] → " + aliveEnemies[targeting.EnemyIndex].entityName);
             
             if (BattleUI.Instance != null)
             {
-                BattleUI.Instance.HighlightEnemyHUD(currentTargetIndex);
-                BattleUI.Instance.SetTargetName(aliveEnemies[currentTargetIndex].entityName);
+                BattleUI.Instance.HighlightEnemyHUD(targeting.EnemyIndex);
+                BattleUI.Instance.SetTargetName(aliveEnemies[targeting.EnemyIndex].entityName);
             }
             
-            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            var dialog = GetBattleDialog();
             if (dialog != null)
             {
                 dialog.UpdateBuffDebuff(currentUnit);
-                dialog.UpdateEnemyCombo(aliveEnemies[currentTargetIndex].PlannedAttack);
+                dialog.UpdateEnemyCombo(aliveEnemies[targeting.EnemyIndex].PlannedAttack);
             }
         }
         else if (isTargetingAlly && aliveAllies.Count > 0)
         {
-            currentAllyTargetIndex = (currentAllyTargetIndex + dir + aliveAllies.Count) % aliveAllies.Count;
-            Log("[TARGET ALLY] → " + aliveAllies[currentAllyTargetIndex].entityName);
+            targeting.AllyIndex = (targeting.AllyIndex + dir + aliveAllies.Count) % aliveAllies.Count;
+            Log("[TARGET ALLY] → " + aliveAllies[targeting.AllyIndex].entityName);
             
             if (BattleUI.Instance != null)
-                BattleUI.Instance.SetTargetName(aliveAllies[currentAllyTargetIndex].entityName);
+                BattleUI.Instance.SetTargetName(aliveAllies[targeting.AllyIndex].entityName);
                 
-            var dialog = Object.FindFirstObjectByType<BattleInfoDialogUI>();
+            var dialog = GetBattleDialog();
             if (dialog != null)
             {
-                dialog.UpdateBuffDebuff(aliveAllies[currentAllyTargetIndex]);
+                dialog.UpdateBuffDebuff(aliveAllies[targeting.AllyIndex]);
                 dialog.UpdateEnemyCombo(null); // Allies don't have PlannedAttack to show here
             }
         }

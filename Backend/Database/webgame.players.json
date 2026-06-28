@@ -15,18 +15,6 @@
                 "level": 1,
                 "currentHP": 80,
                 "currentExp": 0
-            },
-            {
-                "entityName": "Warrior",
-                "level": 1,
-                "currentHP": 150,
-                "currentExp": 0
-            },
-            {
-                "entityName": "Priest",
-                "level": 1,
-                "currentHP": 90,
-                "currentExp": 0
             }
         ],
         "lastSavePointId": "",

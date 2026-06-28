@@ -23,6 +23,7 @@ Asset[Ss]tore[Tt]ools/
 *.unityproj
 *.sln
 *.slnx
+*.lscache
 *.suo
 *.user
 *.userprefs

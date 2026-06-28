@@ -11,6 +11,22 @@ using System.Diagnostics;
 /// </summary>
 public static class GameLog
 {
+    /// <summary>
+    /// Cờ bật log chi tiết (per-frame, debug input...). MẶC ĐỊNH TẮT để không spam
+    /// console kể cả trong Editor/Development build. Bật thủ công khi cần debug.
+    /// </summary>
+    public static bool EnableVerbose = false;
+
+    /// <summary>
+    /// Log chi tiết: chỉ in khi EnableVerbose = true, và bị strip hoàn toàn trong release.
+    /// Dùng cho các log gọi mỗi frame ([MOBILE-DBG]...) để không làm nghẽn console.
+    /// </summary>
+    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+    public static void Verbose(string message)
+    {
+        if (EnableVerbose) UnityEngine.Debug.Log(message);
+    }
+
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
     public static void Log(string message)
     {

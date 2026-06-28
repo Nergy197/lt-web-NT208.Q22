@@ -27,10 +27,24 @@ public abstract class Status
     protected int defGrowth;
     protected int spdGrowth;
 
-    public int MaxHP => Mathf.Max(1, baseHP + (hpGrowth * (level - 1)));
-    public int Atk   => Mathf.Max(0, baseAtk + (atkGrowth * (level - 1)));
-    public int Def   => Mathf.Max(0, baseDef + (defGrowth * (level - 1)));
-    public int Spd   => Mathf.Max(1, baseSpd + (spdGrowth * (level - 1)));
+    // ── Buff/Debuff layer ──────────────────────────────────────────────
+    // Bonus tách RIÊNG khỏi base stat: buff/debuff chỉ cộng/trừ vào bonus*,
+    // không bao giờ làm hỏng base. Mặc định 0 (battle-only, không persist).
+    [NonSerialized] private int bonusMaxHP;
+    [NonSerialized] private int bonusAtk;
+    [NonSerialized] private int bonusDef;
+    [NonSerialized] private int bonusSpd;
+
+    // Giá trị "nền" theo level, CHƯA tính buff — dùng làm gốc % cho buff/debuff.
+    private int RawMaxHP => baseHP  + (hpGrowth  * (level - 1));
+    private int RawAtk   => baseAtk + (atkGrowth * (level - 1));
+    private int RawDef   => baseDef + (defGrowth * (level - 1));
+    private int RawSpd   => baseSpd + (spdGrowth * (level - 1));
+
+    public int MaxHP => Mathf.Max(1, RawMaxHP + bonusMaxHP);
+    public int Atk   => Mathf.Max(0, RawAtk   + bonusAtk);
+    public int Def   => Mathf.Max(0, RawDef   + bonusDef);
+    public int Spd   => Mathf.Max(1, RawSpd   + bonusSpd);
 
     public int currentHP;
     public bool IsAlive => currentHP > 0;
@@ -141,38 +155,40 @@ public abstract class Status
         StatusEffect clone = effect.Clone();
         activeEffects.Add(clone);
 
+        // % của buff/debuff luôn tính trên giá trị NỀN theo level (Raw*), KHÔNG trên giá trị
+        // đã buff → tránh cộng dồn lệch khi stack nhiều buff cùng loại.
         switch (clone.effectType)
         {
             case StatusEffectType.BuffHeal:
                 Heal(clone.value);
                 break;
             case StatusEffectType.BuffAtk:
-                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseAtk * (clone.value / 100f)));
-                baseAtk += clone.appliedValue;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(RawAtk * (clone.value / 100f)));
+                bonusAtk += clone.appliedValue;
                 break;
             case StatusEffectType.BuffDef:
-                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseDef * (clone.value / 100f)));
-                baseDef += clone.appliedValue;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(RawDef * (clone.value / 100f)));
+                bonusDef += clone.appliedValue;
                 break;
             case StatusEffectType.BuffSpd:
-                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(baseSpd * (clone.value / 100f)));
-                baseSpd += clone.appliedValue;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(RawSpd * (clone.value / 100f)));
+                bonusSpd += clone.appliedValue;
                 break;
             case StatusEffectType.BuffHP:
                 clone.appliedValue = clone.value;
-                baseHP += clone.appliedValue;
+                bonusMaxHP += clone.appliedValue;
                 break;
             case StatusEffectType.DebuffAtk:
-                clone.appliedValue = Mathf.Clamp(Mathf.RoundToInt(baseAtk * (clone.value / 100f)), 1, baseAtk);
-                baseAtk -= clone.appliedValue;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(RawAtk * (clone.value / 100f)));
+                bonusAtk -= clone.appliedValue;
                 break;
             case StatusEffectType.DebuffDef:
-                clone.appliedValue = Mathf.Clamp(Mathf.RoundToInt(baseDef * (clone.value / 100f)), 1, baseDef);
-                baseDef -= clone.appliedValue;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(RawDef * (clone.value / 100f)));
+                bonusDef -= clone.appliedValue;
                 break;
             case StatusEffectType.DebuffSpd:
-                clone.appliedValue = Mathf.Clamp(Mathf.RoundToInt(baseSpd * (clone.value / 100f)), 1, Mathf.Max(1, baseSpd - 1));
-                baseSpd -= clone.appliedValue;
+                clone.appliedValue = Mathf.Max(1, Mathf.RoundToInt(RawSpd * (clone.value / 100f)));
+                bonusSpd -= clone.appliedValue;
                 break;
             case StatusEffectType.Poison:
             case StatusEffectType.Stun:
@@ -209,15 +225,19 @@ public abstract class Status
     {
         switch (effect.effectType)
         {
-            // Buff đã cộng vào khi Apply → undo phải TRỪ đi.
-            case StatusEffectType.BuffAtk:   baseAtk -= effect.appliedValue; break;
-            case StatusEffectType.BuffDef:   baseDef -= effect.appliedValue; break;
-            case StatusEffectType.BuffSpd:   baseSpd -= effect.appliedValue; break;
-            case StatusEffectType.BuffHP:    baseHP  -= effect.appliedValue; break;
-            // Debuff đã trừ khi Apply → undo phải CỘNG lại.
-            case StatusEffectType.DebuffAtk: baseAtk += effect.appliedValue; break;
-            case StatusEffectType.DebuffDef: baseDef += effect.appliedValue; break;
-            case StatusEffectType.DebuffSpd: baseSpd += effect.appliedValue; break;
+            // Buff đã cộng vào bonus khi Apply → undo phải TRỪ đi.
+            case StatusEffectType.BuffAtk:   bonusAtk -= effect.appliedValue; break;
+            case StatusEffectType.BuffDef:   bonusDef -= effect.appliedValue; break;
+            case StatusEffectType.BuffSpd:   bonusSpd -= effect.appliedValue; break;
+            case StatusEffectType.BuffHP:
+                bonusMaxHP -= effect.appliedValue;
+                // MaxHP vừa giảm → kẹp currentHP để không vượt quá.
+                if (currentHP > MaxHP) currentHP = MaxHP;
+                break;
+            // Debuff đã trừ khỏi bonus khi Apply → undo phải CỘNG lại.
+            case StatusEffectType.DebuffAtk: bonusAtk += effect.appliedValue; break;
+            case StatusEffectType.DebuffDef: bonusDef += effect.appliedValue; break;
+            case StatusEffectType.DebuffSpd: bonusSpd += effect.appliedValue; break;
             case StatusEffectType.Poison:
             case StatusEffectType.Stun:
             case StatusEffectType.BuffHeal:
@@ -247,6 +267,10 @@ public abstract class Status
         foreach (var effect in activeEffects)
             UndoStatusEffect(effect);
         activeEffects.Clear();
+
+        // An toàn: sau khi gỡ hết buff, ép bonus về 0 và kẹp currentHP.
+        bonusMaxHP = bonusAtk = bonusDef = bonusSpd = 0;
+        if (currentHP > MaxHP) currentHP = MaxHP;
     }
 
     public virtual void Revive(int hpAmount)

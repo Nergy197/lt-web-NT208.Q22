@@ -109,7 +109,43 @@ app.post("/player/save", async (req, res) => {
   }
 });
 
+// Kiểm tra một Transfer Code (vd "guest_a3f9c1e8") có save nào trên server không.
+// Trả về { exists, slots: [...] } — dùng để validate mã trước khi Start Game,
+// và cho biết save nằm ở những slot nào (khắc phục việc transfer code không mang slot).
+app.get("/player/check/:code", async (req, res) => {
+  try {
+    let code = (req.params.code || "").trim().toLowerCase();
+
+    if (!code.startsWith("guest_")) {
+      return res.status(400).json({ error: "Invalid transfer code format" });
+    }
+
+    // Escape ký tự regex để tránh injection, rồi khớp prefix "<code>_slot_"
+    const safe = code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const docs = await db
+      .collection("players")
+      .find({ _id: { $regex: `^${safe}_slot_\\d+$` } })
+      .project({ _id: 1, slotId: 1, saveTime: 1 })
+      .toArray();
+
+    res.json({
+      exists: docs.length > 0,
+      slots: docs.map(d => ({ slotId: d.slotId, saveTime: d.saveTime })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "check failed" });
+  }
+});
+
 app.get("/sync", async (req, res) => {
+  // Bảo vệ: /sync ghi đè toàn bộ DB bằng file JSON → chỉ cho phép khi có token đúng.
+  // Đặt SYNC_TOKEN trong .env để bật; nếu không đặt, route bị khoá (an toàn mặc định).
+  const expected = process.env.SYNC_TOKEN;
+  if (!expected || req.query.token !== expected) {
+    console.warn("[SYNC] Rejected: missing/invalid token");
+    return res.status(403).send("Forbidden: set SYNC_TOKEN and pass ?token=");
+  }
   try {
     const filePath = path.join(
       __dirname,
@@ -155,8 +191,9 @@ client.connect()
 
     await seedDatabase();
 
-    app.listen(3000, () => {
-      console.log("Server running on port 3000");
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log("Server running on port " + PORT);
     });
   })
   .catch(err => {

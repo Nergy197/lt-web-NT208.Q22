@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
+using System.Collections;
 using TMPro;
 
 public class StartMenuUI : MonoBehaviour
@@ -124,20 +126,76 @@ public class StartMenuUI : MonoBehaviour
     {
         if (GameManager.Instance == null || transferCodeInput == null) return;
 
-        bool success = GameManager.Instance.SetPlayerId(transferCodeInput.text);
+        // Chuẩn hoá giống server (trim + lowercase) để khớp prefix _id trên DB
+        string code = (transferCodeInput.text ?? "").Trim().ToLower();
 
-        if (success)
-        {
-            if (transferStatusText != null)
-                transferStatusText.text = "<color=#00ff88>✓ Thành công! Ấn Start Game để tải dữ liệu.</color>";
-            if (currentIdLabel != null)
-                currentIdLabel.text = GameManager.Instance.GetPlayerId();
-        }
-        else
+        // 1. Kiểm tra định dạng trước (rẻ, không cần mạng)
+        if (!code.StartsWith("guest_"))
         {
             if (transferStatusText != null)
                 transferStatusText.text = "<color=#ff4444>✗ Sai định dạng! Mã phải là: guest_xxxxxxxx</color>";
+            return;
         }
+
+        // 2. Hỏi server xem mã có save thật không, rồi mới áp dụng
+        if (confirmTransferButton != null) confirmTransferButton.interactable = false;
+        if (transferStatusText != null)
+            transferStatusText.text = "<color=#dddddd>Đang kiểm tra mã...</color>";
+
+        StartCoroutine(CheckAndApplyTransferCode(code));
+    }
+
+    [System.Serializable]
+    class TransferSlot { public int slotId; public string saveTime; }
+
+    [System.Serializable]
+    class TransferCheckResult { public bool exists; public TransferSlot[] slots; }
+
+    IEnumerator CheckAndApplyTransferCode(string code)
+    {
+        string url = GameManager.Instance.backendBaseURL + "/player/check/" + UnityWebRequest.EscapeURL(code);
+        UnityWebRequest req = UnityWebRequest.Get(url);
+        yield return req.SendWebRequest();
+
+        if (confirmTransferButton != null) confirmTransferButton.interactable = true;
+
+        // Không chạm được server → cho qua kèm cảnh báo (game vẫn chơi offline được)
+        if (req.result != UnityWebRequest.Result.Success)
+        {
+            bool ok = GameManager.Instance.SetPlayerId(code);
+            if (transferStatusText != null)
+                transferStatusText.text = ok
+                    ? "<color=#ffcc44>⚠ Không kết nối được máy chủ để kiểm tra. Đã áp dụng mã — ấn Start Game để thử tải.</color>"
+                    : "<color=#ff4444>✗ Mã không hợp lệ.</color>";
+            yield break;
+        }
+
+        TransferCheckResult res = null;
+        try { res = JsonUtility.FromJson<TransferCheckResult>(req.downloadHandler.text); }
+        catch { res = null; }
+
+        if (res == null || !res.exists)
+        {
+            if (transferStatusText != null)
+                transferStatusText.text = "<color=#ff4444>✗ Không tìm thấy dữ liệu cho mã này trên máy chủ.</color>";
+            yield break;
+        }
+
+        // Mã hợp lệ và có save → áp dụng
+        GameManager.Instance.SetPlayerId(code);
+        if (currentIdLabel != null) currentIdLabel.text = GameManager.Instance.GetPlayerId();
+
+        string slotList = "";
+        if (res.slots != null && res.slots.Length > 0)
+        {
+            for (int i = 0; i < res.slots.Length; i++)
+                slotList += (i > 0 ? ", " : "") + (res.slots[i].slotId + 1);
+        }
+
+        if (transferStatusText != null)
+            transferStatusText.text = string.IsNullOrEmpty(slotList)
+                ? "<color=#00ff88>✓ Thành công! Ấn Start Game để tải dữ liệu.</color>"
+                : $"<color=#00ff88>✓ Tìm thấy save ở slot: {slotList}.</color>\n<color=#dddddd>Ấn Start Game và chọn đúng slot để tải.</color>";
     }
 
     void OnCloseTransferPanel()
