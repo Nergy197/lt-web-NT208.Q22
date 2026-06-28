@@ -42,6 +42,8 @@ public class PlayerMovement : MonoBehaviour
 
         onMovePerformed = ctx =>
         {
+            if (!this.enabled) return;
+            
             move = ctx.ReadValue<Vector2>();
 
             // UPDATE ANIMATION
@@ -52,6 +54,8 @@ public class PlayerMovement : MonoBehaviour
 
         onMoveCanceled = ctx =>
         {
+            if (!this.enabled) return;
+            
             move = Vector2.zero;
 
             // UPDATE ANIMATION
@@ -119,6 +123,7 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>Gọi từ MobileInputUI để feed joystick vào hệ thống di chuyển.</summary>
     public void SetMobileInput(Vector2 v)
     {
+        if (!this.enabled) return;
         move = v;
         UpdateAnimation();
     }
