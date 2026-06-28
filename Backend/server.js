@@ -11,8 +11,11 @@ const app = express();
 
 /* ================= MIDDLEWARE ================= */
 
-// BUG FIX: Thêm CORS để Unity WebGL có thể gọi API
-app.use(cors());
+// BUG FIX: Thêm CORS để Unity WebGL có thể gọi API. Cần expose header Bypass-Tunnel-Reminder.
+app.use(cors({
+  origin: '*',
+  allowedHeaders: ['Content-Type', 'Authorization', 'Bypass-Tunnel-Reminder']
+}));
 app.use(express.json());
 
 /* ================= DATABASE ================= */

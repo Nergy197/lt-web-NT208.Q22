@@ -16,6 +16,10 @@ echo "Giữ cửa sổ này mở để giảng viên có thể chơi game qua AP
 echo "Nhấn Ctrl+C để tắt server."
 echo "--------------------------------------------------------"
 
+# Mở trình duyệt web để tự chơi trên máy (chỉ áp dụng cho macOS/Linux)
+echo "Đang mở trình duyệt web..."
+open "http://localhost:3000" 2>/dev/null || xdg-open "http://localhost:3000" 2>/dev/null
+
 npx localtunnel --port 3000 --subdomain ntugame-nergy
 
 # Khi tắt localtunnel thì kill luôn server
