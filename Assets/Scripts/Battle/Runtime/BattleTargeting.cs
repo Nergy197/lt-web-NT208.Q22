@@ -143,4 +143,44 @@ public class BattleTargeting
         }
         return bestIdx;
     }
+
+    /// <summary>
+    /// Tìm index đồng minh còn sống gần điểm tap trên màn hình (mobile). Trả -1 nếu không thấy.
+    /// Pass 1: trúng sprite bounds. Pass 2: gần nhất trong 1.5 world unit.
+    /// </summary>
+    public int FindAliveAllyIndexNearScreenPoint(Camera cam, Vector2 screenPos)
+    {
+        var alive = AliveAllies();
+        if (alive.Count == 0 || cam == null) return -1;
+
+        float depth = Mathf.Abs(cam.transform.position.z);
+        Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
+
+        for (int i = 0; i < alive.Count; i++)
+        {
+            var model = alive[i]?.SpawnedModel;
+            if (model == null) continue;
+            foreach (var sr in model.GetComponentsInChildren<SpriteRenderer>())
+            {
+                if (sr == null || !sr.enabled) continue;
+                Bounds b = sr.bounds;
+                if (worldPos.x >= b.min.x && worldPos.x <= b.max.x &&
+                    worldPos.y >= b.min.y && worldPos.y <= b.max.y)
+                    return i;
+            }
+        }
+
+        float bestDist = 1.5f;
+        int bestIdx = -1;
+        for (int i = 0; i < alive.Count; i++)
+        {
+            var model = alive[i]?.SpawnedModel;
+            if (model == null) continue;
+            float dist = Vector2.Distance(
+                new Vector2(worldPos.x, worldPos.y),
+                new Vector2(model.transform.position.x, model.transform.position.y));
+            if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+        }
+        return bestIdx;
+    }
 }

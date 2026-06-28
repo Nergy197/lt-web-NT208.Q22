@@ -222,6 +222,11 @@ public class GameManager : MonoBehaviour
             });
         }
 
+        if (save.party.Count > Party.PlayerMaxMembers)
+        {
+            Debug.LogWarning($"[SAVE] Cảnh báo: Party đang lưu có {save.party.Count} member > giới hạn {Party.PlayerMaxMembers}!");
+        }
+
         var qm = questManager != null ? questManager : QuestManager.Instance;
         if (qm != null) save.questProgress = qm.BuildSaveData();
         save.chapter1TutorialCompleted = chapter1TutorialCompleted;

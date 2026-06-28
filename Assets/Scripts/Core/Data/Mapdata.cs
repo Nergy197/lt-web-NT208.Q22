@@ -65,7 +65,7 @@ public class Mapdata : ScriptableObject
         playerBuffs.Clear();
         playerDebuffs.Clear();
 
-        System.Random rnd = (seed == 0) ? new System.Random() : new System.Random(seed);
+        System.Random rnd = (seed == 0) ? new System.Random(System.Guid.NewGuid().GetHashCode()) : new System.Random(seed);
 
         // simple heuristic: enemyLevel low -> more buffs, high -> more debuffs
         int lvl = Mathf.Max(1, enemyLevel);
@@ -115,7 +115,7 @@ public class Mapdata : ScriptableObject
         enemyBuffs.Clear();
         enemyDebuffs.Clear();
 
-        System.Random rnd = (seed == 0) ? new System.Random() : new System.Random(seed);
+        System.Random rnd = (seed == 0) ? new System.Random(System.Guid.NewGuid().GetHashCode()) : new System.Random(seed);
 
         int lvl = Mathf.Max(1, enemyLevel);
         if (lvl <= 3)

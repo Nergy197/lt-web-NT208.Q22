@@ -151,9 +151,8 @@ public class BattleManager : MonoBehaviour
         if (InputController.Instance != null)
             InputController.Instance.BindBattleManager(this);
 
-#if UNITY_EDITOR
-        SetupEditorClickCapture();
-#endif
+        inputHandler = gameObject.AddComponent<BattleInputHandler>();
+        inputHandler.Init(this);
 
         InitBattle();
     }
@@ -217,7 +216,7 @@ public class BattleManager : MonoBehaviour
     {
         UpdateTargetCursor();
         UpdatePlayerTurnCursor();
-        HandleMobileTapTargetSelection();
+        if (inputHandler != null) inputHandler.HandleMobileTapTargetSelection();
     }
 
     void UpdateTargetCursor()
@@ -270,198 +269,30 @@ public class BattleManager : MonoBehaviour
     }
 
     private bool _dbgLoggedOnce = false;
+    private BattleInputHandler inputHandler;
 
-    void HandleMobileTapTargetSelection()
+    public bool ShouldUseMobileTouchFlowPublic() => ShouldUseMobileTouchFlow();
+    public bool IsWaitingForPlayerAction => waitingForPlayerAction;
+    public bool IsTargetingAlly => isTargetingAlly;
+    public BattleTargeting Targeting => targeting;
+    public float MobileSkipTapsUntil => mobileSkipTapsUntil;
+    public Status CurrentUnitPublic => currentUnit;
+
+    public void SetMobileTargetSelected(bool value)
     {
-        if (!ShouldUseMobileTouchFlow()) return;
-        if (!waitingForPlayerAction || !isSelectingTarget || isTargetingAlly) return;
-        if (enemyParty == null) return;
-
-        // Log một lần khi vào trạng thái selecting để xác nhận function chạy được tới đây
-        if (!_dbgLoggedOnce)
-        {
-            _dbgLoggedOnce = true;
-            var m = UnityEngine.InputSystem.Mouse.current;
-            GameLog.Verbose($"[MOBILE-DBG] SelectingTarget active | Mouse.current={(m == null ? "NULL" : "OK")} | isPressed={(m?.leftButton.isPressed)}");
-        }
-
-        if (!TryGetTapScreenPosition(out Vector2 screenPos)) return;
-
-        // Bỏ qua tap trong grace period ngay sau khi chọn action, bất kể thứ tự frame Update/EventSystem
-        if (Time.unscaledTime < mobileSkipTapsUntil)
-        {
-            GameLog.Verbose($"[MOBILE-DBG] Grace period còn {mobileSkipTapsUntil - Time.unscaledTime:F3}s → skip tap tại {screenPos}");
-            return;
-        }
-
-        Camera cam = Camera.main;
-        if (cam == null) { GameLog.Verbose("[MOBILE-DBG] Camera.main null"); return; }
-
-        float depth = Mathf.Abs(cam.transform.position.z);
-        Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
-        GameLog.Verbose($"[MOBILE-DBG] Tap screen={screenPos} → world={worldPos:F2} (cam.z={cam.transform.position.z:F1}, depth={depth:F1})");
-
-        int targetIndex = FindAliveEnemyIndexNearScreenPoint(cam, screenPos, 0f);
-        if (targetIndex < 0)
-        {
-            // Log vị trí các enemy để so sánh với worldPos
-            var alive = new System.Collections.Generic.List<EnemyStatus>();
-            foreach (var e in enemyParty.Members) if (e.IsAlive) alive.Add(e as EnemyStatus);
-            foreach (var e in alive)
-            {
-                if (e?.SpawnedModel == null) { GameLog.Verbose($"[MOBILE-DBG] Enemy '{e?.entityName}' SpawnedModel=NULL"); continue; }
-                var srs = e.SpawnedModel.GetComponentsInChildren<SpriteRenderer>();
-                foreach (var sr in srs)
-                    GameLog.Verbose($"[MOBILE-DBG] Enemy '{e.entityName}' SR bounds={sr.bounds.min:F2}→{sr.bounds.max:F2} | model.pos={e.SpawnedModel.transform.position:F2}");
-            }
-            GameLog.Verbose($"[MOBILE-DBG] Không tìm thấy enemy tại tap position");
-            return;
-        }
-
-        if (mobileTargetSelected && targetIndex == targeting.EnemyIndex)
-        {
-            // Tap 2: cùng mục tiêu → confirm
-            ConfirmAction();
-            return;
-        }
-
-        // Tap 1: chọn mục tiêu, chờ tap 2 để confirm
-        targeting.EnemyIndex = targetIndex;
-        mobileTargetSelected = true;
-        var target = GetEnemyTarget();
-        if (target == null) return;
-
-        BattleUI.Instance?.HighlightEnemyHUD(targeting.EnemyIndex);
-        BattleUI.Instance?.SetTargetName(target.entityName);
-
-        var dialog = GetBattleDialog();
-        if (dialog != null)
-        {
-            dialog.UpdateBuffDebuff(currentUnit);
-            dialog.UpdateEnemyCombo(target.PlannedAttack);
-        }
+        mobileTargetSelected = value;
     }
 
-    bool TryGetTapScreenPosition(out Vector2 screenPos)
+    public Status GetEnemyTargetPublic()
     {
-        screenPos = Vector2.zero;
-
-        // New Input System: touchscreen (device thật hoặc simulator)
-        var touchscreen = UnityEngine.InputSystem.Touchscreen.current;
-        if (touchscreen != null)
-        {
-            foreach (var touch in touchscreen.touches)
-            {
-                if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
-                {
-                    screenPos = touch.position.ReadValue();
-                    return true;
-                }
-            }
-        }
-
-#if UNITY_EDITOR
-        // Luôn sync _prevMousePressed trước để tránh false-positive ở Pointer fallback
-        // khi EventSystem branch đã return true ở frame trước mà không update state.
-        var pointer = UnityEngine.InputSystem.Pointer.current;
-        bool isNowPressed = pointer?.press.isPressed ?? false;
-
-        // Primary: EventSystem click capture (reliable, không phụ thuộc Game View focus)
-        if (!float.IsNaN(_pendingEditorTap.x))
-        {
-            screenPos = _pendingEditorTap;
-            _pendingEditorTap = new Vector2(float.NaN, float.NaN);
-            _prevMousePressed = isNowPressed; // sync để Pointer fallback không double-fire
-            GameLog.Verbose($"[MOBILE-DBG] Tap via EventSystem at {screenPos}");
-            return true;
-        }
-
-        // Fallback: Pointer.current edge detection (khi canvas chưa init)
-        bool tapped = !_prevMousePressed && isNowPressed;
-        _prevMousePressed = isNowPressed;
-        if (tapped)
-        {
-            screenPos = Input.mousePosition;
-            GameLog.Verbose($"[MOBILE-DBG] Tap via Pointer fallback at {screenPos}");
-            return true;
-        }
-#endif
-
-        return false;
+        return GetEnemyTarget();
     }
 
-#if UNITY_EDITOR
-    private bool _prevMousePressed = false;
-    private Vector2 _pendingEditorTap = new Vector2(float.NaN, float.NaN);
-
-    void SetupEditorClickCapture()
+    public BattleInfoDialogUI GetBattleDialogPublic()
     {
-        // Tạo invisible panel bắt click qua EventSystem — reliable trong Unity 6 Play Focused mode.
-        // Chỉ dùng trong Editor để test mobile flow. Panel nằm dưới mọi UI button nên không chặn click UI.
-        var canvas = Object.FindFirstObjectByType<Canvas>();
-        if (canvas == null) return;
-
-        var go = new GameObject("_EditorMobileClickCapture",
-            typeof(RectTransform), typeof(CanvasRenderer),
-            typeof(UnityEngine.UI.Image));
-        go.transform.SetParent(canvas.transform, false);
-        go.transform.SetAsFirstSibling(); // dưới toàn bộ UI khác
-
-        var rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = rt.offsetMax = Vector2.zero;
-
-        var img = go.GetComponent<UnityEngine.UI.Image>();
-        img.color = new Color(0, 0, 0, 0); // hoàn toàn trong suốt
-        img.raycastTarget = true;
-
-        var cap = go.AddComponent<EditorMobileClickCapture>();
-        cap.Init(pos => _pendingEditorTap = pos);
+        return GetBattleDialog();
     }
-#endif
 
-    int FindAliveEnemyIndexNearScreenPoint(Camera cam, Vector2 screenPos, float _unused = 0f)
-    {
-        var aliveEnemies = new List<EnemyStatus>();
-        foreach (var e in enemyParty.Members)
-            if (e.IsAlive) aliveEnemies.Add(e as EnemyStatus);
-        if (aliveEnemies.Count == 0) return -1;
-
-        // Camera orthographic 2D: chuyển screen → world bằng cách depth = khoảng cách đến z=0
-        float depth = Mathf.Abs(cam.transform.position.z);
-        Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, depth));
-
-        // Pass 1: kiểm tra chính xác sprite bounds
-        for (int i = 0; i < aliveEnemies.Count; i++)
-        {
-            var model = aliveEnemies[i]?.SpawnedModel;
-            if (model == null) continue;
-            var renderers = model.GetComponentsInChildren<SpriteRenderer>();
-            foreach (var sr in renderers)
-            {
-                if (sr == null || !sr.enabled) continue;
-                Bounds b = sr.bounds;
-                if (worldPos.x >= b.min.x && worldPos.x <= b.max.x &&
-                    worldPos.y >= b.min.y && worldPos.y <= b.max.y)
-                    return i;
-            }
-        }
-
-        // Pass 2 (fallback): gần nhất trong vòng 1.5 world units
-        float bestDist = 1.5f;
-        int bestIdx = -1;
-        for (int i = 0; i < aliveEnemies.Count; i++)
-        {
-            var model = aliveEnemies[i]?.SpawnedModel;
-            if (model == null) continue;
-            float dist = Vector2.Distance(
-                new Vector2(worldPos.x, worldPos.y),
-                new Vector2(model.transform.position.x, model.transform.position.y));
-            if (dist < bestDist) { bestDist = dist; bestIdx = i; }
-        }
-        return bestIdx;
-    }
 
     bool ShouldUseMobileTouchFlow()
     {
@@ -1055,21 +886,7 @@ public class BattleManager : MonoBehaviour
     public void SetEnemyTarget(PlayerStatus target)
     {
         if (target == null) return;
-        // Tim index cua target trong danh sach alive players.
-        // Ghi vào enemyChosenPlayerIndex (KHÔNG phải targeting.AllyIndex) để không
-        // làm nhiễu lựa chọn heal đồng minh của người chơi.
-        var alive = new List<PlayerStatus>();
-        foreach (var p in playerParty.Members)
-            if (p.IsAlive) alive.Add(p as PlayerStatus);
-
-        for (int i = 0; i < alive.Count; i++)
-        {
-            if (alive[i] == target)
-            {
-                enemyChosenPlayerIndex = i;
-                break;
-            }
-        }
+        targeting.SetEnemyChosenPlayer(target);
     }
 
     IEnumerator EnemyTurn()
@@ -1144,9 +961,14 @@ public class BattleManager : MonoBehaviour
     PlayerStatus GetAlivePlayer()
     {
         if (playerParty == null) return null;
+        var alive = new System.Collections.Generic.List<PlayerStatus>();
         foreach (var p in playerParty.Members)
-            if (p.IsAlive) return p as PlayerStatus;
-        return null;
+            if (p.IsAlive) alive.Add(p as PlayerStatus);
+        
+        if (alive.Count == 0) return null;
+        
+        int idx = Mathf.Clamp(targeting.EnemyChosenPlayerIndex, 0, alive.Count - 1);
+        return alive[idx];
     }
 
     public PlayerStatus GetAllyTarget()

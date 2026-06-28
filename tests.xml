@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="21" result="Passed" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.0516944">
+  <test-suite type="TestSuite" id="1000" name="core_gameplay_test" fullname="core_gameplay_test" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.051694" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1027" name="Game.EditModeTests.dll" fullname="/Users/nergy/lt-web-NT208.Q22/Library/ScriptAssemblies/Game.EditModeTests.dll" runstate="Runnable" testcasecount="21" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.048036" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="17820" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1001" name="PartyTests" fullname="PartyTests" classname="PartyTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.017444" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1005" name="AddMember_AssignsBattleSlotAndPartyType" fullname="PartyTests.AddMember_AssignsBattleSlotAndPartyType" methodname="AddMember_AssignsBattleSlotAndPartyType" classname="PartyTests" runstate="Runnable" seed="142764574" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.007775" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1004" name="AddMember_RejectsNullAndDuplicate" fullname="PartyTests.AddMember_RejectsNullAndDuplicate" methodname="AddMember_RejectsNullAndDuplicate" classname="PartyTests" runstate="Runnable" seed="94153862" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.001669" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Party] AddMember bị từ chối: status null (Player).
+[Party] AddMember bị từ chối: 'A' đã có trong party Player.
+]]></output>
+        </test-case>
+        <test-case id="1003" name="EnemyParty_CapsAtThreeMembers" fullname="PartyTests.EnemyParty_CapsAtThreeMembers" methodname="EnemyParty_CapsAtThreeMembers" classname="PartyTests" runstate="Runnable" seed="2120949117" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000459" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Party] AddMember bị từ chối: 'D' — party Enemy đã đầy (3/3).
+]]></output>
+        </test-case>
+        <test-case id="1002" name="PlayerParty_CapsAtTwoMembers" fullname="PartyTests.PlayerParty_CapsAtTwoMembers" methodname="PlayerParty_CapsAtTwoMembers" classname="PartyTests" runstate="Runnable" seed="95263409" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000325" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Party] AddMember bị từ chối: 'C' — party Player đã đầy (2/2).
+]]></output>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1006" name="PlayerStatusTests" fullname="PlayerStatusTests" classname="PlayerStatusTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.011552" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1011" name="Ap_CannotExceedMax" fullname="PlayerStatusTests.Ap_CannotExceedMax" methodname="Ap_CannotExceedMax" classname="PlayerStatusTests" runstate="Runnable" seed="1163244528" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000112" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1007" name="ExpToNextLevel_FollowsCurveFormula" fullname="PlayerStatusTests.ExpToNextLevel_FollowsCurveFormula" methodname="ExpToNextLevel_FollowsCurveFormula" classname="PlayerStatusTests" runstate="Runnable" seed="269600350" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000471" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Hero set to level 4, HP restored to 160
+]]></output>
+        </test-case>
+        <test-case id="1009" name="GainExp_CanLevelUpMultipleTimes" fullname="PlayerStatusTests.GainExp_CanLevelUpMultipleTimes" methodname="GainExp_CanLevelUpMultipleTimes" classname="PlayerStatusTests" runstate="Runnable" seed="1254506995" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.008674" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Hero level up → 2
+Hero level up → 3
+Hero level up → 4
+Hero level up → 5
+Hero level up → 6
+Hero level up → 7
+Hero level up → 8
+Hero level up → 9
+Hero level up → 10
+Hero level up → 11
+Hero level up → 12
+Hero level up → 13
+Hero level up → 14
+Hero level up → 15
+Hero level up → 16
+Hero level up → 17
+Hero level up → 18
+Hero level up → 19
+Hero level up → 20
+Hero level up → 21
+Hero level up → 22
+Hero level up → 23
+]]></output>
+        </test-case>
+        <test-case id="1008" name="GainExp_LevelsUpAndKeepsRemainder" fullname="PlayerStatusTests.GainExp_LevelsUpAndKeepsRemainder" methodname="GainExp_LevelsUpAndKeepsRemainder" classname="PlayerStatusTests" runstate="Runnable" seed="641268935" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000511" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Hero level up → 2
+]]></output>
+        </test-case>
+        <test-case id="1010" name="LevelUp_HealsFullAndRestoresAp" fullname="PlayerStatusTests.LevelUp_HealsFullAndRestoresAp" methodname="LevelUp_HealsFullAndRestoresAp" classname="PlayerStatusTests" runstate="Runnable" seed="1309131533" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000642" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Hero level up → 2
+]]></output>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1012" name="SaveRoundTripTests" fullname="SaveRoundTripTests" classname="SaveRoundTripTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.001983" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1013" name="PlayerSave_SurvivesJsonRoundTrip" fullname="SaveRoundTripTests.PlayerSave_SurvivesJsonRoundTrip" methodname="PlayerSave_SurvivesJsonRoundTrip" classname="SaveRoundTripTests" runstate="Runnable" seed="1855009171" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.001050" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1014" name="UnitSave_DefaultsAreZeroValued" fullname="SaveRoundTripTests.UnitSave_DefaultsAreZeroValued" methodname="UnitSave_DefaultsAreZeroValued" classname="SaveRoundTripTests" runstate="Runnable" seed="1698749559" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000098" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1015" name="SaveServiceTests" fullname="SaveServiceTests" classname="SaveServiceTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.007023" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1017" name="DeleteLocal_RemovesSlot" fullname="SaveServiceTests.DeleteLocal_RemovesSlot" methodname="DeleteLocal_RemovesSlot" classname="SaveServiceTests" runstate="Runnable" seed="1575614340" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.002742" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1018" name="LocalKey_IsSlotScoped" fullname="SaveServiceTests.LocalKey_IsSlotScoped" methodname="LocalKey_IsSlotScoped" classname="SaveServiceTests" runstate="Runnable" seed="1281703205" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.001834" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1016" name="SaveLocal_ThenLoad_RoundTrips" fullname="SaveServiceTests.SaveLocal_ThenLoad_RoundTrips" methodname="SaveLocal_ThenLoad_RoundTrips" classname="SaveServiceTests" runstate="Runnable" seed="470805657" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.001243" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1019" name="StatusTests" fullname="StatusTests" classname="StatusTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.008665" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1022" name="BuffAtk_AppliesThenRevertsOnExpire" fullname="StatusTests.BuffAtk_AppliesThenRevertsOnExpire" methodname="BuffAtk_AppliesThenRevertsOnExpire" classname="StatusTests" runstate="Runnable" seed="2084421924" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.001214" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[EFFECT] T gained b (dur:2, val:50)
+[EFFECT EXPIRED] T lost b
+]]></output>
+        </test-case>
+        <test-case id="1025" name="BuffHP_DoesNotLeaveCurrentHpAboveMaxAfterExpire" fullname="StatusTests.BuffHP_DoesNotLeaveCurrentHpAboveMaxAfterExpire" methodname="BuffHP_DoesNotLeaveCurrentHpAboveMaxAfterExpire" classname="StatusTests" runstate="Runnable" seed="946769672" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000879" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[EFFECT] T gained hp (dur:1, val:50)
+[EFFECT EXPIRED] T lost hp
+]]></output>
+        </test-case>
+        <test-case id="1026" name="ClearAllEffects_ResetsStatsToBase" fullname="StatusTests.ClearAllEffects_ResetsStatsToBase" methodname="ClearAllEffects_ResetsStatsToBase" classname="StatusTests" runstate="Runnable" seed="1929824869" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000746" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[EFFECT] T gained b (dur:5, val:50)
+[EFFECT] T gained d (dur:5, val:50)
+]]></output>
+        </test-case>
+        <test-case id="1024" name="DebuffDef_RevertsExactlyOnExpire" fullname="StatusTests.DebuffDef_RevertsExactlyOnExpire" methodname="DebuffDef_RevertsExactlyOnExpire" classname="StatusTests" runstate="Runnable" seed="1429436521" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000678" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[EFFECT] T gained d (dur:1, val:50)
+[EFFECT EXPIRED] T lost d
+]]></output>
+        </test-case>
+        <test-case id="1023" name="StackingBuffAtk_DoesNotCompound" fullname="StatusTests.StackingBuffAtk_DoesNotCompound" methodname="StackingBuffAtk_DoesNotCompound" classname="StatusTests" runstate="Runnable" seed="220825927" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000657" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[EFFECT] T gained b1 (dur:5, val:50)
+[EFFECT] T gained b2 (dur:5, val:50)
+]]></output>
+        </test-case>
+        <test-case id="1021" name="TakeDamage_DiesAtZeroHp" fullname="StatusTests.TakeDamage_DiesAtZeroHp" methodname="TakeDamage_DiesAtZeroHp" classname="StatusTests" runstate="Runnable" seed="856870163" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000608" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[T died
+]]></output>
+        </test-case>
+        <test-case id="1020" name="TakeDamage_SubtractsDefWithMinimumOne" fullname="StatusTests.TakeDamage_SubtractsDefWithMinimumOne" methodname="TakeDamage_SubtractsDefWithMinimumOne" classname="StatusTests" runstate="Runnable" seed="1423490618" result="Passed" start-time="2026-06-28 02:20:15Z" end-time="2026-06-28 02:20:15Z" duration="0.000095" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /Users/nergy/Library/Application Support/DefaultCompany/core_gameplay_test/TestResults.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
