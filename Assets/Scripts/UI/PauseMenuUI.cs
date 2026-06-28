@@ -70,21 +70,38 @@ public class PauseMenuUI : MonoBehaviour
     private readonly System.Collections.Generic.List<(RectTransform rect, System.Action act)> _pollButtons
         = new System.Collections.Generic.List<(RectTransform, System.Action)>();
 
+    private int _clickCount;
+    private TMP_Text _debugText;
+
+    private bool _updateLogged;
+
     void Update()
     {
-        if (_pollButtons.Count == 0) return;
-
-        if (!TryGetClickPos(out Vector2 pos)) return;
-
-        foreach (var b in _pollButtons)
+        if (!_updateLogged)
         {
-            if (b.rect == null || !b.rect.gameObject.activeInHierarchy) continue;
-            if (RectTransformUtility.RectangleContainsScreenPoint(b.rect, pos, null))
-            {
-                b.act?.Invoke();
-                return; // 1 click = 1 nút
-            }
+            _updateLogged = true;
+            Debug.Log($"[PAUSE] Update() ĐANG CHẠY trên instance này. debugText set={(_debugText != null)} | pollButtons={_pollButtons.Count}");
         }
+
+        // Poll click giờ do PausePoller (gắn trên Canvas) lo — tránh double-fire.
+    }
+
+    /// <summary>Bật/tắt pause BỎ QUA CanPause — dùng cho nút bấm trực tiếp của người chơi.</summary>
+    public void ForceToggle()
+    {
+        if (isPaused) { Resume(); return; }
+
+        isPaused = true;
+        IsPaused = true;
+        if (InputController.Instance != null)
+        {
+            modeBeforePause = InputController.Instance.Mode;
+            InputController.Instance.SetMode(InputMode.Pause);
+        }
+        Time.timeScale = 0f;
+        SFXManager.Instance?.PlayPanelOpen();
+        if (pausePanel != null) { EnsurePausePanelOnTop(); pausePanel.SetActive(true); }
+        SetStatus("");
     }
 
     static bool TryGetClickPos(out Vector2 pos)
@@ -100,6 +117,14 @@ public class PauseMenuUI : MonoBehaviour
         if (ts != null && ts.primaryTouch.press.wasPressedThisFrame)
         {
             pos = ts.primaryTouch.position.ReadValue();
+            return true;
+        }
+
+        // Fallback Input Manager cũ (activeInputHandler = Both) — phòng khi Mouse.current
+        // của Input System mới không hoạt động trên WebGL build này.
+        if (Input.GetMouseButtonDown(0))
+        {
+            pos = Input.mousePosition;
             return true;
         }
         return false;
@@ -168,7 +193,13 @@ public class PauseMenuUI : MonoBehaviour
             pausePanel.SetActive(false);
 
         if (InputController.Instance != null)
-            InputController.Instance.SetMode(modeBeforePause);
+        {
+            // Khôi phục mode trước pause; nếu mode đó "kẹt" (UI/Pause) thì về Map cho an toàn
+            // → đóng pause cũng giúp gỡ kẹt mode (teleport/di chuyển chạy lại).
+            var restore = (modeBeforePause == InputMode.UI || modeBeforePause == InputMode.Pause)
+                ? InputMode.Map : modeBeforePause;
+            InputController.Instance.SetMode(restore);
+        }
     }
 
     public void SaveGame()
@@ -322,20 +353,17 @@ public class PauseMenuUI : MonoBehaviour
         if (_runtimeBuilt && pausePanel != null) return;
         _runtimeBuilt = true;
 
-        // Ưu tiên dùng Canvas ScreenSpaceOverlay SẴN CÓ (đang hoạt động cho UI khác →
-        // chắc chắn nhận click qua EventSystem). Chỉ tự tạo nếu scene không có.
-        Canvas canvas = FindOverlayCanvas();
-        if (canvas == null)
-        {
-            var canvasGo = new GameObject("PauseRuntimeCanvas",
-                typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler), typeof(GraphicRaycaster));
-            canvas = canvasGo.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = PauseSortingOrder;
-            var scaler = canvasGo.GetComponent<UnityEngine.UI.CanvasScaler>();
-            scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-        }
+        // LUÔN tạo Canvas ScreenSpaceOverlay RIÊNG (bản dùng FindOverlayCanvas làm UI
+        // biến mất). Click xử lý bằng poll (RectangleContainsScreenPoint) nên không cần
+        // canvas có sẵn / EventSystem.
+        var canvasGo = new GameObject("PauseRuntimeCanvas",
+            typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler), typeof(GraphicRaycaster));
+        var canvas = canvasGo.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = PauseSortingOrder;
+        var scaler = canvasGo.GetComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
 
         var overlay = NewRect("PausePanel", canvas.transform);
         var oImg = overlay.gameObject.AddComponent<Image>();
@@ -383,7 +411,7 @@ public class PauseMenuUI : MonoBehaviour
         pbRt.gameObject.AddComponent<Image>().color = new Color(0.12f, 0.14f, 0.2f, 0.95f);
         pbRt.gameObject.AddComponent<Button>(); // hiệu ứng nhấn; hành động xử lý ở Update (poll)
         pbRt.SetAsLastSibling(); // nổi trên UI khác
-        _pollButtons.Add((pbRt, Toggle)); // poll chuột/touch — không phụ thuộc EventSystem
+        _pollButtons.Add((pbRt, ForceToggle)); // poll chuột/touch, ép pause bất kể mode
 
         var pbLbl = NewRect("Lbl", pbRt);
         pbLbl.anchorMin = Vector2.zero; pbLbl.anchorMax = Vector2.one;
@@ -393,7 +421,29 @@ public class PauseMenuUI : MonoBehaviour
         pbT.alignment = TextAlignmentOptions.Center;
         pbT.fontStyle = FontStyles.Bold;
 
-        Debug.Log("[PauseMenuUI] Đã dựng panel pause + nút pause runtime (canvas riêng).");
+        // Dòng debug: nền đen + chữ to để CHẮC CHẮN thấy (chẩn đoán Mode + click).
+        var dbgBg = NewRect("PauseDebug", canvas.transform);
+        dbgBg.anchorMin = dbgBg.anchorMax = dbgBg.pivot = new Vector2(0.5f, 1f);
+        dbgBg.anchoredPosition = new Vector2(0, -2);
+        dbgBg.sizeDelta = new Vector2(700, 40);
+        dbgBg.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.85f);
+
+        var dbgRt = NewRect("Txt", dbgBg);
+        dbgRt.anchorMin = Vector2.zero; dbgRt.anchorMax = Vector2.one;
+        dbgRt.offsetMin = dbgRt.offsetMax = Vector2.zero;
+        _debugText = dbgRt.gameObject.AddComponent<TextMeshProUGUI>();
+        _debugText.text = "DEBUG…"; _debugText.fontSize = 24; _debugText.color = new Color(1f, 1f, 0.3f);
+        _debugText.alignment = TextAlignmentOptions.Center;
+        _debugText.fontStyle = FontStyles.Bold;
+        _debugText.raycastTarget = false;
+
+        // Gắn POLLER lên chính Canvas (chắc chắn active) — poll click chạy ở đây thay vì
+        // ở Update của PauseMenuUI (instance này có thể inactive nên Update không chạy).
+        var poller = canvasGo.AddComponent<PausePoller>();
+        poller.Buttons = _pollButtons;
+        poller.DebugText = _debugText;
+
+        Debug.Log("[PauseMenuUI] BuildRuntimeUI XONG — panel + nút + debug + poller đã tạo.");
     }
 
     static RectTransform NewRect(string name, Transform parent)
@@ -431,5 +481,53 @@ public class PauseMenuUI : MonoBehaviour
         t.alignment = TextAlignmentOptions.Center;
         t.fontStyle = FontStyles.Bold;
         return btn;
+    }
+}
+
+/// <summary>
+/// Poll click chuột/touch cho các nút Pause runtime. Gắn THẲNG lên Canvas pause
+/// (luôn active) để Update chắc chắn chạy — không phụ thuộc PauseMenuUI (instance của
+/// nó có thể inactive trên build nên Update của nó không chạy).
+/// </summary>
+public class PausePoller : MonoBehaviour
+{
+    public System.Collections.Generic.List<(RectTransform rect, System.Action act)> Buttons;
+    public TMPro.TMP_Text DebugText;
+    private int _clicks;
+
+    void Update()
+    {
+        if (DebugText != null)
+        {
+            string mode = InputController.Instance != null ? InputController.Instance.Mode.ToString() : "null";
+            DebugText.text = $"Mode:{mode}  click:{_clicks}  paused:{PauseMenuUI.IsPaused}";
+        }
+
+        if (Buttons == null || Buttons.Count == 0) return;
+        if (!TryGetClickPos(out Vector2 pos)) return;
+        _clicks++;
+        Debug.Log($"[PAUSE] click #{_clicks} tại {pos}");
+
+        foreach (var b in Buttons)
+        {
+            if (b.rect == null || !b.rect.gameObject.activeInHierarchy) continue;
+            if (RectTransformUtility.RectangleContainsScreenPoint(b.rect, pos, null))
+            {
+                Debug.Log("[PAUSE] trúng nút → invoke");
+                b.act?.Invoke();
+                return;
+            }
+        }
+    }
+
+    static bool TryGetClickPos(out Vector2 pos)
+    {
+        pos = Vector2.zero;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame) { pos = mouse.position.ReadValue(); return true; }
+        var ts = UnityEngine.InputSystem.Touchscreen.current;
+        if (ts != null && ts.primaryTouch.press.wasPressedThisFrame) { pos = ts.primaryTouch.position.ReadValue(); return true; }
+        if (Input.GetMouseButtonDown(0)) { pos = Input.mousePosition; return true; }
+        return false;
     }
 }
