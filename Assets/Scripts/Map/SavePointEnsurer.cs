@@ -8,6 +8,17 @@ public static class SavePointEnsurer
 {
     public static void Ensure()
     {
+        // Ép về Map mode khi vào map (scene thiếu PlayerInputConnector) — nếu không,
+        // Mode có thể kẹt ở Battle/UI sau khi từ trận về → chặn di chuyển/teleport/pause.
+        // Không đụng tới Cutscene (intro tự quản mode riêng).
+        var ic = InputController.Instance;
+        if (ic != null && ic.Mode != InputMode.Cutscene)
+            ic.SetMode(InputMode.Map);
+
+        // 0. Pause menu — đảm bảo có instance + dựng UI runtime NGAY (không chờ Start).
+        PauseMenuUI.EnsureExists();
+        PauseMenuUI.Instance?.BuildRuntimeUI();
+
         // 1. SavePointUI — tạo runtime nếu scene chưa có.
         if (SavePointUI.Instance == null)
         {

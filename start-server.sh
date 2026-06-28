@@ -47,22 +47,46 @@ echo "$SERVER_PID" > "$SCRIPT_DIR/.server.pid"
 sleep 2
 
 echo "==> [3/3] Khởi động Cloudflare Tunnel..."
-echo "--------------------------------------------------------"
-echo "Local URL: http://localhost:$PORT"
-echo "Link công khai (dạng https://xxx.trycloudflare.com) sẽ HIỆN BÊN DƯỚI."
-echo "Giữ cửa sổ này mở. Tắt bằng: ./stop-server.sh (hoặc Ctrl+C)."
-echo "--------------------------------------------------------"
 
-# Mở trình duyệt tự chơi trên máy (macOS/Linux)
-echo "Đang mở trình duyệt web (localhost)..."
-open "http://localhost:$PORT" 2>/dev/null || xdg-open "http://localhost:$PORT" 2>/dev/null
+CF_LOG="$SCRIPT_DIR/.cloudflare.log"
+: > "$CF_LOG"
 
-# Nếu nhấn Ctrl+C ở cửa sổ này: kill luôn node server (không tắt Mongo — dùng stop-server.sh)
-trap 'echo; echo "Đang dừng server..."; kill "$SERVER_PID" 2>/dev/null; rm -f "$SCRIPT_DIR/.server.pid"; exit 0' INT TERM
+# Cloudflare quick tunnel (URL ngẫu nhiên mỗi lần). Ghi output ra file để lấy URL.
+cloudflared tunnel --url "http://localhost:$PORT" > "$CF_LOG" 2>&1 &
+CF_PID=$!
+echo "$CF_PID" > "$SCRIPT_DIR/.cloudflared.pid"
 
-# Cloudflare quick tunnel — khỏe hơn localtunnel với file lớn. URL ngẫu nhiên mỗi lần.
-cloudflared tunnel --url "http://localhost:$PORT"
+# Ctrl+C: kill node server + cloudflared (Mongo giữ nguyên — dùng stop-server.sh để tắt hẳn)
+trap 'echo; echo "Đang dừng..."; kill "$SERVER_PID" "$CF_PID" 2>/dev/null; rm -f "$SCRIPT_DIR/.server.pid" "$SCRIPT_DIR/.cloudflared.pid"; exit 0' INT TERM
+
+# Chờ và trích link công khai
+echo "    Đang lấy link công khai..."
+PUBLIC_URL=""
+for i in $(seq 1 30); do
+  PUBLIC_URL=$(grep -oE "https://[a-z0-9-]+\.trycloudflare\.com" "$CF_LOG" | head -1)
+  [ -n "$PUBLIC_URL" ] && break
+  sleep 1
+done
+
+echo ""
+echo "============================================================"
+if [ -n "$PUBLIC_URL" ]; then
+  echo "$PUBLIC_URL" > "$SCRIPT_DIR/cloudflare-url.txt"
+  echo "  LINK CÔNG KHAI (đưa cho người chơi máy khác):"
+  echo "      $PUBLIC_URL"
+  echo "  (đã lưu vào cloudflare-url.txt)"
+  open "$PUBLIC_URL" 2>/dev/null || xdg-open "$PUBLIC_URL" 2>/dev/null
+else
+  echo "  Chưa lấy được link — xem .cloudflare.log"
+  open "http://localhost:$PORT" 2>/dev/null
+fi
+echo "  Local: http://localhost:$PORT"
+echo "  Tắt: ./stop-server.sh  (hoặc Ctrl+C cửa sổ này)"
+echo "============================================================"
+
+# Giữ tiến trình sống theo cloudflared
+wait "$CF_PID"
 
 # Khi cloudflared thoát thì kill server
 kill "$SERVER_PID" 2>/dev/null
-rm -f "$SCRIPT_DIR/.server.pid"
+rm -f "$SCRIPT_DIR/.server.pid" "$SCRIPT_DIR/.cloudflared.pid"
