@@ -18,8 +18,10 @@ public class Party
 
     private int maxMembers;
 
-    /// <summary>Số thành viên tối đa của party người chơi. Nguồn chân lý duy nhất — dùng chung với GameManager.</summary>
-    public const int PlayerMaxMembers = 2;
+    /// <summary>Số thành viên tối đa của party người chơi. Nguồn chân lý duy nhất — dùng chung với GameManager.
+    /// Đặt = 1 vì hiện chỉ Trần Quốc Tuấn/Hero có đủ dữ liệu battle (prefab + đòn đánh);
+    /// Mage/Warrior/Priest là asset rỗng nên không cho vào party (sẽ gây kẹt lượt).</summary>
+    public const int PlayerMaxMembers = 1;
     public const int EnemyMaxMembers = 3;
 
     public int MaxMembers => maxMembers;

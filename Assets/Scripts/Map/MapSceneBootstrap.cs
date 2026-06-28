@@ -78,6 +78,7 @@ public class Chapter5_MapBattleBootstrap : MonoBehaviour
     void Start()
     {
         QuestMapUIEnsurer.EnsureTrackerUnderMinimap();
+        SavePointEnsurer.Ensure(); // tạo SavePointUI + 1 save point nếu scene chưa có (web)
 
         if (QuestManager.Instance == null) return;
 

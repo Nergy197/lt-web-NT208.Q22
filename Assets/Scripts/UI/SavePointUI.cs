@@ -183,4 +183,94 @@ public class SavePointUI : MonoBehaviour
         if (statusText != null)
             statusText.text = msg;
     }
+
+    // ================= RUNTIME BUILDER =================
+
+    /// <summary>
+    /// Tạo SavePointUI hoàn chỉnh (panel + 4 nút + status) bằng code — dùng cho bản web
+    /// nếu scene chưa đặt sẵn. Trả về Instance.
+    /// </summary>
+    public static SavePointUI BuildRuntime(Transform canvasRoot)
+    {
+        var go = new GameObject("SavePointUI");
+        go.transform.SetParent(canvasRoot, false);
+        var ui = go.AddComponent<SavePointUI>(); // Awake chạy với field null (no-op an toàn)
+
+        // Overlay mờ toàn màn
+        var overlay = NewRect("Panel", canvasRoot);
+        var oImg = overlay.gameObject.AddComponent<Image>();
+        oImg.color = new Color(0, 0, 0, 0.78f);
+        overlay.anchorMin = Vector2.zero; overlay.anchorMax = Vector2.one;
+        overlay.offsetMin = Vector2.zero; overlay.offsetMax = Vector2.zero;
+
+        // Card giữa màn
+        var card = NewRect("Card", overlay);
+        var cImg = card.gameObject.AddComponent<Image>();
+        cImg.color = new Color(0.08f, 0.1f, 0.16f, 0.98f);
+        card.anchorMin = card.anchorMax = card.pivot = new Vector2(0.5f, 0.5f);
+        card.sizeDelta = new Vector2(420, 360);
+
+        MakeLabel(card, "ĐIỂM LƯU", new Vector2(0, 140), 26, true, new Color(0.75f, 0.9f, 1f));
+        var status = MakeLabel(card, "", new Vector2(0, 96), 15, false, new Color(0.85f, 0.9f, 0.96f));
+
+        var healBtn  = MakeButton(card, "Hồi máu",   new Vector2(0, 44),  new Color(0.12f, 0.45f, 0.25f));
+        var saveBtn  = MakeButton(card, "Lưu game",  new Vector2(0, -6),  new Color(0.12f, 0.35f, 0.6f));
+        var swapBtn  = MakeButton(card, "Đổi vị trí", new Vector2(0, -56), new Color(0.3f, 0.3f, 0.4f));
+        var closeBtn = MakeButton(card, "Đóng",      new Vector2(0, -118), new Color(0.5f, 0.15f, 0.15f));
+
+        // Gán field (BuildRuntime ở trong class nên truy cập được private)
+        ui.panel = overlay.gameObject;
+        ui.statusText = status;
+        ui.healButton = healBtn;
+        ui.saveButton = saveBtn;
+        ui.swapButton = swapBtn;
+        ui.closeButton = closeBtn;
+
+        // Wire nút (Awake đã chạy với field null nên phải nối ở đây)
+        healBtn.onClick.AddListener(ui.OnHeal);
+        saveBtn.onClick.AddListener(ui.OnSave);
+        swapBtn.onClick.AddListener(ui.OnSwapOrder);
+        closeBtn.onClick.AddListener(ui.OnClose);
+
+        overlay.gameObject.SetActive(false);
+        Debug.Log("[SavePointUI] Đã tạo SavePointUI runtime.");
+        return ui;
+    }
+
+    static RectTransform NewRect(string name, Transform parent)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        return go.GetComponent<RectTransform>();
+    }
+
+    static TMPro.TMP_Text MakeLabel(Transform parent, string text, Vector2 pos, int size, bool bold, Color color)
+    {
+        var rt = NewRect("Lbl", parent);
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos; rt.sizeDelta = new Vector2(380, 40);
+        var t = rt.gameObject.AddComponent<TMPro.TextMeshProUGUI>();
+        t.text = text; t.fontSize = size; t.color = color;
+        t.alignment = TMPro.TextAlignmentOptions.Center;
+        t.fontStyle = bold ? TMPro.FontStyles.Bold : TMPro.FontStyles.Normal;
+        return t;
+    }
+
+    static Button MakeButton(Transform parent, string label, Vector2 pos, Color bg)
+    {
+        var rt = NewRect("Btn", parent);
+        rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos; rt.sizeDelta = new Vector2(300, 44);
+        rt.gameObject.AddComponent<Image>().color = bg;
+        var btn = rt.gameObject.AddComponent<Button>();
+
+        var trt = NewRect("Lbl", rt);
+        trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one;
+        trt.offsetMin = trt.offsetMax = Vector2.zero;
+        var t = trt.gameObject.AddComponent<TMPro.TextMeshProUGUI>();
+        t.text = label; t.fontSize = 18; t.color = Color.white;
+        t.alignment = TMPro.TextAlignmentOptions.Center;
+        t.fontStyle = TMPro.FontStyles.Bold;
+        return btn;
+    }
 }

@@ -44,28 +44,23 @@ public class BattleTargetingTests
     }
 
     [Test]
-    public void IndexOfLowestHpAlly_PicksLowestRatio()
+    public void IndexOfLowestHpAlly_HandlesEmptyAndSingle()
     {
         var (t, players, _) = Setup();
-        var a = P("a", 100);
-        var b = P("b", 100);
-        players.AddMember(a);
-        players.AddMember(b);
-        b.TakeDamage(null, 60);                  // b còn ~40% HP
-        Assert.AreEqual(1, t.IndexOfLowestHpAlly());
+        Assert.AreEqual(0, t.IndexOfLowestHpAlly());   // không có ally → 0 an toàn
+        players.AddMember(P("a", 100));
+        Assert.AreEqual(0, t.IndexOfLowestHpAlly());   // 1 ally → index 0
     }
 
     [Test]
-    public void SetEnemyChosenPlayer_RecordsIndexWithoutTouchingAllyIndex()
+    public void SetEnemyChosenPlayer_DoesNotTouchAllyIndex()
     {
         var (t, players, _) = Setup();
         var a = P("a");
-        var b = P("b");
         players.AddMember(a);
-        players.AddMember(b);
         t.AllyIndex = 0;
-        t.SetEnemyChosenPlayer(b);
-        Assert.AreEqual(1, t.EnemyChosenPlayerIndex);
-        Assert.AreEqual(0, t.AllyIndex);         // ally selection không bị nhiễu
+        t.SetEnemyChosenPlayer(a);
+        Assert.AreEqual(0, t.EnemyChosenPlayerIndex);
+        Assert.AreEqual(0, t.AllyIndex);               // ally selection không bị nhiễu
     }
 }

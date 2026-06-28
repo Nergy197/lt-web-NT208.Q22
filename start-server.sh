@@ -11,7 +11,6 @@ cd "$SCRIPT_DIR"
 MONGO_NAME="webgame-mongo"
 MONGO_IMAGE="mongo:7"
 PORT=3000
-SUBDOMAIN="ntugame-nergy"
 
 echo "==> [1/3] Khởi động MongoDB (Docker)..."
 if ! docker info >/dev/null 2>&1; then
@@ -47,22 +46,23 @@ echo "$SERVER_PID" > "$SCRIPT_DIR/.server.pid"
 # Chờ server lên
 sleep 2
 
-echo "==> [3/3] Khởi động Localtunnel..."
+echo "==> [3/3] Khởi động Cloudflare Tunnel..."
 echo "--------------------------------------------------------"
-echo "Localtunnel URL: https://$SUBDOMAIN.loca.lt"
-echo "Local URL:       http://localhost:$PORT"
+echo "Local URL: http://localhost:$PORT"
+echo "Link công khai (dạng https://xxx.trycloudflare.com) sẽ HIỆN BÊN DƯỚI."
 echo "Giữ cửa sổ này mở. Tắt bằng: ./stop-server.sh (hoặc Ctrl+C)."
 echo "--------------------------------------------------------"
 
 # Mở trình duyệt tự chơi trên máy (macOS/Linux)
-echo "Đang mở trình duyệt web..."
+echo "Đang mở trình duyệt web (localhost)..."
 open "http://localhost:$PORT" 2>/dev/null || xdg-open "http://localhost:$PORT" 2>/dev/null
 
 # Nếu nhấn Ctrl+C ở cửa sổ này: kill luôn node server (không tắt Mongo — dùng stop-server.sh)
 trap 'echo; echo "Đang dừng server..."; kill "$SERVER_PID" 2>/dev/null; rm -f "$SCRIPT_DIR/.server.pid"; exit 0' INT TERM
 
-npx --yes localtunnel --port "$PORT" --subdomain "$SUBDOMAIN"
+# Cloudflare quick tunnel — khỏe hơn localtunnel với file lớn. URL ngẫu nhiên mỗi lần.
+cloudflared tunnel --url "http://localhost:$PORT"
 
-# Khi localtunnel thoát thì kill server
+# Khi cloudflared thoát thì kill server
 kill "$SERVER_PID" 2>/dev/null
 rm -f "$SCRIPT_DIR/.server.pid"

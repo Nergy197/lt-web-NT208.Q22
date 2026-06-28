@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
@@ -16,6 +17,17 @@ app.use(cors({
   origin: '*',
   allowedHeaders: ['Content-Type', 'Authorization', 'Bypass-Tunnel-Reminder']
 }));
+
+// Nén gzip on-the-fly — ÉP nén cả .wasm/.data (Unity build ~84MB raw) để tải nhanh
+// qua tunnel. Mặc định compression bỏ qua octet-stream/wasm nên phải tự cho phép.
+app.use(compression({
+  filter: (req, res) => {
+    const type = String(res.getHeader("Content-Type") || "");
+    if (/wasm|octet-stream|javascript|json|text/i.test(type)) return true;
+    return compression.filter(req, res); // phần còn lại theo mặc định (bỏ qua ảnh đã nén)
+  }
+}));
+
 app.use(express.json());
 
 /* ================= DATABASE ================= */

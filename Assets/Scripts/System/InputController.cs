@@ -36,6 +36,7 @@ public class InputController : MonoBehaviour
         BindBattleInput();
         BindSkillMenuInput();
         BindSavePointMenuInput();
+        BindMapInput();
 
         SetMode(InputMode.Map);
         Debug.Log("[INPUT] Awake complete");
@@ -61,7 +62,9 @@ public class InputController : MonoBehaviour
             case InputMode.BattleItemMenu: Input.Battle.Enable();       break;
             case InputMode.UI:             Input.SavePointMenu.Enable(); break;
             case InputMode.Cutscene:       Input.Map.Enable();          break;
-            case InputMode.Pause:                                         break;
+            // Pause: vẫn bật Map map để ESC (Open Menu) đóng được pause.
+            // Moves bị đóng băng do Time.timeScale=0; Interact bị SavePoint chặn (Mode != Map).
+            case InputMode.Pause:          Input.Map.Enable();          break;
         }
 
         Debug.Log("[INPUT MODE] " + mode);
@@ -119,6 +122,14 @@ public class InputController : MonoBehaviour
         Input.SavePointMenu.Close.performed += _ => SavePointUI.Instance?.OnClose();
         Input.SavePointMenu.Heal.performed  += _ => SavePointUI.Instance?.OnHeal();
         Input.SavePointMenu.Save.performed  += _ => SavePointUI.Instance?.OnSave();
+    }
+
+    void BindMapInput()
+    {
+        // ESC (Open Menu) mở/đóng Pause Menu. Chạy trên cả web desktop (bàn phím),
+        // không phụ thuộc nút pause của mobile. Map map được bật cả ở mode Pause
+        // (xem SetMode) để ESC có thể đóng lại pause.
+        Input.Map.OpenMenu.performed += _ => PauseMenuUI.Instance?.Toggle();
     }
 
     bool ShouldIgnoreBattleGameplayInput()

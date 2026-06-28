@@ -6,8 +6,9 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MONGO_NAME="webgame-mongo"
 
-echo "==> Tắt Localtunnel..."
-pkill -f "localtunnel --port" 2>/dev/null && echo "    Đã tắt localtunnel." || echo "    (không thấy localtunnel đang chạy)"
+echo "==> Tắt Tunnel (cloudflared/localtunnel)..."
+pkill -f "cloudflared tunnel" 2>/dev/null && echo "    Đã tắt cloudflared." || echo "    (không thấy cloudflared)"
+pkill -f "localtunnel --port" 2>/dev/null && echo "    Đã tắt localtunnel." || true
 
 echo "==> Tắt Node server..."
 if [ -f "$SCRIPT_DIR/.server.pid" ]; then

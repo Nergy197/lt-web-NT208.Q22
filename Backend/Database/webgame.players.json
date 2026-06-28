@@ -9,12 +9,6 @@
                 "level": 1,
                 "currentHP": 100,
                 "currentExp": 0
-            },
-            {
-                "entityName": "Mage",
-                "level": 1,
-                "currentHP": 80,
-                "currentExp": 0
             }
         ],
         "lastSavePointId": "",
