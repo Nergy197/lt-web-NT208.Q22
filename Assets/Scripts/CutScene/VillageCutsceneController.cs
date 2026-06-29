@@ -127,18 +127,40 @@ public class VillageCutsceneController : MonoBehaviour
             yield return null;
         }
 
-        // Sau thoại cuối: nhân vật đi sang trái đến khi khuất hẳn khỏi màn hình
-        float offScreenX = endX - camHalfW; // cạnh trái màn hình khi cam khoá tại endX
-        while (character != null && character.position.x > offScreenX)
+        // Sau thoại cuối: nhân vật đi thêm 3 giây nữa rồi chuyển scene
+        float walkTime = 3f;
+        while (walkTime > 0f)
         {
-            Vector3 cp = character.position;
-            cp.x -= scrollSpeed * Time.deltaTime;
-            character.position = cp;
+            walkTime -= Time.deltaTime;
+            
+            // Nếu camera chưa tới đích, cho camera trôi tiếp
+            if (cam.transform.position.x > endX)
+            {
+                Vector3 pos = cam.transform.position;
+                pos.x = Mathf.Max(pos.x - scrollSpeed * Time.deltaTime, endX);
+                cam.transform.position = pos;
+
+                if (character != null)
+                {
+                    Vector3 cp = character.position;
+                    cp.x = cam.transform.position.x + characterOffsetX;
+                    character.position = cp;
+                }
+            }
+            else // Camera đã dừng, nhân vật tự đi
+            {
+                if (character != null)
+                {
+                    Vector3 cp = character.position;
+                    cp.x -= scrollSpeed * Time.deltaTime;
+                    character.position = cp;
+                }
+            }
+            
             yield return null;
         }
 
         if (characterAnimator != null) characterAnimator.speed = 0f;
-        yield return new WaitForSeconds(0.5f);
 
         if (!string.IsNullOrEmpty(nextScene))
             UnityEngine.SceneManagement.SceneManager.LoadScene(nextScene);

@@ -371,7 +371,7 @@ MonoBehaviour:
   scrollSpeed: 1.5
   cameraY: 0
   characterOffsetX: 7
-  nextScene: 
+  nextScene: Chapter6_Ending
   dialoguePanel: {fileID: 384707724}
   dialogueText: {fileID: 79853978}
   dialogueLines:
