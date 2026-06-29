@@ -417,6 +417,10 @@ public class BattleManager : MonoBehaviour
         turnManager.AddParty(playerParty);
         turnManager.AddParty(enemyParty);
 
+        // QUAN TRỌNG: nạp party vào BattleTargeting để chọn mục tiêu (đặc biệt tap mobile)
+        // hoạt động — nếu thiếu, FindAlive/CycleEnemy trả null (tap mobile không chọn được).
+        targeting.SetParties(playerParty, enemyParty);
+
         // Apply map effects cho player khi vào trận
         if (MapManager.Instance != null)
         {
