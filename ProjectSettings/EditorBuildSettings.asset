@@ -29,5 +29,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Chapter6_Village.unity
     guid: 9fb207248851b4a47846f98b27a40346
+  - enabled: 1
+    path: Assets/Scenes/Chapter6_Ending.unity
+    guid: 237555087eddbad4a9f557b51d04f640
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: a2aae26292cee4965811d0bd03a1745b, type: 3}
