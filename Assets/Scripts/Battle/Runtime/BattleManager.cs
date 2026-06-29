@@ -710,9 +710,27 @@ public class BattleManager : MonoBehaviour
         }
         else if (isMobile)
         {
-            // Mobile: không tự chọn enemy — player phải tap để target (tap 1)
-            BattleUI.Instance?.HighlightEnemyHUD(-1);
-            BattleUI.Instance?.SetTargetName(string.Empty);
+            // Mobile: TỰ chọn sẵn enemy đầu (đặc biệt khi chỉ 1 enemy như tutorial) → hiện
+            // nút Confirm ngay. Player tap Confirm để đánh, hoặc tap enemy khác để đổi mục tiêu.
+            targeting.EnemyIndex = 0;
+            var t = GetEnemyTarget();
+            if (t != null)
+            {
+                mobileTargetSelected = true;
+                BattleUI.Instance?.HighlightEnemyHUD(targeting.EnemyIndex);
+                BattleUI.Instance?.SetTargetName(t.entityName);
+                var dialog = GetBattleDialog();
+                if (dialog != null)
+                {
+                    dialog.UpdateBuffDebuff(currentUnit);
+                    dialog.UpdateEnemyCombo(t.PlannedAttack);
+                }
+            }
+            else
+            {
+                BattleUI.Instance?.HighlightEnemyHUD(-1);
+                BattleUI.Instance?.SetTargetName(string.Empty);
+            }
         }
         else
         {

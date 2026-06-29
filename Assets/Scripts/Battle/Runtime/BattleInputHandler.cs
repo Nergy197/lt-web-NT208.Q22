@@ -97,7 +97,7 @@ public class BattleInputHandler : MonoBehaviour
     {
         screenPos = Vector2.zero;
 
-        // New Input System: touchscreen
+        // 1) New Input System: Touchscreen (device thật / simulator)
         var touchscreen = Touchscreen.current;
         if (touchscreen != null)
         {
@@ -112,27 +112,34 @@ public class BattleInputHandler : MonoBehaviour
         }
 
 #if UNITY_EDITOR
-        var pointer = Pointer.current;
-        bool isNowPressed = pointer?.press.isPressed ?? false;
-
-        // Primary: EventSystem click capture
+        // 2a) Editor: EventSystem click capture (reliable trong Play Focused)
         if (!float.IsNaN(_pendingEditorTap.x))
         {
             screenPos = _pendingEditorTap;
             _pendingEditorTap = new Vector2(float.NaN, float.NaN);
-            _prevMousePressed = isNowPressed; 
+            _prevMousePressed = Pointer.current?.press.isPressed ?? false;
             return true;
         }
+#endif
 
-        // Fallback: Pointer.current edge detection
+        // 2b) Pointer edge-detection — CHẠY CẢ TRONG BUILD vì WebGL mobile thường đưa
+        //     touch qua Pointer/mouse chứ không phải Touchscreen → nếu bỏ thì không tap được.
+        var pointer = Pointer.current;
+        bool isNowPressed = pointer?.press.isPressed ?? false;
         bool tapped = !_prevMousePressed && isNowPressed;
         _prevMousePressed = isNowPressed;
         if (tapped)
         {
+            screenPos = pointer != null ? pointer.position.ReadValue() : (Vector2)Input.mousePosition;
+            return true;
+        }
+
+        // 3) Fallback Input Manager cũ (activeInputHandler = Both)
+        if (Input.GetMouseButtonDown(0))
+        {
             screenPos = Input.mousePosition;
             return true;
         }
-#endif
 
         return false;
     }
