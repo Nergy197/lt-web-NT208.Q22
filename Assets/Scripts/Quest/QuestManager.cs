@@ -56,6 +56,11 @@ public class QuestManager : MonoBehaviour
     /// <summary>Bắt đầu quest trong StartingQuests (gọi sau tutorial chapter 1).</summary>
     public void StartNewGame()
     {
+        // === TẠM THỜI CHỈ BẬT NHIỆM VỤ 3 ĐỂ TEST ===
+        StartQuest("Q003");
+        return;
+        // ===========================================
+
         foreach (var q in StartingQuests)
             if (q != null) StartQuest(q);
     }
