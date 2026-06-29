@@ -100,6 +100,9 @@ public class MobileInputUI : MonoBehaviour
         EnsureBattleShortcutButtons();
         if (applyConfiguredButtonLayout || createdRuntimeButton)
             ApplyMobileButtonLayout();
+        // Luôn KHOÁ nút Parry vào góc dưới-phải (kể cả khi không áp layout cấu hình) — tránh
+        // bị khuất mép phải màn hình.
+        LayoutBottomRight(battleParryButton, buttonSize);
         BindButtons();
 
         if (joystick != null)
@@ -361,7 +364,20 @@ public class MobileInputUI : MonoBehaviour
         LayoutButton(interactButton, interactAnchor, buttonSize);
         LayoutButton(battleBackButton, backAnchor, buttonSize);
         LayoutButton(battleConfirmButton, confirmAnchor, buttonSize);
-        LayoutButton(battleParryButton, parryAnchor, buttonSize);
+        LayoutBottomRight(battleParryButton, buttonSize); // Parry: khoá góc dưới-phải
+    }
+
+    /// <summary>Ghim nút vào GÓC DƯỚI-PHẢI màn hình, luôn nằm trọn (pivot góc phải-dưới + lề).</summary>
+    void LayoutBottomRight(Button button, Vector2 size)
+    {
+        if (button == null) return;
+        var rt = button.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f); // neo vào góc dưới-phải màn hình
+        rt.pivot = new Vector2(1f, 0f);                    // ghim góc phải-dưới của nút vào đó
+        rt.sizeDelta = size;
+        rt.anchoredPosition = new Vector2(-24f, 24f);      // chừa lề 24px cho khỏi sát mép
     }
 
     void LayoutButton(Button button, Vector2 anchor, Vector2 size)
