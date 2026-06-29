@@ -101,7 +101,9 @@ Server mặc định chạy tại `http://localhost:3000`. Có thể cấu hình
 
 ## 🎥 Demo Video
 
-> Video demo các tính năng (≤ 5 phút): [LINK_DEMO]
+> 📺 **Xem demo các tính năng:** [Google Drive](https://drive.google.com/file/d/1-3WuX8OUtB5FZI5j0JjoYHk5fphC6Sf5/view?usp=drive_link)
+>
+> <https://drive.google.com/file/d/1-3WuX8OUtB5FZI5j0JjoYHk5fphC6Sf5/view?usp=drive_link>
 
 ---
 
