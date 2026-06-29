@@ -151,6 +151,18 @@ public class StartMenuUI : MonoBehaviour
     [System.Serializable]
     class TransferCheckResult { public bool exists; public TransferSlot[] slots; }
 
+    // Slot có trên SERVER theo mã vừa nhập — để hiện ở màn chọn slot trên máy mới.
+    private TransferSlot[] _transferSlots;
+
+    TransferSlot FindServerSlot(int slotIndex)
+    {
+        if (_transferSlots == null || GameManager.Instance == null
+            || !GameManager.Instance.HasPendingTransferLoad) return null;
+        foreach (var s in _transferSlots)
+            if (s != null && s.slotId == slotIndex) return s;
+        return null;
+    }
+
     IEnumerator CheckAndApplyTransferCode(string code)
     {
         string url = GameManager.Instance.backendBaseURL + "/player/check/" + UnityWebRequest.EscapeURL(code);
@@ -184,7 +196,11 @@ public class StartMenuUI : MonoBehaviour
 
         // Mã hợp lệ và có save → áp dụng
         GameManager.Instance.SetPlayerId(code);
+        _transferSlots = res.slots; // lưu để màn chọn slot hiện save từ server
         if (currentIdLabel != null) currentIdLabel.text = GameManager.Instance.GetPlayerId();
+
+        // Nếu màn chọn slot đang mở → refresh để hiện slot server ngay
+        if (saveSlotsPanel != null && saveSlotsPanel.activeSelf) PopulateSaveSlots();
 
         string slotList = "";
         if (res.slots != null && res.slots.Length > 0)
@@ -274,6 +290,7 @@ public class StartMenuUI : MonoBehaviour
 
             int slotIndex = i;
             var saveData = slots[i];
+            var serverSlot = FindServerSlot(slotIndex); // có save trên server (sau khi nhập mã)?
 
             if (saveData != null)
             {
@@ -297,6 +314,16 @@ public class StartMenuUI : MonoBehaviour
                     deleteBtn.onClick.AddListener(() => OnDeleteSlotClicked(slotIndex));
                 }
             }
+            else if (serverSlot != null)
+            {
+                // Slot trống ở máy này nhưng CÓ trên server (vừa nhập mã chuyển máy) → cho tải.
+                string time = string.IsNullOrEmpty(serverSlot.saveTime) ? "" : serverSlot.saveTime;
+                txt.text = $"<size=120%><b>SLOT {slotIndex + 1}</b></size>\n<color=#7fdfff>Save trên máy chủ — bấm để tải</color>\n<size=80%><color=#aaaaaa>{time}</color></size>";
+                btn.onClick.AddListener(() => OnSlotSelected(slotIndex, false)); // false → Load (server)
+
+                foreach (Button b in btnObj.GetComponentsInChildren<Button>(true))
+                    if (b.gameObject.name == "DeleteButton") { b.gameObject.SetActive(false); break; }
+            }
             else
             {
                 txt.text = $"<size=120%><b>SLOT {slotIndex + 1}</b></size>\n<color=#bbbbbb>Bắt đầu hành trình mới</color>";
@@ -311,6 +338,11 @@ public class StartMenuUI : MonoBehaviour
     void OnSlotSelected(int slotIndex, bool isNewGame)
     {
         GameManager.Instance.currentSaveSlot = slotIndex;
+
+        // Vừa nhập mã chuyển máy: slot có thể TRỐNG ở local máy này, nhưng save nằm trên
+        // server → BUỘC đi nhánh Load (server) thay vì New Game.
+        if (GameManager.Instance.HasPendingTransferLoad)
+            isNewGame = false;
 
         Debug.Log($"[StartMenu] OnSlotSelected: slot={slotIndex} isNewGame={isNewGame}");
 

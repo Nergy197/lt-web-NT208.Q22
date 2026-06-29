@@ -116,6 +116,9 @@ public class GameManager : MonoBehaviour
     // Khi true, LoadPlayerParty bỏ qua local và tải thẳng từ server (dùng sau transfer code).
     private bool forceServerLoad = false;
 
+    /// <summary>True khi vừa nhập mã chuyển máy → lần chọn slot tới phải LOAD (server), không New Game.</summary>
+    public bool HasPendingTransferLoad => forceServerLoad;
+
     // ================= INIT =================
 
     void Awake()
