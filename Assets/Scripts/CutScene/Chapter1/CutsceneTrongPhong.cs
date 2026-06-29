@@ -15,6 +15,7 @@ public class CutsceneTrongPhong : MonoBehaviour
     public float delayBeforeLoad = 1f;
 
     private bool dangTrongCuocThoai = false;
+    private bool dangLoadChuyenCanh = false;
     private QuanLyHoiThoai heThongThoai;
 
     void Start()
@@ -25,6 +26,9 @@ public class CutsceneTrongPhong : MonoBehaviour
 
     void Update()
     {
+        // Chặn hoàn toàn mọi tương tác nếu đang trong thời gian chờ load qua màn khác
+        if (dangLoadChuyenCanh) return;
+
         // Nếu đang nói chuyện thì không cho bấm F nữa
         if (dangTrongCuocThoai)
         {
@@ -91,6 +95,8 @@ public class CutsceneTrongPhong : MonoBehaviour
 
         if (!string.IsNullOrEmpty(nextScene))
         {
+            dangLoadChuyenCanh = true; // Bật cờ chặn tương tác
+            MobileInteractRegistry.SetActive(this, false); // Tắt luôn nút tương tác trên mobile
             Debug.Log($"[CutsceneTrongPhong] Chờ {delayBeforeLoad}s → load '{nextScene}'");
             StartCoroutine(LoadSceneDelayed());
         }

@@ -82,11 +82,14 @@ public class QuanLyHoiThoai : MonoBehaviour
 
     bool IsAdvancePressed()
     {
+        bool pressed = false;
         if (InputController.Instance != null)
-            return InputController.Instance.IsInteractPressed();
+        {
+            pressed = InputController.Instance.IsInteractPressed();
+        }
 
-        // Fallback khi scene test không có InputController.
-        return Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0);
+        // Luôn cho phép bấm Space, click chuột (hoặc chạm màn hình) để qua thoại
+        return pressed || Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
     }
 
     void HienThiCauTiepTheo()
