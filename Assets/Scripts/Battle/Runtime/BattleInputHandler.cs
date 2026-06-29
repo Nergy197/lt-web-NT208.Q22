@@ -31,10 +31,10 @@ public class BattleInputHandler : MonoBehaviour
 
         if (!TryGetTapScreenPosition(out Vector2 screenPos)) return;
 
-        // Bỏ qua nếu tap đang TRÊN UI (nút Confirm/Back/Skill...) — để nút tự xử lý onClick,
-        // không cho cycle/đổi target (tránh bấm Confirm lại đánh nhầm enemy).
-        var es = UnityEngine.EventSystems.EventSystem.current;
-        if (es != null && es.IsPointerOverGameObject()) { Debug.Log("[MOBILE-TAP] tap trên UI → bỏ qua"); return; }
+        // Bỏ qua CHỈ KHI tap trúng đúng một NÚT (Selectable: Confirm/Back/Skill...) — để nút
+        // tự xử lý onClick. KHÔNG dùng IsPointerOverGameObject vì panel nền full-screen (nếu
+        // có) sẽ chặn hết tap → không chọn được mục tiêu.
+        if (IsTapOverButton(screenPos)) { Debug.Log("[MOBILE-TAP] tap trúng nút UI → bỏ qua"); return; }
 
         Camera cam = Camera.main;
         if (cam == null) { Debug.Log("[MOBILE-TAP] Camera.main null"); return; }
@@ -75,6 +75,20 @@ public class BattleInputHandler : MonoBehaviour
                 dialog.UpdateEnemyCombo((target as EnemyStatus)?.PlannedAttack);
             }
         }
+    }
+
+    // True nếu điểm tap nằm trên một NÚT (Selectable) UI — để khỏi cycle target khi bấm nút.
+    bool IsTapOverButton(Vector2 screenPos)
+    {
+        var es = UnityEngine.EventSystems.EventSystem.current;
+        if (es == null) return false;
+        var ped = new UnityEngine.EventSystems.PointerEventData(es) { position = screenPos };
+        var results = new List<UnityEngine.EventSystems.RaycastResult>();
+        es.RaycastAll(ped, results);
+        foreach (var r in results)
+            if (r.gameObject != null && r.gameObject.GetComponentInParent<UnityEngine.UI.Selectable>() != null)
+                return true;
+        return false;
     }
 
     public bool TryGetTapScreenPosition(out Vector2 screenPos)
