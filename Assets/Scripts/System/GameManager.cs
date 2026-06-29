@@ -104,9 +104,17 @@ public class GameManager : MonoBehaviour
 
         PlayerPrefs.SetString("DevicePlayerId", transferCode);
         PlayerPrefs.Save();
+
+        // Vừa nhập mã chuyển máy → lần load tới PHẢI lấy từ server theo id này,
+        // KHÔNG dùng save local của máy hiện tại (nếu có) — nếu không sẽ load nhầm.
+        forceServerLoad = true;
+
         Debug.Log("[GM] Đã áp dụng Transfer Code: " + transferCode);
         return true;
     }
+
+    // Khi true, LoadPlayerParty bỏ qua local và tải thẳng từ server (dùng sau transfer code).
+    private bool forceServerLoad = false;
 
     // ================= INIT =================
 
@@ -258,6 +266,7 @@ public class GameManager : MonoBehaviour
         if (startAsNewGame)
         {
             // 1. TẠO NEW GAME HOÀN TOÀN MỚI
+            forceServerLoad = false; // New Game không cần ép server
             Debug.Log($"[LOAD] Bắt đầu New Game ở Slot {currentSaveSlot}...");
             PlayerSave newSave = new PlayerSave();
             newSave._id = GetPlayerId() + "_slot_" + currentSaveSlot; // Phân biệt ID theo slot trên Database
@@ -274,7 +283,7 @@ public class GameManager : MonoBehaviour
             // Ép lưu ngay xuống PlayerPrefs để tạo file
             SaveService.SaveLocal(currentSaveSlot, newSave);
         }
-        else if (SaveService.TryLoadLocal(currentSaveSlot, out json))
+        else if (!forceServerLoad && SaveService.TryLoadLocal(currentSaveSlot, out json))
         {
             // 2. Tải dữ liệu từ Slot tương ứng trong Trình duyệt
             Debug.Log($"[LOAD] Tải thành công Slot {currentSaveSlot} từ Local Storage: " + json);
@@ -282,8 +291,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // 3. Fallback: Cố tải từ Server nếu Local Storage mất (hoặc máy khác)
-            // Tải theo ID độc nhất của thiết bị + slot
+            // 3. Tải từ Server: khi vừa nhập mã chuyển máy (forceServerLoad), hoặc khi
+            //    máy này chưa có save local cho slot. Tải theo ID + slot.
+            forceServerLoad = false; // reset cờ — chỉ ép 1 lần ngay sau khi nhập mã
             string slotIdOnServer = GetPlayerId() + "_slot_" + currentSaveSlot;
             string url = FullURL("/player/" + slotIdOnServer);
             Debug.Log("[LOAD] Tìm kiếm file từ Server: " + url);
@@ -295,6 +305,9 @@ public class GameManager : MonoBehaviour
             {
                 json = serverJson;
                 Debug.Log("[LOAD] Lấy Save từ Server: " + json);
+                // Cache xuống local để các lần sau dùng ngay (và để máy này 'trở thành' id đó).
+                PlayerPrefs.SetString(SaveService.LocalKey(currentSaveSlot), serverJson);
+                PlayerPrefs.Save();
             }
             else
             {
