@@ -124,7 +124,7 @@ public class MobileInputUI : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        bool excluded = scene.name == "Chapter0_Login" || scene.name == "Chapter1_Introduction" || scene.name == "Chapter1_CutScene" || scene.name == "Chapter4_WarNews";
+        bool excluded = scene.name == "Chapter0_Login" || scene.name == "Chapter1_Introduction" || scene.name == "Chapter1_CutScene" || scene.name == "Chapter4_WarNews" || scene.name == "Chapter6_Village";
         // Tắt hoàn toàn Canvas + GraphicRaycaster ở scene không dùng mobile UI
         // để tránh block input của scene đó.
         SetCanvasActive(!excluded);
@@ -265,7 +265,7 @@ public class MobileInputUI : MonoBehaviour
     {
         string scene = SceneManager.GetActiveScene().name;
         // Slideshow thuần (không có player movement) → ẩn toàn bộ mobile UI
-        return scene == "Chapter0_Login" || scene == "Chapter1_Introduction" || scene == "Chapter1_CutScene" || scene == "Chapter4_WarNews";
+        return scene == "Chapter0_Login" || scene == "Chapter1_Introduction" || scene == "Chapter1_CutScene" || scene == "Chapter4_WarNews" || scene == "Chapter6_Village";
     }
 
     void BindButtons()
