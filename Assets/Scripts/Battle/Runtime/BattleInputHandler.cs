@@ -34,10 +34,10 @@ public class BattleInputHandler : MonoBehaviour
         // Bỏ qua CHỈ KHI tap trúng đúng một NÚT (Selectable: Confirm/Back/Skill...) — để nút
         // tự xử lý onClick. KHÔNG dùng IsPointerOverGameObject vì panel nền full-screen (nếu
         // có) sẽ chặn hết tap → không chọn được mục tiêu.
-        if (IsTapOverButton(screenPos)) { Debug.Log("[MOBILE-TAP] tap trúng nút UI → bỏ qua"); return; }
+        if (IsTapOverButton(screenPos)) return;
 
         Camera cam = Camera.main;
-        if (cam == null) { Debug.Log("[MOBILE-TAP] Camera.main null"); return; }
+        if (cam == null) return;
 
         // MỖI TAP = CHỌN/ĐỔI mục tiêu, KHÔNG BAO GIỜ confirm. Confirm & Back dùng NÚT
         // mobile (đang hiện sẵn). Tap trúng 1 enemy → chọn enemy đó; tap trượt → xoay
@@ -59,7 +59,6 @@ public class BattleInputHandler : MonoBehaviour
         }
 
         bm.SetMobileTargetSelected(true); // để nút Confirm hiện
-        Debug.Log($"[MOBILE-TAP] tap={screenPos} → target={(target != null ? target.entityName : "null")} (enemyIdx={bm.Targeting.EnemyIndex})");
 
         if (target == null) return;
         BattleUI.Instance?.SetTargetName(target.entityName);
