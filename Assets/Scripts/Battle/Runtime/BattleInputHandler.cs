@@ -32,7 +32,7 @@ public class BattleInputHandler : MonoBehaviour
         if (!TryGetTapScreenPosition(out Vector2 screenPos)) return;
 
         Camera cam = Camera.main;
-        if (cam == null) return;
+        if (cam == null) { Debug.Log("[MOBILE-TAP] Camera.main null"); return; }
 
         int targetIndex = -1;
         if (bm.IsTargetingAlly)
@@ -40,39 +40,65 @@ public class BattleInputHandler : MonoBehaviour
         else
             targetIndex = bm.Targeting.FindAliveEnemyIndexNearScreenPoint(cam, screenPos);
 
-        if (targetIndex < 0) return;
+        int curIndex = bm.IsTargetingAlly ? bm.Targeting.AllyIndex : bm.Targeting.EnemyIndex;
+        Debug.Log($"[MOBILE-TAP] tap={screenPos} → idx={targetIndex} | đãChọn={bm.IsMobileTargetSelected} curIdx={curIndex} ally={bm.IsTargetingAlly}");
 
-        if (bm.IsMobileTargetSelected)
+        // Tap trúng một mục tiêu KHÁC mục tiêu hiện tại → đổi mục tiêu (chưa confirm).
+        if (targetIndex >= 0 && (!bm.IsMobileTargetSelected || targetIndex != curIndex))
         {
-            // Tap 2: cùng mục tiêu → confirm
-            bool sameTarget = bm.IsTargetingAlly 
-                ? (targetIndex == bm.Targeting.AllyIndex)
-                : (targetIndex == bm.Targeting.EnemyIndex);
-
-            if (sameTarget)
+            bm.SetMobileTargetSelected(true);
+            Status t2 = null;
+            if (bm.IsTargetingAlly)
             {
-                bm.ConfirmAction();
-                return;
+                bm.Targeting.AllyIndex = targetIndex;
+                t2 = bm.GetAllyTarget();
+                if (t2 != null) BattleUI.Instance?.HighlightActivePlayerHUD(t2.BattleSlotId);
             }
+            else
+            {
+                bm.Targeting.EnemyIndex = targetIndex;
+                t2 = bm.GetEnemyTargetPublic();
+                if (t2 != null) BattleUI.Instance?.HighlightEnemyHUD(bm.Targeting.EnemyIndex);
+            }
+            if (t2 != null)
+            {
+                BattleUI.Instance?.SetTargetName(t2.entityName);
+                var dlg = bm.GetBattleDialogPublic();
+                if (dlg != null)
+                {
+                    if (bm.IsTargetingAlly) dlg.UpdateBuffDebuff(t2);
+                    else { dlg.UpdateBuffDebuff(bm.CurrentUnitPublic); dlg.UpdateEnemyCombo((t2 as EnemyStatus)?.PlannedAttack); }
+                }
+            }
+            return;
         }
 
-        // Tap 1: chọn mục tiêu, chờ tap 2 để confirm
+        // Còn lại: đã có mục tiêu (auto-select hoặc vừa chọn) + tap trúng mục tiêu đó HOẶC
+        // tap chỗ trống → CONFIRM. Nới lỏng để khỏi phải tap chính xác vào sprite enemy.
+        if (bm.IsMobileTargetSelected)
+        {
+            Debug.Log("[MOBILE-TAP] → ConfirmAction");
+            bm.ConfirmAction();
+            return;
+        }
+
+        // Chưa có mục tiêu và tap trượt hết enemy → bỏ qua.
+        if (targetIndex < 0) return;
+
+        // (đường dự phòng) chọn mục tiêu vừa tap
         bm.SetMobileTargetSelected(true);
         Status target = null;
-
         if (bm.IsTargetingAlly)
         {
             bm.Targeting.AllyIndex = targetIndex;
             target = bm.GetAllyTarget();
-            if (target != null)
-                BattleUI.Instance?.HighlightActivePlayerHUD(target.BattleSlotId);
+            if (target != null) BattleUI.Instance?.HighlightActivePlayerHUD(target.BattleSlotId);
         }
         else
         {
             bm.Targeting.EnemyIndex = targetIndex;
             target = bm.GetEnemyTargetPublic();
-            if (target != null)
-                BattleUI.Instance?.HighlightEnemyHUD(bm.Targeting.EnemyIndex);
+            if (target != null) BattleUI.Instance?.HighlightEnemyHUD(bm.Targeting.EnemyIndex);
         }
 
         if (target == null) return;
