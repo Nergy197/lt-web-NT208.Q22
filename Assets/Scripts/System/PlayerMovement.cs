@@ -135,8 +135,11 @@ public class PlayerMovement : MonoBehaviour
         if (animator == null) return;
 
         bool isMoving = move.sqrMagnitude > 0.0001f;
-        animator.SetFloat("MoveX", move.x);
-        animator.SetFloat("MoveY", move.y);
+        if (isMoving)
+        {
+            animator.SetFloat("MoveX", move.x);
+            animator.SetFloat("MoveY", move.y);
+        }
         animator.speed = isMoving ? 1f : 0f;
     }
 
