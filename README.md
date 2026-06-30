@@ -12,6 +12,13 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/License-Educational-blue?style=for-the-badge)](#-giấy-phép)
 
+<br/>
+<a href="https://github.com/Nergy197/lt-web-NT208.Q22/raw/main/HiepKhachTranTrieu.apk">
+  <img src="https://img.shields.io/badge/Tải_Game-Android_APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
+</a>
+<br/>
+<br/>
+
 [Giới thiệu](#-giới-thiệu) • [Tính năng](#-tính-năng-nổi-bật) • [Kiến trúc](#-kiến-trúc-hệ-thống) • [Cài đặt](#-hướng-dẫn-cài-đặt) • [Demo](#-demo-video) • [Thành viên](#-thành-viên-nhóm)
 
 </div>
